@@ -14,7 +14,12 @@ public class OpenTeamOneServerApplication {
 	}
 
 	@Bean
-	public CommandLineRunner demo(final TenantParameterRepository tpr, final UserRepository ur, final PersonRepository pr, final RoomRepository rr) {
+	public CommandLineRunner model(
+			final TenantParameterRepository tpr,
+			final UserRepository ur,
+			final PersonRepository pr,
+			final RoomRepository rr
+	) {
 		return new CommandLineRunner() {
 			@Override
 			public void run(String... args) throws Exception {

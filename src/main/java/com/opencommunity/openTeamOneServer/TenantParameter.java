@@ -1,5 +1,6 @@
 package com.opencommunity.openTeamOneServer;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.repository.CrudRepository;
@@ -7,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.util.ArrayList;
 
 
 interface TenantParameterRepository extends CrudRepository<TenantParameter, String> {
@@ -39,6 +41,22 @@ public class TenantParameter {
 		tenantParameter.put("key", key);
 		tenantParameter.put("value", value);
 		return tenantParameter;
+	}
+
+	public static Iterable<TenantParameter> fromJsonList(JSONArray array) throws JSONException {
+		if (array == null)
+			return null;
+		ArrayList<TenantParameter> tenantParameterList = new ArrayList<>();
+		for (int i = 0; i < array.length(); i++)
+			tenantParameterList.add(new TenantParameter(array.getJSONObject(i)));
+		return tenantParameterList;
+	}
+
+	public static JSONArray toJsonList(Iterable<TenantParameter> tenantParameters) throws JSONException {
+		JSONArray array = new JSONArray();
+		for (TenantParameter tenantParameter : tenantParameters)
+			array.put(tenantParameter.toJson());
+		return array;
 	}
 
 	public String getKey() {

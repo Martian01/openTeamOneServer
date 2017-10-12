@@ -1,5 +1,6 @@
 package com.opencommunity.openTeamOneServer;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.repository.CrudRepository;
@@ -7,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.util.ArrayList;
 
 interface RoomRepository extends CrudRepository<Room, String> {
 }
@@ -68,6 +70,22 @@ public class Room {
 		room.put("roomData", roomData);
 		room.put("roomContent", new JSONObject());
 		return room;
+	}
+
+	public static Iterable<Room> fromJsonList(JSONArray array) throws JSONException {
+		if (array == null)
+			return null;
+		ArrayList<Room> roomList = new ArrayList<>();
+		for (int i = 0; i < array.length(); i++)
+			roomList.add(new Room(array.getJSONObject(i)));
+		return roomList;
+	}
+
+	public static JSONArray toJsonList(Iterable<Room> rooms) throws JSONException {
+		JSONArray array = new JSONArray();
+		for (Room room : rooms)
+			array.put(room.toJson());
+		return array;
 	}
 
 	public String getRoomId() {

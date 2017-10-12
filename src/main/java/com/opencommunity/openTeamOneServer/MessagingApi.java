@@ -39,6 +39,17 @@ public class MessagingApi {
 		return Util.defaultStringResponse(HttpStatus.OK); // TODO
 	}
 
+	@RequestMapping(method = RequestMethod.DELETE, value = "/device/subscription")
+	@ResponseBody
+	public ResponseEntity<String> deviceSubscriptionDelete(HttpServletRequest request) throws JSONException {
+		String sessionId = request.getHeader("Cookie");
+		Session session = sessionId == null ? null : Session.getSession(sessionId);
+		if (session == null)
+			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		return Util.defaultStringResponse(HttpStatus.OK); // TODO
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value = "/me")
 	@ResponseBody
 	public ResponseEntity<String> me(HttpServletRequest request) throws JSONException {
@@ -164,9 +175,31 @@ public class MessagingApi {
 		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
 	}
 
+	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/message")
+	@ResponseBody
+	public ResponseEntity<String> roomMessage(HttpServletRequest request, @PathVariable String roomId) throws JSONException {
+		String sessionId = request.getHeader("Cookie");
+		Session session = sessionId == null ? null : Session.getSession(sessionId);
+		if (session == null)
+			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
+	}
+
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/viewedConfirmation")
 	@ResponseBody
 	public ResponseEntity<String> roomviewedConfirmation(HttpServletRequest request, @PathVariable String roomId) throws JSONException {
+		String sessionId = request.getHeader("Cookie");
+		Session session = sessionId == null ? null : Session.getSession(sessionId);
+		if (session == null)
+			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, value = "/message/{messageId}")
+	@ResponseBody
+	public ResponseEntity<String> messageDelete(HttpServletRequest request, @PathVariable String messageId) throws JSONException {
 		String sessionId = request.getHeader("Cookie");
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		if (session == null)

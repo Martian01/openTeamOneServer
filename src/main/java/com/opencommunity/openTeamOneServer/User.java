@@ -1,5 +1,6 @@
 package com.opencommunity.openTeamOneServer;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.repository.CrudRepository;
@@ -7,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.util.ArrayList;
 
 
 interface UserRepository extends CrudRepository<User, String> {
@@ -58,6 +60,22 @@ public class User {
 		user.put("hasUserRole", hasUserRole);
 		user.put("hasAdminRole", hasAdminRole);
 		return user;
+	}
+
+	public static Iterable<User> fromJsonList(JSONArray array) throws JSONException {
+		if (array == null)
+			return null;
+		ArrayList<User> userList = new ArrayList<>();
+		for (int i = 0; i < array.length(); i++)
+			userList.add(new User(array.getJSONObject(i)));
+		return userList;
+	}
+
+	public static JSONArray toJsonList(Iterable<User> users) throws JSONException {
+		JSONArray array = new JSONArray();
+		for (User user : users)
+			array.put(user.toJson());
+		return array;
 	}
 
 	public String getUserId() {

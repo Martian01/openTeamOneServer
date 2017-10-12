@@ -1,4 +1,4 @@
 package com.opencommunity.openTeamOneServer;
 
-public class MessageConfirmation {
+public class ViewedConfirmation {
 }

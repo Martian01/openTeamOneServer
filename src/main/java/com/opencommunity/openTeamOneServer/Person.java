@@ -1,5 +1,6 @@
 package com.opencommunity.openTeamOneServer;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.repository.CrudRepository;
@@ -7,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.util.ArrayList;
 
 
 interface PersonRepository extends CrudRepository<Person, String> {
@@ -56,6 +58,22 @@ public class Person {
 		Util.put(person, "nickName", nickName);
 		Util.put(person, "pictureId", pictureId);
 		return person;
+	}
+
+	public static Iterable<Person> fromJsonList(JSONArray array) throws JSONException {
+		if (array == null)
+			return null;
+		ArrayList<Person> personList = new ArrayList<>();
+		for (int i = 0; i < array.length(); i++)
+			personList.add(new Person(array.getJSONObject(i)));
+		return personList;
+	}
+
+	public static JSONArray toJsonList(Iterable<Person> persons) throws JSONException {
+		JSONArray array = new JSONArray();
+		for (Person person : persons)
+			array.put(person.toJson());
+		return array;
 	}
 
 	public String getPersonId() {
