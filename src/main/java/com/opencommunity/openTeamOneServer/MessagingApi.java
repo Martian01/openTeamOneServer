@@ -16,6 +16,8 @@ import java.util.Map;
 public class MessagingApi {
 
 	@Autowired
+	private TenantParameterRepository tenantParameterRepository;
+	@Autowired
 	private UserRepository userRepository;
 	@Autowired
 	private PersonRepository personRepository;
@@ -36,19 +38,18 @@ public class MessagingApi {
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> me(HttpServletRequest request) {
 		String sessionId = request.getHeader("Cookie");
-		System.out.println(sessionId == null ? "sessionId == null" : sessionId);
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		if (session == null)
 			return Util.defaultMapResponse(HttpStatus.UNAUTHORIZED);
 		//
-		System.out.println(session.userId == null ? "session.userId == null" : session.userId);
 		User user = userRepository.findOne(session.userId);
-		System.out.println(user == null ? "user == null" : user.toString());
 		Person person = user == null ? null : personRepository.findOne(user.getPersonId());
-		System.out.println(person == null ? "person == null" : person.toString());
 		Map<String, Object> tenant = new HashMap<>();
-		tenant.put("name", "OpenTeamOne");
-		tenant.put("pictureId", "Pic09");
+		TenantParameter tp;
+		tp = tenantParameterRepository.findOne("name");
+		tenant.put("name", tp == null ? null : tp.getValue());
+		tp = tenantParameterRepository.findOne("pictureId");
+		tenant.put("pictureId", tp == null ? null : tp.getValue());
 		Map<String, Object> loginPerson = new HashMap<>();
 		loginPerson.put("personId", person == null ? null : person.getPersonId());
 		loginPerson.put("lastName", person == null ? null : person.getLastName());
