@@ -1,15 +1,15 @@
 package com.opencommunity.openTeamOneServer;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.repository.CrudRepository;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import java.util.List;
 
 
 interface UserRepository extends CrudRepository<User, String> {
-	List<User> findAll();
 }
 
 @Entity
@@ -38,6 +38,26 @@ public class User {
 		this.personId = personId;
 		this.hasUserRole = hasUserRole;
 		this.hasAdminRole = hasAdminRole;
+	}
+
+	public User(JSONObject item) {
+		try {
+			userId = Util.getString(item, "userId");
+			passwordHash = Util.getString(item, "passwordHash");
+			personId = Util.getString(item, "personId");
+			hasUserRole = Util.getBoolean(item, "hasUserRole");
+			hasAdminRole = Util.getBoolean(item, "hasAdminRole");
+		} catch (JSONException e) { }
+	}
+
+	public JSONObject toJson() throws JSONException {
+		JSONObject user = new JSONObject();
+		user.put("userId", userId);
+		user.put("passwordHash", passwordHash);
+		user.put("personId", personId);
+		user.put("hasUserRole", hasUserRole);
+		user.put("hasAdminRole", hasAdminRole);
+		return user;
 	}
 
 	public String getUserId() {

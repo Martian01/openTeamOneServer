@@ -1,15 +1,15 @@
 package com.opencommunity.openTeamOneServer;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.repository.CrudRepository;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import java.util.List;
 
 
 interface PersonRepository extends CrudRepository<Person, String> {
-	List<Person> findAll();
 }
 
 @Entity
@@ -26,7 +26,6 @@ public class Person {
 	private String pictureId;
 
 	protected Person() {
-		personId = Util.getUuid();
 	}
 
 	public Person(String lastName, String firstName, String nickName, String pictureId) {
@@ -35,6 +34,28 @@ public class Person {
 		this.firstName = firstName;
 		this.nickName = nickName;
 		this.pictureId = pictureId;
+	}
+
+	public Person(JSONObject item) {
+		try {
+			personId = Util.getString(item, "personId");
+			lastName = Util.getString(item, "lastName");
+			firstName = Util.getString(item, "firstName");
+			nickName = Util.getString(item, "nickName");
+			pictureId = Util.getString(item, "pictureId");
+		} catch (JSONException e) { }
+		if (personId == null)
+			personId = Util.getUuid();
+	}
+
+	public JSONObject toJson() throws JSONException {
+		JSONObject person = new JSONObject();
+		person.put("personId", personId);
+		Util.put(person, "lastName", lastName);
+		Util.put(person, "firstName", firstName);
+		Util.put(person, "nickName", nickName);
+		Util.put(person, "pictureId", pictureId);
+		return person;
 	}
 
 	public String getPersonId() {

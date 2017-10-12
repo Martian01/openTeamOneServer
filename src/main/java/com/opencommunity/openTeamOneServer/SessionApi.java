@@ -1,5 +1,7 @@
 package com.opencommunity.openTeamOneServer;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,9 +18,10 @@ public class SessionApi {
 
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private PersonRepository personRepository;
 
-	private static final String unsafeToken = "unsafe";
-	private static final String safeToken = "4711";
+	private static final String unsafeCsrfToken = "unsafe";
 
 	@RequestMapping(method = RequestMethod.GET, value = "/token.xsjs")
 	@ResponseBody
@@ -26,54 +29,42 @@ public class SessionApi {
 		String sessionId = request.getHeader("Cookie");
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		//
-		String body = "{}";
-		//
 		HttpHeaders httpHeaders= new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 		if ("Fetch".equals(request.getHeader("X-CSRF-Token")))
-			httpHeaders.set("X-CSRF-Token", session == null ? unsafeToken : safeToken);
-		return new ResponseEntity<>(body, httpHeaders, HttpStatus.OK);
+			httpHeaders.set("X-CSRF-Token", session == null ? unsafeCsrfToken : session.getNewCsrfToken());
+		return new ResponseEntity<>("{}", httpHeaders, HttpStatus.OK);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/login.xscfunc")
 	@ResponseBody
-	public ResponseEntity<String> login(HttpServletRequest request, @RequestBody String input) {
+	public ResponseEntity<String> login(HttpServletRequest request, @RequestBody String input) throws JSONException {
 		Map<String, String> formData = Util.split(input);
-		String userId = formData.get("xs-username").toLowerCase();
+		String userId = formData.get("xs-username");
 		String password = formData.get("xs-password");
-		User sessionUser = userId != null ? userRepository.findOne(userId) : null;
-		Session session = sessionUser != null && sessionUser.matches(password) ? Session.newSession(userId) : null;
+		if (userId != null)
+			userId = userId.toLowerCase();
+		User user = userId != null ? userRepository.findOne(userId) : null;
+		Person person = user != null && user.isHasUserRole() && user.getPersonId() != null ? personRepository.findOne(user.getPersonId()) : null;
+		Session session = person != null && user.matches(password) ? Session.newSession(userId) : null;
 		//
-		String body = "{\"login\":" + Boolean.toString(session != null) + ",\"pwdChange\":false,\"username\":\"" + userId + "\"}";
+		JSONObject body = new JSONObject();
+		body.put("login", session != null);
+		body.put("pwdChange", false);
+		Util.put(body, "username", userId);
 		//
 		HttpHeaders httpHeaders= new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 		if (session != null)
 			httpHeaders.set("Set-Cookie", session.sessionId);
 		if ("Fetch".equals(request.getHeader("X-CSRF-Token")))
-			httpHeaders.set("X-CSRF-Token", session == null ? unsafeToken : safeToken);
-		return new ResponseEntity<>(body, httpHeaders, session == null ? HttpStatus.FORBIDDEN : HttpStatus.OK);
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/logout.xscfunc")
-	@ResponseBody
-	public ResponseEntity<String> logout(HttpServletRequest request) {
-		String sessionId = request.getHeader("Cookie");
-		if (sessionId != null)
-			Session.invalidateSession(sessionId);
-		//
-		String body = "{}";
-		//
-		HttpHeaders httpHeaders= new HttpHeaders();
-		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-		if ("Fetch".equals(request.getHeader("X-CSRF-Token")))
-			httpHeaders.set("X-CSRF-Token", unsafeToken);
-		return new ResponseEntity<>(body, httpHeaders, HttpStatus.OK);
+			httpHeaders.set("X-CSRF-Token", session == null ? unsafeCsrfToken : session.getNewCsrfToken());
+		return new ResponseEntity<>(body.toString(), httpHeaders, session == null ? HttpStatus.FORBIDDEN : HttpStatus.OK);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/pwchange.xscfunc")
 	@ResponseBody
-	public ResponseEntity<String> pwchange(HttpServletRequest request, @RequestBody String input) {
+	public ResponseEntity<String> pwchange(HttpServletRequest request, @RequestBody String input) throws JSONException {
 		Map<String, String> formData = Util.split(input);
 		String userId = formData.get("xs-username").toLowerCase();
 		String passwordNew = formData.get("xs-password-new");
@@ -91,15 +82,32 @@ public class SessionApi {
 			userRepository.save(sessionUser);
 		}
 		//
-		String body = "{\"login\":" + Boolean.toString(session != null) + ",\"pwdChange\":false,\"username\":\"" + userId + "\"}";
+		JSONObject body = new JSONObject();
+		body.put("login", session != null);
+		body.put("pwdChange", false);
+		Util.put(body, "username", userId);
 		//
 		HttpHeaders httpHeaders= new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 		if (session != null)
 			httpHeaders.set("Set-Cookie", session.sessionId);
 		if ("Fetch".equals(request.getHeader("X-CSRF-Token")))
-			httpHeaders.set("X-CSRF-Token", session == null ? unsafeToken : safeToken);
-		return new ResponseEntity<>(body, httpHeaders, session == null ? HttpStatus.FORBIDDEN : HttpStatus.OK);
+			httpHeaders.set("X-CSRF-Token", session == null ? unsafeCsrfToken : session.getNewCsrfToken());
+		return new ResponseEntity<>(body.toString(), httpHeaders, session == null ? HttpStatus.FORBIDDEN : HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/logout.xscfunc")
+	@ResponseBody
+	public ResponseEntity<String> logout(HttpServletRequest request) {
+		String sessionId = request.getHeader("Cookie");
+		if (sessionId != null)
+			Session.invalidateSession(sessionId);
+		//
+		HttpHeaders httpHeaders= new HttpHeaders();
+		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+		if ("Fetch".equals(request.getHeader("X-CSRF-Token")))
+			httpHeaders.set("X-CSRF-Token", unsafeCsrfToken);
+		return new ResponseEntity<>("{}", httpHeaders, HttpStatus.OK);
 	}
 
 }

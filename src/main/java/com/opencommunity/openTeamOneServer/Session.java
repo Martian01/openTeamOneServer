@@ -11,11 +11,14 @@ public class Session {
 	public long startTime;
 	public long lastAccessTime;
 
+	public String csrfToken;
+
 	public Session(String userId) {
 		sessionId = Util.getUuid();
 		this.userId = userId;
 		startTime = System.currentTimeMillis();
 		lastAccessTime = startTime;
+		csrfToken = Util.getUuid();
 	}
 
 	@Override
@@ -25,7 +28,12 @@ public class Session {
 				", userId='" + userId + '\'' +
 				", startTime=" + startTime +
 				", lastAccessTime=" + lastAccessTime +
+				", csrfToken='" + csrfToken + '\'' +
 				'}';
+	}
+
+	public String getNewCsrfToken() {
+		return csrfToken = Util.getUuid();
 	}
 
 	private static final long sessionMaximumAge = 1800000L;
