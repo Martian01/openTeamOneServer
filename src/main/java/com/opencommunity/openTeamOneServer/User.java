@@ -17,21 +17,21 @@ interface UserRepository extends CrudRepository<User, String> {
 @Entity
 public class User {
 	@Id
-	private String userId;
+	public String userId;
 	@Column
-	private String passwordHash;
+	public String passwordHash;
 	@Column
-	private String personId;
+	public String personId;
 	@Column
-	private boolean hasUserRole;
+	public boolean hasUserRole;
 	@Column
-	private boolean hasAdminRole;
+	public boolean hasAdminRole;
 
-	private static String hash(String password) {
+	public static String hash(String password) {
 		return Integer.toHexString(password.hashCode());
 	}
 
-	protected User() {
+	public User() {
 	}
 
 	public User(String userId, String password, String personId, boolean hasUserRole, boolean hasAdminRole) {

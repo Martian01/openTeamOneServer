@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 interface RoomMemberRepository extends CrudRepository<RoomMember, String> {
 	Iterable<RoomMember> findByRoomId(String roomId);
-	Iterable<RoomMember> findByPersonId(String personId);
+	//Iterable<RoomMember> findByPersonId(String personId);
 }
 
 @Entity
@@ -20,9 +20,9 @@ interface RoomMemberRepository extends CrudRepository<RoomMember, String> {
 public class RoomMember {
 
 	@Id
-	private String roomId;
+	public String roomId;
 	@Id
-	private String personId;
+	public String personId;
 
 	public RoomMember() {
 	}

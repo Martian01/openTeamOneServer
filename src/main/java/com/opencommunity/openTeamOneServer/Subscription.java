@@ -2,12 +2,12 @@ package com.opencommunity.openTeamOneServer;
 
 public class Subscription {
 
-	private String targetType;
-	private String appId;
-	private String deviceToken;
-	private String userId;
-	private String language;
-	private String clientAccountId;
-	private long changedAt;
+	public String targetType;
+	public String appId;
+	public String deviceToken;
+	public String userId;
+	public String language;
+	public String clientAccountId;
+	public long changedAt;
 
 }

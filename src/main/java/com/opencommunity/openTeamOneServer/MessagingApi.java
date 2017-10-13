@@ -62,7 +62,7 @@ public class MessagingApi {
 			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 		JSONObject body = new JSONObject();
-		Person me = personRepository.findOne(user.getPersonId());
+		Person me = personRepository.findOne(user.personId);
 		if (me != null)
 			body.put("loginPerson", me.toJson());
 		//
@@ -71,9 +71,9 @@ public class MessagingApi {
 		if (tpName != null || tpPictureId != null) {
 			JSONObject tenant = new JSONObject();
 			if (tpName != null)
-				tenant.put("name", tpName.getValue());
+				tenant.put("name", tpName.value);
 			if (tpPictureId != null)
-				tenant.put("pictureId", tpPictureId.getValue());
+				tenant.put("pictureId", tpPictureId.value);
 			body.put("tenant", tenant);
 		}
 		//
@@ -86,42 +86,10 @@ public class MessagingApi {
 		Iterable<User> users = userRepository.findAll();
 		Set<String> contactIds = new HashSet<>();
 		for (User user : users)
-			if (user.getPersonId() != null && user.isHasUserRole())
-				contactIds.add(user.getPersonId());
+			if (user.personId != null && user.hasUserRole)
+				contactIds.add(user.personId);
 		return contactIds;
 	}
-
-/*
-	private Set<String> getRoomIds(String roomType, String... personIds) {
-		Set<String> roomIds = new HashSet<>();
-		Iterable<Room> rooms = roomType == null ? roomRepository.findAll() : roomRepository.findByRoomType(roomType);
-		for (Room room : rooms) {
-			Iterable<RoomMember> roomMembers = roomMemberRepository.findByRoomId(room.getRoomId());
-			boolean foundAll = false;
-			for (String personId : personIds) {
-				boolean foundPersonId = false;
-				for (RoomMember roomMember : roomMembers) {
-					foundPersonId = personId.equals(roomMember.getPersonId());
-					if (foundPersonId)
-						break;
-				}
-				foundAll = foundPersonId;
-				if (!foundAll)
-					break;
-			}
-			if (foundAll)
-				roomIds.add(room.getRoomId());
-		}
-		return roomIds;
-	}
-
-	private String getPrivateRoomId(String personId1, String personId2) {
-		if (personId1.equals(personId2))
-			return null;
-		Set<String> roomIds = getRoomIds("private", personId1, personId2);
-		return roomIds.size() == 1 ? roomIds.iterator().next() : null;
-	}
-*/
 
 	private String getPrivateRoomId(String personId1, String personId2) {
 		if (personId1 == null || personId2 == null || personId1.equals(personId2))
@@ -129,12 +97,12 @@ public class MessagingApi {
 		Set<String> roomIds = new HashSet<>();
 		Iterable<Room> rooms = roomRepository.findByRoomType("private");
 		for (Room room : rooms) {
-			Iterable<RoomMember> roomMembers = roomMemberRepository.findByRoomId(room.getRoomId());
+			Iterable<RoomMember> roomMembers = roomMemberRepository.findByRoomId(room.roomId);
 			Set<String> set = new HashSet<>();
 			for (RoomMember roomMember : roomMembers)
-				set.add(roomMember.getPersonId());
+				set.add(roomMember.personId);
 			if (set.contains(personId1) && set.contains(personId2) && set.size() == 2)
-				roomIds.add(room.getRoomId());
+				roomIds.add(room.roomId);
 		}
 		return roomIds.size() == 1 ? roomIds.iterator().next() : null;
 	}
@@ -152,7 +120,7 @@ public class MessagingApi {
 		if (person != null) {
 			JSONObject personJson = person.toJson();
 			personJson.put("isContact", getContactIds().contains(personId));
-			JsonUtil.put(personJson, "privateRoomId", getPrivateRoomId(personId, user.getPersonId()));
+			JsonUtil.put(personJson, "privateRoomId", getPrivateRoomId(personId, user.personId));
 			body.put("person", personJson);
 		}
 		//
@@ -174,10 +142,10 @@ public class MessagingApi {
 		Iterable<Person> persons = personRepository.findAll();
 		JSONArray contactsJson = new JSONArray();
 		for (Person person : persons)
-			if (contactIds.contains(person.getPersonId())) {
+			if (contactIds.contains(person.personId)) {
 				JSONObject personJson = person.toJson();
 				personJson.put("isContact", true);
-				JsonUtil.put(personJson, "privateRoomId", getPrivateRoomId(person.getPersonId(), user.getPersonId()));
+				JsonUtil.put(personJson, "privateRoomId", getPrivateRoomId(person.personId, user.personId));
 				contactsJson.put(personJson);
 			}
 		body.put("contacts", contactsJson);
@@ -193,7 +161,7 @@ public class MessagingApi {
 			privateRoomId = getPrivateRoomId(personId1, personId2);
 			if (privateRoomId == null) {
 				Room room = new Room("PM", "PM", "private", null);
-				privateRoomId = room.getRoomId();
+				privateRoomId = room.roomId;
 				// create the room members first assuming concurrent reads will read a room before its members...
 				// the clean solution is a read-write lock
 				roomMemberRepository.save(new RoomMember(privateRoomId, personId1));
@@ -214,11 +182,11 @@ public class MessagingApi {
 		//
 		JSONObject body = new JSONObject();
 		Person person = contactId == null || !getContactIds().contains(contactId) ? null : personRepository.findOne(contactId);
-		if (person == null || person.getPersonId().equals(user.getPersonId()))
+		if (person == null || person.personId.equals(user.personId))
 			return Util.defaultStringResponse(HttpStatus.NOT_FOUND);
-		String privateRoomId = getPrivateRoomId(contactId, user.getPersonId());
+		String privateRoomId = getPrivateRoomId(contactId, user.personId);
 		if (privateRoomId == null)
-			privateRoomId = createPrivateRoom(person.getPersonId(), user.getPersonId()); // create the room on-the-fly
+			privateRoomId = createPrivateRoom(person.personId, user.personId); // create the room on-the-fly
 		body.put("roomId", privateRoomId);
 		//
 		HttpHeaders httpHeaders= new HttpHeaders();
@@ -240,21 +208,21 @@ public class MessagingApi {
 		Set<String> userRoomIds = new HashSet<>();
 		Map<String, JSONArray> byRoomId = new HashMap<>();
 		for (RoomMember roomMember : roomMembers) {
-			if (user.getPersonId().equals(roomMember.getPersonId()))
-				userRoomIds.add(roomMember.getRoomId());
-			JSONArray array = byRoomId.get(roomMember.getRoomId());
+			if (user.personId.equals(roomMember.personId))
+				userRoomIds.add(roomMember.roomId);
+			JSONArray array = byRoomId.get(roomMember.roomId);
 			if (array == null) {
 				array = new JSONArray();
-				byRoomId.put(roomMember.getRoomId(), array);
+				byRoomId.put(roomMember.roomId, array);
 			}
-			array.put(roomMember.getPersonId());
+			array.put(roomMember.personId);
 		}
 		JSONArray roomsJson = new JSONArray();
 		for (Room room : rooms)
-			if (userRoomIds.contains(room.getRoomId())) {
+			if (userRoomIds.contains(room.roomId)) {
 				JSONObject roomJson = room.toJson();
 				JSONObject roomData = roomJson.getJSONObject("roomData");
-				JSONArray currentMemberIds = byRoomId.get(room.getRoomId());
+				JSONArray currentMemberIds = byRoomId.get(room.roomId);
 				if (currentMemberIds == null)
 					currentMemberIds = new JSONArray();
 				roomData.put("currentMemberIds", currentMemberIds);

@@ -2,28 +2,28 @@ package com.opencommunity.openTeamOneServer;
 
 public class Attachment {
 
-	private String attachmentId;
+	public String attachmentId;
 
-	private String messageId;
+	public String messageId;
 
-	private String text;
-	private String mimeType;
-	private String fileId;
+	public String text;
+	public String mimeType;
+	public String fileId;
 
-	//private String roomId;
-	//private String feedId;
-	//private long createdAt;
+	//public String roomId;
+	//public String feedId;
+	//public long createdAt;
 
 	// Video parameters
-	//private int displayTimeCorrection = 0;
-	//private int offsetStart = 0;
-	//private int offsetEnd = 0;
+	//public int displayTimeCorrection = 0;
+	//public int offsetStart = 0;
+	//public int offsetEnd = 0;
 
 	// Questionnaire parameters
-	//private Questionnaire questionnaire;
+	//public Questionnaire questionnaire;
 
 	// InfoPackage parameters
-	//private InfoPackage infoPackage;
+	//public InfoPackage infoPackage;
 
 
 }

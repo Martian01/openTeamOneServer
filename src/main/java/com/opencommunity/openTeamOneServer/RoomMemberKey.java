@@ -6,8 +6,8 @@ public class RoomMemberKey implements Serializable {
 
 	private static final long serialVersionUID = -1L;
 
-	private String roomId;
-	private String personId;
+	public String roomId;
+	public String personId;
 
 }
 

@@ -17,9 +17,9 @@ interface TenantParameterRepository extends CrudRepository<TenantParameter, Stri
 @Entity
 public class TenantParameter {
 	@Id
-	private String key;
+	public String key;
 	@Column
-	private String value;
+	public String value;
 
 	public TenantParameter() {
 	}

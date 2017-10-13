@@ -46,7 +46,7 @@ public class SessionApi {
 		if (userId != null)
 			userId = userId.toLowerCase();
 		User user = userId != null ? userRepository.findOne(userId) : null;
-		Person person = user != null && user.isHasUserRole() && user.getPersonId() != null ? personRepository.findOne(user.getPersonId()) : null;
+		Person person = user != null && user.hasUserRole && user.personId != null ? personRepository.findOne(user.personId) : null;
 		Session session = person != null && user.matches(password) ? Session.newSession(userId) : null;
 		//
 		JSONObject body = new JSONObject();

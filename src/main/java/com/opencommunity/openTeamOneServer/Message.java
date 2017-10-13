@@ -2,23 +2,23 @@ package com.opencommunity.openTeamOneServer;
 
 public class Message {
 
-	private String messageId;
-	private String clientMessageId;
+	public String messageId;
+	public String clientMessageId;
 
-	private String roomId;
+	public String roomId;
 
-	private String senderPersonId;
-	private boolean isOwnMessage;
-	//private boolean readConfirmationRequested;
-	private long createdAt;
-	private String text;
+	public String senderPersonId;
+	public boolean isOwnMessage;
+	//public boolean readConfirmationRequested;
+	public long createdAt;
+	public String text;
 
-	private boolean isDeleted;
-	private long updatedAt;
+	public boolean isDeleted;
+	public long updatedAt;
 
-	//private int viewedCount;
-	//private int readConfirmedCount;
-	//private long viewedAt;
-	//private long readConfirmedAt;
+	//public int viewedCount;
+	//public int readConfirmedCount;
+	//public long viewedAt;
+	//public long readConfirmedAt;
 
 }
