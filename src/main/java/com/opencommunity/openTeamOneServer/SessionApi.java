@@ -28,11 +28,12 @@ public class SessionApi {
 	public ResponseEntity<String> token(HttpServletRequest request) {
 		String sessionId = request.getHeader("Cookie");
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
+		User user = session == null ? null : userRepository.findOne(session.userId);
 		//
 		HttpHeaders httpHeaders= new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 		if ("Fetch".equals(request.getHeader("X-CSRF-Token")))
-			httpHeaders.set("X-CSRF-Token", session == null ? unsafeCsrfToken : session.getNewCsrfToken());
+			httpHeaders.set("X-CSRF-Token", user == null ? unsafeCsrfToken : session.getNewCsrfToken());
 		return new ResponseEntity<>("{}", httpHeaders, HttpStatus.OK);
 	}
 
@@ -71,9 +72,10 @@ public class SessionApi {
 		String passwordOld = formData.get("xs-password-old");
 		boolean passwordOldConfirmed = false;
 		if (passwordOld == null) {
-			String sessionId = request.getHeader("Cookie");
-			Session session = sessionId == null ? null : Session.getSession(sessionId);
-			passwordOldConfirmed = session != null & userId.equals(session.userId);
+			String oldSessionId = request.getHeader("Cookie");
+			Session oldSession = oldSessionId == null ? null : Session.getSession(oldSessionId);
+			User oldSessionUser = oldSession == null ? null : userRepository.findOne(oldSession.userId);
+			passwordOldConfirmed = oldSessionUser != null & userId.equals(oldSession.userId);
 		}
 		User sessionUser = userId != null ? userRepository.findOne(userId) : null;
 		Session session = sessionUser != null && passwordNew != null && (sessionUser.matches(passwordOld) || passwordOldConfirmed) ? Session.newSession(userId) : null;

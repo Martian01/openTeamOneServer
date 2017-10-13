@@ -71,18 +71,17 @@ public class PersistenceService {
 		//
 		Room r1, r2, r3;
 		rr.save(r1 = new Room("Team Room", "TR", "group", "Pic04"));
-		rr.save(r2 = new Room("General", "G", "group", "Pic05"));
-		rr.save(r3 = new Room("News", "NEW", "group", "Pic06"));
+		rr.save(r2 = new Room("General", "GN", "group", "Pic05"));
+		rr.save(r3 = new Room("PM", "PM", "private", null));
 		//
-		rmr.save(new RoomMember(p1.getPersonId(), r1.getRoomId()));
-		rmr.save(new RoomMember(p1.getPersonId(), r2.getRoomId()));
-		rmr.save(new RoomMember(p1.getPersonId(), r3.getRoomId()));
-		rmr.save(new RoomMember(p2.getPersonId(), r1.getRoomId()));
-		rmr.save(new RoomMember(p2.getPersonId(), r2.getRoomId()));
-		rmr.save(new RoomMember(p2.getPersonId(), r3.getRoomId()));
-		rmr.save(new RoomMember(p3.getPersonId(), r1.getRoomId()));
-		rmr.save(new RoomMember(p3.getPersonId(), r2.getRoomId()));
-		rmr.save(new RoomMember(p3.getPersonId(), r3.getRoomId()));
+		rmr.save(new RoomMember(r1.getRoomId(), p1.getPersonId()));
+		rmr.save(new RoomMember(r1.getRoomId(), p2.getPersonId()));
+		rmr.save(new RoomMember(r1.getRoomId(), p3.getPersonId()));
+		rmr.save(new RoomMember(r2.getRoomId(), p1.getPersonId()));
+		rmr.save(new RoomMember(r2.getRoomId(), p2.getPersonId()));
+		rmr.save(new RoomMember(r2.getRoomId(), p3.getPersonId()));
+		rmr.save(new RoomMember(r3.getRoomId(), p1.getPersonId()));
+		rmr.save(new RoomMember(r3.getRoomId(), p2.getPersonId()));
 	}
 
 }

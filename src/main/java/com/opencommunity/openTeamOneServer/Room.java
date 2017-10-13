@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import java.util.ArrayList;
 
 interface RoomRepository extends CrudRepository<Room, String> {
+	Iterable<Room> findByRoomType(String roomType);
 }
 
 @Entity

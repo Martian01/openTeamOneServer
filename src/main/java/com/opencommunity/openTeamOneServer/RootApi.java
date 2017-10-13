@@ -3,6 +3,7 @@ package com.opencommunity.openTeamOneServer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,15 +16,17 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/sap/sports/pe/api/messaging")
-public class VersionApi {
+public class RootApi {
 
-	@RequestMapping(method = RequestMethod.GET, value = "/versions")
-	@ResponseBody
+	@Autowired
+	private UserRepository userRepository;
+
+	@RequestMapping(method = RequestMethod.GET, value = "/sap/sports/pe/api/messaging/versions")
 	public ResponseEntity<String> versions(HttpServletRequest request) throws JSONException {
 		String sessionId = request.getHeader("Cookie");
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
-		if (session == null)
+		User user = session == null ? null : userRepository.findOne(session.userId);
+		if (user == null)
 			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 		JSONObject teamOneAndroid = new JSONObject();
@@ -41,6 +44,17 @@ public class VersionApi {
 		HttpHeaders httpHeaders= new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 		return new ResponseEntity<>(body.toString(), httpHeaders, HttpStatus.OK);
+	}
+
+	@RequestMapping("*") // does not work for some unknown reason
+	public ResponseEntity<String> fallback(HttpServletRequest request) throws JSONException {
+		String sessionId = request.getHeader("Cookie");
+		Session session = sessionId == null ? null : Session.getSession(sessionId);
+		User user = session == null ? null : userRepository.findOne(session.userId);
+		if (user == null)
+			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE);
 	}
 
 }
