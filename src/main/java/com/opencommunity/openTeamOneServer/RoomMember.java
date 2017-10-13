@@ -32,11 +32,9 @@ public class RoomMember {
 		this.personId = personId;
 	}
 
-	public RoomMember(JSONObject item) {
-		try {
-			roomId = JsonUtil.getString(item, "roomId");
-			personId = JsonUtil.getString(item, "personId");
-		} catch (JSONException e) { }
+	public RoomMember(JSONObject item) throws JSONException {
+		roomId = JsonUtil.getString(item, "roomId");
+		personId = JsonUtil.getString(item, "personId");
 	}
 
 	public JSONObject toJson() throws JSONException {
@@ -46,7 +44,7 @@ public class RoomMember {
 		return roomMember;
 	}
 
-	public static Iterable<RoomMember> fromJsonList(JSONArray array) throws JSONException {
+	public static Iterable<RoomMember> fromJsonArray(JSONArray array) throws JSONException {
 		if (array == null)
 			return null;
 		ArrayList<RoomMember> roomMemberList = new ArrayList<>();
@@ -55,7 +53,7 @@ public class RoomMember {
 		return roomMemberList;
 	}
 
-	public static JSONArray toJsonList(Iterable<RoomMember> roomMembers) throws JSONException {
+	public static JSONArray toJsonArray(Iterable<RoomMember> roomMembers) throws JSONException {
 		JSONArray array = new JSONArray();
 		for (RoomMember roomMember : roomMembers)
 			array.put(roomMember.toJson());

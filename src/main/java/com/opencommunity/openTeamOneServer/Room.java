@@ -33,26 +33,25 @@ public class Room {
 	public Room() {
 	}
 
-	public Room(String name, String shortName, String roomType, String pictureId) {
-		this.roomId = Util.getUuid();
+	public Room(String roomId, String shortName, String name, String roomType, String pictureId, long changedAt) {
+		this.roomId = roomId == null ? Util.getUuid() : roomId;
 		this.shortName = shortName;
 		this.name = name;
 		this.roomType = roomType;
 		this.pictureId = pictureId;
-		this.changedAt = System.currentTimeMillis();
+		this.changedAt = changedAt;
 	}
 
-	public Room(JSONObject item) {
-		try {
-			roomId = JsonUtil.getString(item, "roomId");
-			JSONObject roomStatus = JsonUtil.getJSONObject(item, "roomStatus");
-			changedAt = JsonUtil.getIsoDate(roomStatus, "dataChangedAt");
-			JSONObject roomData = JsonUtil.getJSONObject(item, "roomData");
-			shortName = JsonUtil.getString(roomData, "shortName");
-			name = JsonUtil.getString(roomData, "name", "(null)");
-			pictureId = JsonUtil.getString(roomData, "pictureId");
-			roomType = JsonUtil.getString(roomData, "roomType");
-		} catch (JSONException e) { }
+	public Room(JSONObject item) throws JSONException {
+		roomId = JsonUtil.getString(item, "roomId");
+		JSONObject roomStatus = JsonUtil.getJSONObject(item, "roomStatus");
+		changedAt = JsonUtil.getIsoDate(roomStatus, "dataChangedAt");
+		JSONObject roomData = JsonUtil.getJSONObject(item, "roomData");
+		shortName = JsonUtil.getString(roomData, "shortName");
+		name = JsonUtil.getString(roomData, "name");
+		pictureId = JsonUtil.getString(roomData, "pictureId");
+		roomType = JsonUtil.getString(roomData, "roomType");
+		//
 		if (roomId == null)
 			roomId = Util.getUuid();
 	}
@@ -73,7 +72,7 @@ public class Room {
 		return room;
 	}
 
-	public static Iterable<Room> fromJsonList(JSONArray array) throws JSONException {
+	public static Iterable<Room> fromJsonArray(JSONArray array) throws JSONException {
 		if (array == null)
 			return null;
 		ArrayList<Room> roomList = new ArrayList<>();
@@ -82,7 +81,7 @@ public class Room {
 		return roomList;
 	}
 
-	public static JSONArray toJsonList(Iterable<Room> rooms) throws JSONException {
+	public static JSONArray toJsonArray(Iterable<Room> rooms) throws JSONException {
 		JSONArray array = new JSONArray();
 		for (Room room : rooms)
 			array.put(room.toJson());

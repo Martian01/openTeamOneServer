@@ -19,9 +19,12 @@ public class OpenTeamOneServerApplication {
 			UserRepository ur,
 			PersonRepository pr,
 			RoomRepository rr,
-			RoomMemberRepository rmr
+			RoomMemberRepository rmr,
+			MessageRepository mr,
+			AttachmentRepository ar,
+			ViewedConfirmationRepository vcr
 	) {
-		final PersistenceService ps = new PersistenceService(tpr, ur, pr, rr, rmr);
+		final PersistenceService ps = new PersistenceService(tpr, ur, pr, rr, rmr, mr, ar, vcr);
 		return new CommandLineRunner() {
 			@Override
 			public void run(String... args) throws Exception {

@@ -42,14 +42,12 @@ public class User {
 		this.hasAdminRole = hasAdminRole;
 	}
 
-	public User(JSONObject item) {
-		try {
-			userId = JsonUtil.getString(item, "userId");
-			passwordHash = JsonUtil.getString(item, "passwordHash");
-			personId = JsonUtil.getString(item, "personId");
-			hasUserRole = JsonUtil.getBoolean(item, "hasUserRole");
-			hasAdminRole = JsonUtil.getBoolean(item, "hasAdminRole");
-		} catch (JSONException e) { }
+	public User(JSONObject item) throws JSONException {
+		userId = JsonUtil.getString(item, "userId");
+		passwordHash = JsonUtil.getString(item, "passwordHash");
+		personId = JsonUtil.getString(item, "personId");
+		hasUserRole = JsonUtil.getBoolean(item, "hasUserRole");
+		hasAdminRole = JsonUtil.getBoolean(item, "hasAdminRole");
 	}
 
 	public JSONObject toJson() throws JSONException {
@@ -62,7 +60,7 @@ public class User {
 		return user;
 	}
 
-	public static Iterable<User> fromJsonList(JSONArray array) throws JSONException {
+	public static Iterable<User> fromJsonArray(JSONArray array) throws JSONException {
 		if (array == null)
 			return null;
 		ArrayList<User> userList = new ArrayList<>();
@@ -71,7 +69,7 @@ public class User {
 		return userList;
 	}
 
-	public static JSONArray toJsonList(Iterable<User> users) throws JSONException {
+	public static JSONArray toJsonArray(Iterable<User> users) throws JSONException {
 		JSONArray array = new JSONArray();
 		for (User user : users)
 			array.put(user.toJson());

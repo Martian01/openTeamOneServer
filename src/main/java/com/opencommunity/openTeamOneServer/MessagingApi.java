@@ -30,6 +30,12 @@ public class MessagingApi {
 	private RoomRepository roomRepository;
 	@Autowired
 	private RoomMemberRepository roomMemberRepository;
+	@Autowired
+	private MessageRepository messageRepository;
+	@Autowired
+	private AttachmentRepository attachmentRepository;
+	@Autowired
+	private ViewedConfirmationRepository viewedConfirmationRepository;
 
 	@RequestMapping(method = RequestMethod.POST, value = "/device/subscription")
 	public ResponseEntity<String> deviceSubscription(HttpServletRequest request) throws JSONException {
@@ -37,9 +43,9 @@ public class MessagingApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.defaultStringResponse(HttpStatus.OK); // TODO
+		return Util.defaultResponse(HttpStatus.OK); // TODO
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/device/subscription")
@@ -48,9 +54,9 @@ public class MessagingApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.defaultStringResponse(HttpStatus.OK); // TODO
+		return Util.defaultResponse(HttpStatus.OK); // TODO
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/me")
@@ -59,13 +65,12 @@ public class MessagingApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
 		JSONObject body = new JSONObject();
 		Person me = personRepository.findOne(user.personId);
 		if (me != null)
 			body.put("loginPerson", me.toJson());
-		//
 		TenantParameter tpName = tenantParameterRepository.findOne("name");
 		TenantParameter tpPictureId = tenantParameterRepository.findOne("pictureId");
 		if (tpName != null || tpPictureId != null) {
@@ -113,7 +118,7 @@ public class MessagingApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
 		JSONObject body = new JSONObject();
 		Person person = personId == null ? null : personRepository.findOne(personId);
@@ -135,7 +140,7 @@ public class MessagingApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
 		JSONObject body = new JSONObject();
 		Set<String> contactIds = getContactIds();
@@ -160,7 +165,7 @@ public class MessagingApi {
 		synchronized(Room.class) {
 			privateRoomId = getPrivateRoomId(personId1, personId2);
 			if (privateRoomId == null) {
-				Room room = new Room("PM", "PM", "private", null);
+				Room room = new Room(null, "PM", "PM", "private", null, System.currentTimeMillis());
 				privateRoomId = room.roomId;
 				// create the room members first assuming concurrent reads will read a room before its members...
 				// the clean solution is a read-write lock
@@ -178,12 +183,12 @@ public class MessagingApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
 		JSONObject body = new JSONObject();
 		Person person = contactId == null || !getContactIds().contains(contactId) ? null : personRepository.findOne(contactId);
 		if (person == null || person.personId.equals(user.personId))
-			return Util.defaultStringResponse(HttpStatus.NOT_FOUND);
+			return Util.defaultResponse(HttpStatus.NOT_FOUND);
 		String privateRoomId = getPrivateRoomId(contactId, user.personId);
 		if (privateRoomId == null)
 			privateRoomId = createPrivateRoom(person.personId, user.personId); // create the room on-the-fly
@@ -200,7 +205,7 @@ public class MessagingApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
 		JSONObject body = new JSONObject();
 		Iterable<Room> rooms = roomRepository.findAll();
@@ -227,9 +232,15 @@ public class MessagingApi {
 					currentMemberIds = new JSONArray();
 				roomData.put("currentMemberIds", currentMemberIds);
 				JSONObject roomContent = roomJson.getJSONObject("roomContent");
-				// TODO: find badge count and latest message
-				roomContent.put("badgeCount", 0);
-				//roomContent.put("latestMessage", null);
+				ViewedConfirmation viewedConfirmation = viewedConfirmationRepository.findTopByRoomIdOrderByTimestampDesc(room.roomId);
+				if (viewedConfirmation != null) {
+					long watermark = viewedConfirmation.timestamp;
+					long count = messageRepository.countByRoomIdAndCreatedAtGreaterThan(room.roomId, watermark);
+					roomContent.put("badgeCount", count);
+				}
+				Message latestMessage = messageRepository.findTopByRoomIdOrderByCreatedAtDesc(room.roomId);
+				if (latestMessage != null)
+					roomContent.put("latestMessage", latestMessage.toJson());
 				roomsJson.put(roomJson);
 			}
 		body.put("rooms", roomsJson);
@@ -245,9 +256,21 @@ public class MessagingApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
+		JSONObject body = new JSONObject();
+		Iterable<RoomMember> roomMembers = roomMemberRepository.findByRoomId(roomId);
+		boolean found = false;
+		for (RoomMember roomMember : roomMembers)
+			if (found = roomMember.personId.equals(user.personId))
+				break;
+		if (!found)
+			return Util.defaultResponse(HttpStatus.FORBIDDEN);
+		body.put("roomMembers", RoomMember.toJsonArray(roomMembers));
+		//
+		HttpHeaders httpHeaders= new HttpHeaders();
+		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+		return new ResponseEntity<>(body.toString(), httpHeaders, HttpStatus.OK);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/messagesSince")
@@ -256,20 +279,22 @@ public class MessagingApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
+		// TODO: validation of roomId
+		return Util.defaultResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/messagesBefore")
+	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/messagesUntil")
 	public ResponseEntity<String> roomMessagesBefore(HttpServletRequest request, @PathVariable String roomId) throws JSONException {
 		String sessionId = request.getHeader("Cookie");
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
+		// TODO: validation of roomId
+		return Util.defaultResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/message")
@@ -278,20 +303,22 @@ public class MessagingApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
+		// TODO: validation of roomId
+		return Util.defaultResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/viewedConfirmation")
+	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/viewedConfirmation") // query param "until" contains millis
 	public ResponseEntity<String> roomViewedConfirmation(HttpServletRequest request, @PathVariable String roomId) throws JSONException {
 		String sessionId = request.getHeader("Cookie");
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
+		// TODO: validation of roomId
+		return Util.defaultResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/message/{messageId}/confirmations")
@@ -300,9 +327,10 @@ public class MessagingApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
+		// TODO: validation of roomId
+		return Util.defaultResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/message/{messageId}")
@@ -311,9 +339,10 @@ public class MessagingApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
+		// TODO: validation of owner
+		return Util.defaultResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
 	}
 
 	/* The following API calls are intentionally not implemented */
@@ -322,6 +351,6 @@ public class MessagingApi {
 	//@RequestMapping(method = RequestMethod.POST, value = "/message/{messageId}/readConfirmation")
 	//@RequestMapping(method = RequestMethod.POST, value = "/messages/viewedConfirmation}")
 	//@RequestMapping(method = RequestMethod.GET, value = "/messagesSince")
-	//@RequestMapping(method = RequestMethod.GET, value = "/messagesBefore")
+	//@RequestMapping(method = RequestMethod.GET, value = "/messagesUntil")
 
 }

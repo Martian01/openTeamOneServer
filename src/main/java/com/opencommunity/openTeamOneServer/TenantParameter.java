@@ -29,11 +29,9 @@ public class TenantParameter {
 		this.value = value;
 	}
 
-	public TenantParameter(JSONObject item) {
-		try {
-			key = JsonUtil.getString(item, "key");
-			value = JsonUtil.getString(item, "value");
-		} catch (JSONException e) { }
+	public TenantParameter(JSONObject item) throws JSONException {
+		key = JsonUtil.getString(item, "key");
+		value = JsonUtil.getString(item, "value");
 	}
 
 	public JSONObject toJson() throws JSONException {
@@ -43,7 +41,7 @@ public class TenantParameter {
 		return tenantParameter;
 	}
 
-	public static Iterable<TenantParameter> fromJsonList(JSONArray array) throws JSONException {
+	public static Iterable<TenantParameter> fromJsonArray(JSONArray array) throws JSONException {
 		if (array == null)
 			return null;
 		ArrayList<TenantParameter> tenantParameterList = new ArrayList<>();
@@ -52,7 +50,7 @@ public class TenantParameter {
 		return tenantParameterList;
 	}
 
-	public static JSONArray toJsonList(Iterable<TenantParameter> tenantParameters) throws JSONException {
+	public static JSONArray toJsonArray(Iterable<TenantParameter> tenantParameters) throws JSONException {
 		JSONArray array = new JSONArray();
 		for (TenantParameter tenantParameter : tenantParameters)
 			array.put(tenantParameter.toJson());

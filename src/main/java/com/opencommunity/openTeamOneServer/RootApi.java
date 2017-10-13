@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,7 +26,7 @@ public class RootApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
 		JSONObject teamOneAndroid = new JSONObject();
 		teamOneAndroid.put("required", 360);
@@ -52,9 +51,9 @@ public class RootApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE);
+		return Util.defaultResponse(HttpStatus.SERVICE_UNAVAILABLE);
 	}
 
 }

@@ -30,7 +30,7 @@ public class Util {
 		return map;
 	}
 
-	public static ResponseEntity<String> defaultStringResponse(HttpStatus httpStatus) {
+	public static ResponseEntity<String> defaultResponse(HttpStatus httpStatus) {
 		HttpHeaders httpHeaders= new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 		return new ResponseEntity<>("{}", httpHeaders, httpStatus);

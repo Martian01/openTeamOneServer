@@ -22,9 +22,9 @@ public class MediaApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
+		return Util.defaultResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{itemId}/preview")
@@ -33,9 +33,9 @@ public class MediaApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
+		return Util.defaultResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{itemId}/content")
@@ -44,9 +44,9 @@ public class MediaApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
+		return Util.defaultResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{itemId}/details")
@@ -55,9 +55,9 @@ public class MediaApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // video not implemented
+		return Util.defaultResponse(HttpStatus.SERVICE_UNAVAILABLE); // video not implemented
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{itemId}/url")
@@ -66,9 +66,9 @@ public class MediaApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		if (user == null)
-			return Util.defaultStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.defaultStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // video not implemented
+		return Util.defaultResponse(HttpStatus.SERVICE_UNAVAILABLE); // video not implemented
 	}
 
 }

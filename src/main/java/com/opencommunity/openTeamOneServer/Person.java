@@ -30,22 +30,21 @@ public class Person {
 	public Person() {
 	}
 
-	public Person(String lastName, String firstName, String nickName, String pictureId) {
-		personId = Util.getUuid();
+	public Person(String personId, String lastName, String firstName, String nickName, String pictureId) {
+		this.personId = personId == null ? Util.getUuid() : personId;
 		this.lastName = lastName;
 		this.firstName = firstName;
 		this.nickName = nickName;
 		this.pictureId = pictureId;
 	}
 
-	public Person(JSONObject item) {
-		try {
-			personId = JsonUtil.getString(item, "personId");
-			lastName = JsonUtil.getString(item, "lastName");
-			firstName = JsonUtil.getString(item, "firstName");
-			nickName = JsonUtil.getString(item, "nickName");
-			pictureId = JsonUtil.getString(item, "pictureId");
-		} catch (JSONException e) { }
+	public Person(JSONObject item) throws JSONException {
+		personId = JsonUtil.getString(item, "personId");
+		lastName = JsonUtil.getString(item, "lastName");
+		firstName = JsonUtil.getString(item, "firstName");
+		nickName = JsonUtil.getString(item, "nickName");
+		pictureId = JsonUtil.getString(item, "pictureId");
+		//
 		if (personId == null)
 			personId = Util.getUuid();
 	}
@@ -60,7 +59,7 @@ public class Person {
 		return person;
 	}
 
-	public static Iterable<Person> fromJsonList(JSONArray array) throws JSONException {
+	public static Iterable<Person> fromJsonArray(JSONArray array) throws JSONException {
 		if (array == null)
 			return null;
 		ArrayList<Person> personList = new ArrayList<>();
@@ -69,7 +68,7 @@ public class Person {
 		return personList;
 	}
 
-	public static JSONArray toJsonList(Iterable<Person> persons) throws JSONException {
+	public static JSONArray toJsonArray(Iterable<Person> persons) throws JSONException {
 		JSONArray array = new JSONArray();
 		for (Person person : persons)
 			array.put(person.toJson());
