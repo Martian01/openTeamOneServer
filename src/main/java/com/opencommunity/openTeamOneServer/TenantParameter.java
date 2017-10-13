@@ -31,8 +31,8 @@ public class TenantParameter {
 
 	public TenantParameter(JSONObject item) {
 		try {
-			key = Util.getString(item, "key");
-			value = Util.getString(item, "value");
+			key = JsonUtil.getString(item, "key");
+			value = JsonUtil.getString(item, "value");
 		} catch (JSONException e) { }
 	}
 

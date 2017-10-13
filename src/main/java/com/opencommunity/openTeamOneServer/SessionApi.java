@@ -51,7 +51,7 @@ public class SessionApi {
 		JSONObject body = new JSONObject();
 		body.put("login", session != null);
 		body.put("pwdChange", false);
-		Util.put(body, "username", userId);
+		JsonUtil.put(body, "username", userId);
 		//
 		HttpHeaders httpHeaders= new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -85,7 +85,7 @@ public class SessionApi {
 		JSONObject body = new JSONObject();
 		body.put("login", session != null);
 		body.put("pwdChange", false);
-		Util.put(body, "username", userId);
+		JsonUtil.put(body, "username", userId);
 		//
 		HttpHeaders httpHeaders= new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);

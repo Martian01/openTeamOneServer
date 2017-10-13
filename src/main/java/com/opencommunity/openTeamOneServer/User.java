@@ -44,11 +44,11 @@ public class User {
 
 	public User(JSONObject item) {
 		try {
-			userId = Util.getString(item, "userId");
-			passwordHash = Util.getString(item, "passwordHash");
-			personId = Util.getString(item, "personId");
-			hasUserRole = Util.getBoolean(item, "hasUserRole");
-			hasAdminRole = Util.getBoolean(item, "hasAdminRole");
+			userId = JsonUtil.getString(item, "userId");
+			passwordHash = JsonUtil.getString(item, "passwordHash");
+			personId = JsonUtil.getString(item, "personId");
+			hasUserRole = JsonUtil.getBoolean(item, "hasUserRole");
+			hasAdminRole = JsonUtil.getBoolean(item, "hasAdminRole");
 		} catch (JSONException e) { }
 	}
 

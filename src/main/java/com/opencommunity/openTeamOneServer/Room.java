@@ -43,14 +43,14 @@ public class Room {
 
 	public Room(JSONObject item) {
 		try {
-			roomId = Util.getString(item, "roomId");
-			JSONObject roomStatus = Util.getJSONObject(item, "roomStatus");
-			changedAt = Util.getIsoDate(roomStatus, "dataChangedAt");
-			JSONObject roomData = Util.getJSONObject(item, "roomData");
-			shortName = Util.getString(roomData, "shortName");
-			name = Util.getString(roomData, "name", "(null)");
-			pictureId = Util.getString(roomData, "pictureId");
-			roomType = Util.getString(roomData, "roomType");
+			roomId = JsonUtil.getString(item, "roomId");
+			JSONObject roomStatus = JsonUtil.getJSONObject(item, "roomStatus");
+			changedAt = JsonUtil.getIsoDate(roomStatus, "dataChangedAt");
+			JSONObject roomData = JsonUtil.getJSONObject(item, "roomData");
+			shortName = JsonUtil.getString(roomData, "shortName");
+			name = JsonUtil.getString(roomData, "name", "(null)");
+			pictureId = JsonUtil.getString(roomData, "pictureId");
+			roomType = JsonUtil.getString(roomData, "roomType");
 		} catch (JSONException e) { }
 		if (roomId == null)
 			roomId = Util.getUuid();
@@ -58,12 +58,12 @@ public class Room {
 
 	public JSONObject toJson() throws JSONException {
 		JSONObject roomStatus = new JSONObject();
-		roomStatus.put("dataChangedAt", Util.toIsoDate(changedAt));
+		roomStatus.put("dataChangedAt", JsonUtil.toIsoDate(changedAt));
 		JSONObject roomData = new JSONObject();
-		Util.put(roomData, "shortName", shortName);
-		Util.put(roomData, "name", name);
-		Util.put(roomData, "roomType", roomType);
-		Util.put(roomData, "pictureId", pictureId);
+		JsonUtil.put(roomData, "shortName", shortName);
+		JsonUtil.put(roomData, "name", name);
+		JsonUtil.put(roomData, "roomType", roomType);
+		JsonUtil.put(roomData, "pictureId", pictureId);
 		JSONObject room = new JSONObject();
 		room.put("roomId", roomId);
 		room.put("roomStatus", roomStatus);

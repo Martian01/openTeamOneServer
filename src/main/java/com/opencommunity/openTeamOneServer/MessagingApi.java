@@ -26,7 +26,8 @@ public class MessagingApi {
 	private PersonRepository personRepository;
 	@Autowired
 	private RoomRepository roomRepository;
-
+	@Autowired
+	private RoomMemberRepository roomMemberRepository;
 
 	@RequestMapping(method = RequestMethod.POST, value = "/device/subscription")
 	@ResponseBody

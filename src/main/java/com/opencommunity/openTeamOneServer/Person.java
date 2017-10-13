@@ -40,11 +40,11 @@ public class Person {
 
 	public Person(JSONObject item) {
 		try {
-			personId = Util.getString(item, "personId");
-			lastName = Util.getString(item, "lastName");
-			firstName = Util.getString(item, "firstName");
-			nickName = Util.getString(item, "nickName");
-			pictureId = Util.getString(item, "pictureId");
+			personId = JsonUtil.getString(item, "personId");
+			lastName = JsonUtil.getString(item, "lastName");
+			firstName = JsonUtil.getString(item, "firstName");
+			nickName = JsonUtil.getString(item, "nickName");
+			pictureId = JsonUtil.getString(item, "pictureId");
 		} catch (JSONException e) { }
 		if (personId == null)
 			personId = Util.getUuid();
@@ -53,10 +53,10 @@ public class Person {
 	public JSONObject toJson() throws JSONException {
 		JSONObject person = new JSONObject();
 		person.put("personId", personId);
-		Util.put(person, "lastName", lastName);
-		Util.put(person, "firstName", firstName);
-		Util.put(person, "nickName", nickName);
-		Util.put(person, "pictureId", pictureId);
+		JsonUtil.put(person, "lastName", lastName);
+		JsonUtil.put(person, "firstName", firstName);
+		JsonUtil.put(person, "nickName", nickName);
+		JsonUtil.put(person, "pictureId", pictureId);
 		return person;
 	}
 
