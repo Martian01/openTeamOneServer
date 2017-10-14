@@ -12,7 +12,14 @@ import javax.persistence.IdClass;
 import java.util.ArrayList;
 
 interface ViewedConfirmationRepository extends CrudRepository<ViewedConfirmation, String> {
-	ViewedConfirmation findTopByRoomIdOrderByTimestampDesc(String RoomId);
+	// for message confirmations
+	Iterable<ViewedConfirmation> findByMessageId(String messageId);
+	// for viewedCount (simple version)
+	long countByMessageId(String messageId);
+	// for badgeCount etc.
+	ViewedConfirmation findTopByPersonIdAndRoomIdOrderByTimestampDesc(String personId, String roomId);
+	// for viewedAt
+	ViewedConfirmation findTopByMessageIdAndPersonId(String messageId, String personId);
 }
 
 @Entity

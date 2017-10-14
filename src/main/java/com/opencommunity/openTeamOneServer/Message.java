@@ -3,6 +3,8 @@ package com.opencommunity.openTeamOneServer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 
 import javax.persistence.Column;
@@ -11,9 +13,26 @@ import javax.persistence.Id;
 import java.util.ArrayList;
 
 interface MessageRepository extends CrudRepository<Message, String> {
-	//Iterable<Message> findByRoomIdOrderByCreatedAtDesc(String RoomId);
-	Message findTopByRoomIdOrderByCreatedAtDesc(String RoomId);
-	long countByRoomIdAndCreatedAtGreaterThan(String RoomId, long createdAt);
+	// for latest message
+	Message findTopByRoomIdOrderByPostedAtDesc(String roomId);
+	// for badge count
+	long countByRoomIdAndPostedAtGreaterThan(String roomId, long postedAt);
+	// for messagesSince
+	Iterable<Message> findByRoomIdAndUpdatedAtGreaterThanAndPostedAtGreaterThanEqual(String roomId, long updatedAt, long postedAt);
+	Iterable<Message> findByRoomIdAndUpdatedAtGreaterThan(String roomId, long updatedAt);
+	Iterable<Message> findByRoomIdAndPostedAtGreaterThanEqual(String roomId, long postedAt);
+	// for messagesUntil
+	Page<Message> findByRoomIdAndPostedAtLessThanOrderByPostedAtDesc(String roomId, long postedAt, Pageable pageable);
+	Page<Message> findByRoomIdOrderByPostedAtDesc(String roomId, Pageable pageable);
+	Iterable<Message> findByRoomIdAndPostedAtBetween(String roomId, long postedAtLow, long postedAtHigh);
+	Iterable<Message> findByRoomIdAndPostedAtLessThan(String roomId, long postedAt);
+	// for viewed confirmations
+	Iterable<Message> findByRoomIdAndSenderPersonIdAndPostedAtGreaterThan(String roomId, String senderPersonId, long postedAt);
+	Iterable<Message> findByRoomIdAndSenderPersonIdAndPostedAtGreaterThanAndPostedAtLessThanEqual(String roomId, String senderPersonId, long postedAtLow, long postedAtHigh);
+	Iterable<Message> findTop1ByRoomIdAndSenderPersonIdOrderByPostedAtDesc(String roomId, String senderPersonId);
+	Iterable<Message> findTop1ByRoomIdAndSenderPersonIdAndPostedAtLessThanEqualOrderByPostedAtDesc(String roomId, String senderPersonId, long postedAt);
+	// for all
+	Iterable<Message> findByRoomId(String roomId);
 }
 
 @Entity
@@ -28,7 +47,7 @@ public class Message {
 	@Column
 	public String senderPersonId;
 	@Column
-	public long createdAt;
+	public long postedAt;
 	@Column
 	public String text;
 	@Column
@@ -36,24 +55,15 @@ public class Message {
 	@Column
 	public long updatedAt;
 
-	//public Attachment[] attachments;
-	//public boolean isOwnMessage;
-	//public int viewedCount;
-	//public long viewedAt;
-
-	//public boolean readConfirmationRequested;
-	//public int readConfirmedCount;
-	//public long readConfirmedAt;
-
 	public Message() {
 	}
 
-	public Message(String messageId, String clientMessageId, String roomId, String senderPersonId, long createdAt, String text, boolean isDeleted, long updatedAt) {
+	public Message(String messageId, String clientMessageId, String roomId, String senderPersonId, long postedAt, String text, boolean isDeleted, long updatedAt) {
 		this.messageId =  messageId == null ? Util.getUuid() : messageId;
 		this.clientMessageId = clientMessageId;
 		this.roomId = roomId;
 		this.senderPersonId = senderPersonId;
-		this.createdAt = createdAt;
+		this.postedAt = postedAt;
 		this.text = text;
 		this.isDeleted = isDeleted;
 		this.updatedAt = updatedAt;
@@ -65,7 +75,7 @@ public class Message {
 		JSONObject messageContent = JsonUtil.getJSONObject(item, "messageData");
 		roomId = JsonUtil.getString(messageContent, "roomId");
 		senderPersonId = JsonUtil.getString(messageContent, "senderPersonId");
-		createdAt = JsonUtil.getIsoDate(messageContent, "postedAt");
+		postedAt = JsonUtil.getIsoDate(messageContent, "postedAt");
 		text = JsonUtil.getString(messageContent, "text");
 		JSONObject messageStatus = JsonUtil.getJSONObject(item, "messageStatus");
 		isDeleted = JsonUtil.getBoolean(messageStatus, "isDeleted");
@@ -79,7 +89,7 @@ public class Message {
 		JSONObject messageContent = new JSONObject();
 		JsonUtil.put(messageContent, "roomId", roomId);
 		JsonUtil.put(messageContent, "senderPersonId", senderPersonId);
-		JsonUtil.put(messageContent, "postedAt", JsonUtil.toIsoDate(createdAt));
+		JsonUtil.put(messageContent, "postedAt", JsonUtil.toIsoDate(postedAt));
 		JsonUtil.put(messageContent, "text", text);
 		JSONObject messageStatus = new JSONObject();
 		messageStatus.put("isDeleted", isDeleted);
@@ -142,12 +152,12 @@ public class Message {
 		this.senderPersonId = senderPersonId;
 	}
 
-	public long getCreatedAt() {
-		return createdAt;
+	public long getPostedAt() {
+		return postedAt;
 	}
 
-	public void setCreatedAt(long createdAt) {
-		this.createdAt = createdAt;
+	public void setPostedAt(long postedAt) {
+		this.postedAt = postedAt;
 	}
 
 	public String getText() {
@@ -181,7 +191,7 @@ public class Message {
 				", clientMessageId='" + clientMessageId + '\'' +
 				", roomId='" + roomId + '\'' +
 				", senderPersonId='" + senderPersonId + '\'' +
-				", createdAt=" + createdAt +
+				", postedAt=" + postedAt +
 				", text='" + text + '\'' +
 				", isDeleted=" + isDeleted +
 				", updatedAt=" + updatedAt +

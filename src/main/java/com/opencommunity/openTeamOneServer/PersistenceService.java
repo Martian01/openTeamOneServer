@@ -75,11 +75,12 @@ public class PersistenceService {
 			ur.save(viewedConfirmations);
 	}
 
-	public void importModelData() throws JSONException {
+	public void createModelData() throws JSONException {
 		long now = System.currentTimeMillis();
 		//
 		tpr.save(new TenantParameter("name", "OpenTeamOne"));
 		tpr.save(new TenantParameter("pictureId", "Pic00"));
+		tpr.save(new TenantParameter("pagestyle", "default"));
 		//
 		Person p0, p1, p2, p3;
 		pr.save(p0 = new Person(null, "Byrd", "Robert", "Dickie", null));
@@ -116,19 +117,19 @@ public class PersistenceService {
 		//
 		ar.save(new Attachment(null, m3.messageId, "Attachment 1", "image/png", "FileId1"));
 		//
-		vcr.save(new ViewedConfirmation(m1.messageId, p1.personId, m1.roomId, m1.createdAt));
-		vcr.save(new ViewedConfirmation(m1.messageId, p2.personId, m1.roomId, m1.createdAt));
-		vcr.save(new ViewedConfirmation(m1.messageId, p3.personId, m1.roomId, m1.createdAt));
-		vcr.save(new ViewedConfirmation(m2.messageId, p1.personId, m2.roomId, m2.createdAt));
-		vcr.save(new ViewedConfirmation(m2.messageId, p3.personId, m2.roomId, m2.createdAt));
-		vcr.save(new ViewedConfirmation(m3.messageId, p1.personId, m3.roomId, m3.createdAt));
-		vcr.save(new ViewedConfirmation(m3.messageId, p2.personId, m3.roomId, m3.createdAt));
-		vcr.save(new ViewedConfirmation(m3.messageId, p3.personId, m3.roomId, m3.createdAt));
-		vcr.save(new ViewedConfirmation(m4.messageId, p1.personId, m4.roomId, m4.createdAt));
-		vcr.save(new ViewedConfirmation(m4.messageId, p2.personId, m4.roomId, m4.createdAt));
-		vcr.save(new ViewedConfirmation(m5.messageId, p1.personId, m5.roomId, m5.createdAt));
-		vcr.save(new ViewedConfirmation(m5.messageId, p2.personId, m5.roomId, m5.createdAt));
-		vcr.save(new ViewedConfirmation(m6.messageId, p2.personId, m6.roomId, m6.createdAt));
+		vcr.save(new ViewedConfirmation(m1.messageId, p1.personId, m1.roomId, m1.postedAt));
+		vcr.save(new ViewedConfirmation(m1.messageId, p2.personId, m1.roomId, m1.postedAt));
+		vcr.save(new ViewedConfirmation(m1.messageId, p3.personId, m1.roomId, m1.postedAt));
+		vcr.save(new ViewedConfirmation(m2.messageId, p1.personId, m2.roomId, m2.postedAt));
+		vcr.save(new ViewedConfirmation(m2.messageId, p3.personId, m2.roomId, m2.postedAt));
+		vcr.save(new ViewedConfirmation(m3.messageId, p1.personId, m3.roomId, m3.postedAt));
+		vcr.save(new ViewedConfirmation(m3.messageId, p2.personId, m3.roomId, m3.postedAt));
+		vcr.save(new ViewedConfirmation(m3.messageId, p3.personId, m3.roomId, m3.postedAt));
+		vcr.save(new ViewedConfirmation(m4.messageId, p1.personId, m4.roomId, m4.postedAt));
+		vcr.save(new ViewedConfirmation(m4.messageId, p2.personId, m4.roomId, m4.postedAt));
+		vcr.save(new ViewedConfirmation(m5.messageId, p1.personId, m5.roomId, m5.postedAt));
+		vcr.save(new ViewedConfirmation(m5.messageId, p2.personId, m5.roomId, m5.postedAt));
+		vcr.save(new ViewedConfirmation(m6.messageId, p2.personId, m6.roomId, m6.postedAt));
 	}
 
 }

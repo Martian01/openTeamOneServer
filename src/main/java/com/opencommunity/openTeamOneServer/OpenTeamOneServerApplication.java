@@ -28,7 +28,7 @@ public class OpenTeamOneServerApplication {
 		return new CommandLineRunner() {
 			@Override
 			public void run(String... args) throws Exception {
-				ps.importModelData();
+				ps.createModelData();
 				System.out.println("\n" + ps.exportJson().toString(4) + "\n");
 			}
 		};

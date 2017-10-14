@@ -12,6 +12,12 @@ import java.util.ArrayList;
 
 
 interface UserRepository extends CrudRepository<User, String> {
+	// for contacts (still needs to be joined with person table)
+	Iterable<User> findByPersonIdNotNullAndHasUserRoleTrue();
+	// for isContact()
+	long countByPersonIdAndHasUserRoleTrue(String personId);
+	// for admins
+	Iterable<User> findByHasAdminRoleTrue();
 }
 
 @Entity

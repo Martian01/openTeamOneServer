@@ -22,11 +22,9 @@ public class RootApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/sap/sports/pe/api/messaging/versions")
 	public ResponseEntity<String> versions(HttpServletRequest request) throws JSONException {
-		String sessionId = request.getHeader("Cookie");
-		Session session = sessionId == null ? null : Session.getSession(sessionId);
-		User user = session == null ? null : userRepository.findOne(session.userId);
+		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
 		//
 		JSONObject teamOneAndroid = new JSONObject();
 		teamOneAndroid.put("required", 360);
@@ -40,20 +38,16 @@ public class RootApi {
 		body.put("versions", versions);
 		body.put("clients", clients);
 		//
-		HttpHeaders httpHeaders= new HttpHeaders();
-		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-		return new ResponseEntity<>(body.toString(), httpHeaders, HttpStatus.OK);
+		return Util.httpResponse(body);
 	}
 
 	@RequestMapping("*") // does not work for some unknown reason
 	public ResponseEntity<String> fallback(HttpServletRequest request) throws JSONException {
-		String sessionId = request.getHeader("Cookie");
-		Session session = sessionId == null ? null : Session.getSession(sessionId);
-		User user = session == null ? null : userRepository.findOne(session.userId);
+		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.defaultResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.defaultResponse(HttpStatus.SERVICE_UNAVAILABLE);
+		return Util.httpResponse(HttpStatus.SERVICE_UNAVAILABLE);
 	}
 
 }

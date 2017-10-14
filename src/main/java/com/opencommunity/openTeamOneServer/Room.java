@@ -20,9 +20,9 @@ public class Room {
 	@Id
 	public String roomId;
 	@Column
-	public String shortName;
-	@Column
 	public String name;
+	@Column
+	public String shortName;
 	@Column
 	public String roomType;
 	@Column
@@ -33,10 +33,10 @@ public class Room {
 	public Room() {
 	}
 
-	public Room(String roomId, String shortName, String name, String roomType, String pictureId, long changedAt) {
+	public Room(String roomId, String name, String shortName, String roomType, String pictureId, long changedAt) {
 		this.roomId = roomId == null ? Util.getUuid() : roomId;
-		this.shortName = shortName;
 		this.name = name;
+		this.shortName = shortName;
 		this.roomType = roomType;
 		this.pictureId = pictureId;
 		this.changedAt = changedAt;
@@ -47,8 +47,8 @@ public class Room {
 		JSONObject roomStatus = JsonUtil.getJSONObject(item, "roomStatus");
 		changedAt = JsonUtil.getIsoDate(roomStatus, "dataChangedAt");
 		JSONObject roomData = JsonUtil.getJSONObject(item, "roomData");
-		shortName = JsonUtil.getString(roomData, "shortName");
 		name = JsonUtil.getString(roomData, "name");
+		shortName = JsonUtil.getString(roomData, "shortName");
 		pictureId = JsonUtil.getString(roomData, "pictureId");
 		roomType = JsonUtil.getString(roomData, "roomType");
 		//
@@ -60,8 +60,8 @@ public class Room {
 		JSONObject roomStatus = new JSONObject();
 		roomStatus.put("dataChangedAt", JsonUtil.toIsoDate(changedAt));
 		JSONObject roomData = new JSONObject();
-		JsonUtil.put(roomData, "shortName", shortName);
 		JsonUtil.put(roomData, "name", name);
+		JsonUtil.put(roomData, "shortName", shortName);
 		JsonUtil.put(roomData, "roomType", roomType);
 		JsonUtil.put(roomData, "pictureId", pictureId);
 		JSONObject room = new JSONObject();
@@ -96,20 +96,20 @@ public class Room {
 		this.roomId = roomId;
 	}
 
-	public String getShortName() {
-		return shortName;
-	}
-
-	public void setShortName(String shortName) {
-		this.shortName = shortName;
-	}
-
 	public String getName() {
 		return name;
 	}
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getShortName() {
+		return shortName;
+	}
+
+	public void setShortName(String shortName) {
+		this.shortName = shortName;
 	}
 
 	public String getRoomType() {
@@ -140,8 +140,8 @@ public class Room {
 	public String toString() {
 		return "Room{" +
 				"roomId='" + roomId + '\'' +
-				", shortName='" + shortName + '\'' +
 				", name='" + name + '\'' +
+				", shortName='" + shortName + '\'' +
 				", roomType='" + roomType + '\'' +
 				", pictureId='" + pictureId + '\'' +
 				", changedAt=" + changedAt +

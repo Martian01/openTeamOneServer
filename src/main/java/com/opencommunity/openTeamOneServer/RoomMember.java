@@ -11,8 +11,12 @@ import javax.persistence.IdClass;
 import java.util.ArrayList;
 
 interface RoomMemberRepository extends CrudRepository<RoomMember, String> {
+	// for members
 	Iterable<RoomMember> findByRoomId(String roomId);
-	//Iterable<RoomMember> findByPersonId(String personId);
+	// for rooms
+	Iterable<RoomMember> findByPersonId(String personId);
+	// for specific membership (validation)
+	long countByRoomIdAndPersonId(String roomId, String personId);
 }
 
 @Entity
