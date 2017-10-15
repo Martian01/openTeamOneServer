@@ -270,15 +270,15 @@ public class MessagingApi {
 //System.out.println("Until    : " + JsonUtil.toIsoDate(until));
 		if (watermark != null) {
 			if (until != null) {
-				messages = messageRepository.findByRoomIdAndPostedAtGreaterThanAndPostedAtLessThanEqual(roomId, watermark, until);
+				messages = messageRepository.findByRoomIdAndIsDeletedFalseAndPostedAtGreaterThanAndPostedAtLessThanEqual(roomId, watermark, until);
 			} else {
-				messages = messageRepository.findByRoomIdAndPostedAtGreaterThan(roomId, watermark);
+				messages = messageRepository.findByRoomIdAndIsDeletedFalseAndPostedAtGreaterThan(roomId, watermark);
 			}
 		} else {
 			if (until != null) {
-				messages = messageRepository.findTop1ByRoomIdAndPostedAtLessThanEqualOrderByPostedAtDesc(roomId, until);
+				messages = messageRepository.findTop1ByRoomIdAndIsDeletedFalseAndPostedAtLessThanEqualOrderByPostedAtDesc(roomId, until);
 			} else {
-				messages = messageRepository.findTop1ByRoomIdOrderByPostedAtDesc(roomId);
+				messages = messageRepository.findTop1ByRoomIdAndIsDeletedFalseOrderByPostedAtDesc(roomId);
 			}
 		}
 //System.out.println("CNF R: " + Message.toJsonArray(messages).toString());
@@ -397,11 +397,13 @@ public class MessagingApi {
 		return viewedConfirmation == null ? null : viewedConfirmation.messagePostedAt;
 	}
 
-	/* API JSON parsers */
+	/* API JSON formats */
 
-	/* no re-use of BO parsers since the formats differ too much and include mixed data */
+	/* the following JSON formats are simply different from the straight-forward entity JSON formats */
 
 	public JSONObject personToJson(Person person) throws JSONException {
+		if (person == null)
+			return null;
 		JSONObject item = new JSONObject();
 		item.put("personId", person.personId);
 		JsonUtil.put(item, "lastName", person.lastName);
@@ -412,6 +414,8 @@ public class MessagingApi {
 	}
 
 	private JSONObject confirmationToJson(ViewedConfirmation confirmation) throws JSONException {
+		if (confirmation == null)
+			return null;
 		JSONObject item = new JSONObject();
 		item.put("personId", confirmation.personId);
 		item.put("viewedAt", JsonUtil.toIsoDate(confirmation.confirmedAt));
@@ -426,6 +430,8 @@ public class MessagingApi {
 	}
 
 	public JSONObject attachmentToJson(Attachment attachment) throws JSONException {
+		if (attachment == null)
+			return null;
 		JSONObject sapSportsFile = new JSONObject();
 		sapSportsFile.put("fileId", attachment.fileId);
 		sapSportsFile.put("mimeType", attachment.mimeType);
@@ -446,7 +452,11 @@ public class MessagingApi {
 		return array;
 	}
 
+	/* the following JSON formats are complex and include data from outside the actual entity parsed */
+
 	private JSONObject messageToJson(Message message, String personId) throws JSONException {
+		if (message == null)
+			return null;
 		JSONObject messageContent = new JSONObject();
 		messageContent.put("roomId", message.roomId);
 		messageContent.put("senderPersonId", message.senderPersonId);
@@ -482,6 +492,33 @@ public class MessagingApi {
 		return array;
 	}
 
+	public JSONObject roomToJson(Room room, JSONArray currentMemberIds, String personId) throws JSONException {
+		if (room == null)
+			return null;
+		JSONObject roomStatus = new JSONObject();
+		roomStatus.put("dataChangedAt", JsonUtil.toIsoDate(room.changedAt));
+		JSONObject roomData = new JSONObject();
+		JsonUtil.put(roomData, "name", room.name);
+		JsonUtil.put(roomData, "shortName", room.shortName);
+		JsonUtil.put(roomData, "roomType", room.roomType);
+		JsonUtil.put(roomData, "pictureId", room.pictureId);
+		JsonUtil.put(roomData, "currentMemberIds", currentMemberIds);
+		JSONObject roomContent = new JSONObject();
+		Long watermark = getWatermark(personId, room.roomId);
+		if (watermark != null) {
+			long count = messageRepository.countByRoomIdAndIsDeletedFalseAndPostedAtGreaterThan(room.roomId, watermark);
+			roomContent.put("badgeCount", count);
+		}
+		Message latestMessage = messageRepository.findTopByRoomIdAndIsDeletedFalseOrderByPostedAtDesc(room.roomId);
+		JsonUtil.put(roomContent, "latestMessage", messageToJson(latestMessage, personId));
+		JSONObject item = new JSONObject();
+		item.put("roomId", room.roomId);
+		item.put("roomStatus", roomStatus);
+		item.put("roomData", roomData);
+		item.put("roomContent", roomContent);
+		return item;
+	}
+
 	public JSONArray roomsToJsonArray(Iterable<Room> rooms, Iterable<RoomMember> roomMembers, String personId) throws JSONException {
 		// set up two helper maps
 		Set<String> userRooms = new HashSet<>();
@@ -499,34 +536,8 @@ public class MessagingApi {
 		// process the rooms
 		JSONArray array = new JSONArray();
 		for (Room room : rooms)
-			if (userRooms.contains(room.roomId)) {
-				JSONObject roomStatus = new JSONObject();
-				roomStatus.put("dataChangedAt", JsonUtil.toIsoDate(room.changedAt));
-				JSONObject roomData = new JSONObject();
-				JsonUtil.put(roomData, "name", room.name);
-				JsonUtil.put(roomData, "shortName", room.shortName);
-				JsonUtil.put(roomData, "roomType", room.roomType);
-				JsonUtil.put(roomData, "pictureId", room.pictureId);
-				JSONArray currentMemberIds = membersMap.get(room.roomId);
-				if (currentMemberIds == null)
-					currentMemberIds = new JSONArray();
-				roomData.put("currentMemberIds", currentMemberIds);
-				JSONObject roomContent = new JSONObject();
-				Long watermark = getWatermark(personId, room.roomId);
-				if (watermark != null) {
-					long count = messageRepository.countByRoomIdAndPostedAtGreaterThan(room.roomId, watermark);
-					roomContent.put("badgeCount", count);
-				}
-				Message latestMessage = messageRepository.findTopByRoomIdAndIsDeletedFalseOrderByPostedAtDesc(room.roomId);
-				if (latestMessage != null)
-					roomContent.put("latestMessage", messageToJson(latestMessage, personId));
-				JSONObject item = new JSONObject();
-				item.put("roomId", room.roomId);
-				item.put("roomStatus", roomStatus);
-				item.put("roomData", roomData);
-				item.put("roomContent", roomContent);
-				array.put(item);
-			}
+			if (userRooms.contains(room.roomId))
+				array.put(roomToJson(room, membersMap.get(room.roomId), personId));
 		return array;
 	}
 

@@ -16,7 +16,12 @@ interface MessageRepository extends CrudRepository<Message, String> {
 	// for latest message
 	Message findTopByRoomIdAndIsDeletedFalseOrderByPostedAtDesc(String roomId);
 	// for badge count
-	long countByRoomIdAndPostedAtGreaterThan(String roomId, long postedAt);
+	long countByRoomIdAndIsDeletedFalseAndPostedAtGreaterThan(String roomId, long postedAt);
+	// for viewed confirmations
+	Iterable<Message> findByRoomIdAndIsDeletedFalseAndPostedAtGreaterThan(String roomId, long postedAt);
+	Iterable<Message> findByRoomIdAndIsDeletedFalseAndPostedAtGreaterThanAndPostedAtLessThanEqual(String roomId, long postedAtLow, long postedAtHigh);
+	Iterable<Message> findTop1ByRoomIdAndIsDeletedFalseOrderByPostedAtDesc(String roomId);
+	Iterable<Message> findTop1ByRoomIdAndIsDeletedFalseAndPostedAtLessThanEqualOrderByPostedAtDesc(String roomId, long postedAt);
 	// for messages since
 	Iterable<Message> findByRoomIdAndUpdatedAtGreaterThanAndPostedAtGreaterThanEqual(String roomId, long updatedAt, long postedAt);
 	Iterable<Message> findByRoomIdAndUpdatedAtGreaterThan(String roomId, long updatedAt);
@@ -28,11 +33,6 @@ interface MessageRepository extends CrudRepository<Message, String> {
 	Iterable<Message> findByRoomIdAndPostedAtLessThan(String roomId, long postedAt);
 	// for messages since/until
 	Iterable<Message> findTop100ByRoomId(String roomId);
-	// for viewed confirmations
-	Iterable<Message> findByRoomIdAndPostedAtGreaterThan(String roomId, long postedAt);
-	Iterable<Message> findByRoomIdAndPostedAtGreaterThanAndPostedAtLessThanEqual(String roomId, long postedAtLow, long postedAtHigh);
-	Iterable<Message> findTop1ByRoomIdOrderByPostedAtDesc(String roomId);
-	Iterable<Message> findTop1ByRoomIdAndPostedAtLessThanEqualOrderByPostedAtDesc(String roomId, long postedAt);
 	// for debugging
 	Iterable<Message> findByRoomId(String roomId);
 	Message findTopByClientMessageId(String clientMessageId);
