@@ -43,25 +43,25 @@ public class MessagingApi {
 	public ResponseEntity<String> deviceSubscription(HttpServletRequest request) throws JSONException {
 		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.httpResponse(HttpStatus.OK); // TODO
+		return Util.httpStringResponse(HttpStatus.OK); // TODO
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/device/subscription")
 	public ResponseEntity<String> deviceSubscriptionDelete(HttpServletRequest request) throws JSONException {
 		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.httpResponse(HttpStatus.OK); // TODO
+		return Util.httpStringResponse(HttpStatus.OK); // TODO
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/me")
 	public ResponseEntity<String> me(HttpServletRequest request) throws JSONException {
 		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 		JSONObject body = new JSONObject();
 		Person me = personRepository.findOne(user.personId);
@@ -78,14 +78,14 @@ public class MessagingApi {
 			body.put("tenant", tenant);
 		}
 		//
-		return Util.httpResponse(body);
+		return Util.httpStringResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/person/{personId}")
 	public ResponseEntity<String> person(HttpServletRequest request, @PathVariable String personId) throws JSONException {
 		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 		JSONObject body = new JSONObject();
 		Person person = personId == null ? null : personRepository.findOne(personId);
@@ -96,14 +96,14 @@ public class MessagingApi {
 			body.put("person", item);
 		}
 		//
-		return Util.httpResponse(body);
+		return Util.httpStringResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/contacts")
 	public ResponseEntity<String> contacts(HttpServletRequest request) throws JSONException {
 		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 		JSONObject body = new JSONObject();
 		Set<String> contactIds = getContactIds();
@@ -118,32 +118,32 @@ public class MessagingApi {
 			}
 		body.put("contacts", contactsJson);
 		//
-		return Util.httpResponse(body);
+		return Util.httpStringResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/contact/{contactId}/roomId")
 	public ResponseEntity<String> contactRoomId(HttpServletRequest request, @PathVariable String contactId) throws JSONException {
 		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 		JSONObject body = new JSONObject();
 		Person person = contactId == null || !getContactIds().contains(contactId) ? null : personRepository.findOne(contactId);
 		if (person == null || person.personId.equals(user.personId))
-			return Util.httpResponse(HttpStatus.NOT_FOUND);
+			return Util.httpStringResponse(HttpStatus.NOT_FOUND);
 		String privateRoomId = getPrivateRoomId(contactId, user.personId);
 		if (privateRoomId == null)
 			privateRoomId = createPrivateRoom(person.personId, user.personId); // create the room on-the-fly
 		body.put("roomId", privateRoomId);
 		//
-		return Util.httpResponse(body);
+		return Util.httpStringResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/rooms")
 	public ResponseEntity<String> rooms(HttpServletRequest request) throws JSONException {
 		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 //System.out.println("ROM 1: " + ViewedConfirmation.toJsonArray(viewedConfirmationRepository.findByPersonId(user.personId)).toString());
 		JSONObject body = new JSONObject();
@@ -151,33 +151,33 @@ public class MessagingApi {
 		Iterable<RoomMember> roomMembers = roomMemberRepository.findAll();
 		body.put("rooms", roomsToJsonArray(rooms, roomMembers, user.personId));
 		//
-		return Util.httpResponse(body);
+		return Util.httpStringResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/members")
 	public ResponseEntity<String> roomMembers(HttpServletRequest request, @PathVariable String roomId) throws JSONException {
 		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 		if (!isRoomMember(roomId, user.personId))
-			return Util.httpResponse(HttpStatus.FORBIDDEN);
+			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
 		JSONObject body = new JSONObject();
 		Iterable<RoomMember> roomMembers = roomMemberRepository.findByRoomId(roomId);
 		body.put("roomMembers", RoomMember.toJsonArray(roomMembers));
 		//
-		return Util.httpResponse(body);
+		return Util.httpStringResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/messagesSince")
 	public ResponseEntity<String> roomMessagesSince(HttpServletRequest request, @PathVariable String roomId, @RequestParam(required = false) Long since, @RequestParam(required = false) Long notBefore) throws JSONException {
 		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 		if (!isRoomMember(roomId, user.personId))
-			return Util.httpResponse(HttpStatus.FORBIDDEN);
+			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
 //System.out.println("MSG 1: " + Message.toJsonArray(messageRepository.findByRoomId(roomId)).toString());
 		JSONObject body = new JSONObject();
@@ -198,17 +198,17 @@ public class MessagingApi {
 //System.out.println("MSG R: " + Message.toJsonArray(messages).toString());
 		body.put("messages", messagesToJsonArray(messages, user.personId));
 		//
-		return Util.httpResponse(body);
+		return Util.httpStringResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/messagesUntil")
 	public ResponseEntity<String> roomMessagesUntil(HttpServletRequest request, @PathVariable String roomId, @RequestParam(required = false) Integer count, @RequestParam(required = false) Long until) throws JSONException {
 		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 		if (!isRoomMember(roomId, user.personId))
-			return Util.httpResponse(HttpStatus.FORBIDDEN);
+			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
 		JSONObject body = new JSONObject();
 		Iterable<Message> messages;
@@ -238,29 +238,29 @@ public class MessagingApi {
 		}
 		body.put("messages", messagesToJsonArray(messages, user.personId));
 		//
-		return Util.httpResponse(body);
+		return Util.httpStringResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/message")
 	public ResponseEntity<String> roomMessage(HttpServletRequest request, @PathVariable String roomId) throws JSONException {
 		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 		if (!isRoomMember(roomId, user.personId))
-			return Util.httpResponse(HttpStatus.FORBIDDEN);
+			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
-		return Util.httpResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
+		return Util.httpStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/viewedConfirmation")
 	public ResponseEntity<String> roomViewedConfirmation(HttpServletRequest request, @PathVariable String roomId, @RequestParam(required = false) Long until) throws JSONException {
 		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 		if (!isRoomMember(roomId, user.personId))
-			return Util.httpResponse(HttpStatus.FORBIDDEN);
+			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
 		long now = System.currentTimeMillis();
 //System.out.println("CNF 1: " + ViewedConfirmation.toJsonArray(viewedConfirmationRepository.findByPersonId(user.personId)).toString());
@@ -289,39 +289,39 @@ public class MessagingApi {
 		viewedConfirmationRepository.save(confirmations);
 //System.out.println("CNF 2: " + ViewedConfirmation.toJsonArray(viewedConfirmationRepository.findByPersonId(user.personId)).toString());
 		//
-		return Util.httpResponse(HttpStatus.OK);
+		return Util.httpStringResponse(HttpStatus.OK);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/message/{messageId}/confirmations")
 	public ResponseEntity<String> messageConfirmations(HttpServletRequest request, @PathVariable String messageId) throws JSONException {
 		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 		Message message = messageId == null ? null : messageRepository.findOne(messageId);
 		if (message == null)
-			return Util.httpResponse(HttpStatus.GONE);
+			return Util.httpStringResponse(HttpStatus.GONE);
 		if (!user.personId.equals(message.senderPersonId))
-			return Util.httpResponse(HttpStatus.FORBIDDEN);
+			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
 		JSONObject body = new JSONObject();
 		Iterable<ViewedConfirmation> confirmations = viewedConfirmationRepository.findByMessageId(messageId);
 		body.put("confirmations", confirmationsToJsonArray(confirmations));
 		//
-		return Util.httpResponse(body);
+		return Util.httpStringResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/message/{messageId}")
 	public ResponseEntity<String> messageDelete(HttpServletRequest request, @PathVariable String messageId) throws JSONException {
 		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 		Message message = messageId == null ? null : messageRepository.findOne(messageId);
 		if (message == null)
-			return Util.httpResponse(HttpStatus.GONE);
+			return Util.httpStringResponse(HttpStatus.GONE);
 		if (!user.personId.equals(message.senderPersonId))
-			return Util.httpResponse(HttpStatus.FORBIDDEN);
+			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
 //System.out.println("DEL 1: " + Message.toJsonArray(messageRepository.findByRoomId(message.roomId)).toString());
 		// TODO: physically delete text and attachments
@@ -330,7 +330,7 @@ public class MessagingApi {
 		messageRepository.save(message);
 //System.out.println("DEL 2: " + Message.toJsonArray(messageRepository.findByRoomId(message.roomId)).toString());
 		//
-		return Util.httpResponse(HttpStatus.OK);
+		return Util.httpStringResponse(HttpStatus.OK);
 	}
 
 	/* The following API calls are intentionally not implemented */
@@ -433,7 +433,7 @@ public class MessagingApi {
 		if (attachment == null)
 			return null;
 		JSONObject sapSportsFile = new JSONObject();
-		sapSportsFile.put("fileId", attachment.fileId);
+		sapSportsFile.put("fileId", attachment.attachmentId);
 		sapSportsFile.put("mimeType", attachment.mimeType);
 		JSONObject attachmentContent = new JSONObject();
 		JsonUtil.put(attachmentContent, "text", attachment.text);

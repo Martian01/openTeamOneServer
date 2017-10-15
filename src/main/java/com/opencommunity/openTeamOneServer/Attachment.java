@@ -20,31 +20,27 @@ public class Attachment {
 	@Id
 	public String attachmentId;
 	@Column
-	public String messageId;
+	public String mimeType;
 	@Column
 	public String text;
 	@Column
-	public String mimeType;
-	@Column
-	public String fileId;
+	public String messageId;
 
 	public Attachment() {
 	}
 
-	public Attachment(String attachmentId, String messageId, String text, String mimeType, String fileId) {
+	public Attachment(String attachmentId, String mimeType, String text, String messageId) {
 		this.attachmentId = attachmentId == null ? Util.getUuid() : attachmentId;
-		this.messageId = messageId;
-		this.text = text;
 		this.mimeType = mimeType;
-		this.fileId = fileId;
+		this.text = text;
+		this.messageId = messageId;
 	}
 
 	public Attachment(JSONObject item) throws JSONException {
 		attachmentId = JsonUtil.getString(item, "attachmentId");
-		messageId = JsonUtil.getString(item, "messageId");
-		text = JsonUtil.getString(item, "text");
 		mimeType = JsonUtil.getString(item, "mimeType");
-		fileId = JsonUtil.getString(item, "fileId");
+		text = JsonUtil.getString(item, "text");
+		messageId = JsonUtil.getString(item, "messageId");
 		//
 		if (attachmentId == null)
 			attachmentId = Util.getUuid();
@@ -53,10 +49,9 @@ public class Attachment {
 	public JSONObject toJson() throws JSONException {
 		JSONObject item = new JSONObject();
 		item.put("attachmentId", attachmentId);
-		item.put("messageId", messageId);
-		item.put("text", text);
 		item.put("mimeType", mimeType);
-		item.put("fileId", fileId);
+		item.put("text", text);
+		item.put("messageId", messageId);
 		return item;
 	}
 
@@ -84,12 +79,12 @@ public class Attachment {
 		this.attachmentId = attachmentId;
 	}
 
-	public String getMessageId() {
-		return messageId;
+	public String getMimeType() {
+		return mimeType;
 	}
 
-	public void setMessageId(String messageId) {
-		this.messageId = messageId;
+	public void setMimeType(String mimeType) {
+		this.mimeType = mimeType;
 	}
 
 	public String getText() {
@@ -100,20 +95,12 @@ public class Attachment {
 		this.text = text;
 	}
 
-	public String getMimeType() {
-		return mimeType;
+	public String getMessageId() {
+		return messageId;
 	}
 
-	public void setMimeType(String mimeType) {
-		this.mimeType = mimeType;
-	}
-
-	public String getFileId() {
-		return fileId;
-	}
-
-	public void setFileId(String fileId) {
-		this.fileId = fileId;
+	public void setMessageId(String messageId) {
+		this.messageId = messageId;
 	}
 
 	@Override

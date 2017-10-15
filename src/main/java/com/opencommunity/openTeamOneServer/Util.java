@@ -1,7 +1,8 @@
 package com.opencommunity.openTeamOneServer;
 
 import org.json.JSONObject;
-import org.springframework.http.HttpHeaders;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,27 +33,47 @@ public class Util {
 		return map;
 	}
 
-	public static User getCurrentUser(HttpServletRequest request, UserRepository userRepository) {
+	private static User getCurrentSession(HttpServletRequest request, UserRepository userRepository) {
 		String sessionId = request.getHeader("Cookie");
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
-		User user = session == null ? null : userRepository.findOne(session.userId);
-		return user == null || user.personId == null ? null : user;
+		return session == null ? null : userRepository.findOne(session.userId);
 	}
 
-	public static ResponseEntity<String> httpResponse(HttpStatus httpStatus) {
-		HttpHeaders httpHeaders= new HttpHeaders();
-		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-		return new ResponseEntity<>("{}", httpHeaders, httpStatus);
+	public static User getCurrentUser(HttpServletRequest request, UserRepository userRepository) {
+		User user = getCurrentSession(request, userRepository);
+		return user == null || user.personId == null || !user.hasUserRole ? null : user;
 	}
 
-	public static ResponseEntity<String> httpResponse(JSONObject body, HttpStatus httpStatus) {
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-		return new ResponseEntity<>(body.toString(), httpHeaders, httpStatus);
+	public static User getCurrentAdminUser(HttpServletRequest request, UserRepository userRepository) {
+		User user = getCurrentSession(request, userRepository);
+		return user == null || !user.hasAdminRole ? null : user;
 	}
 
-	public static ResponseEntity<String> httpResponse(JSONObject body) {
-		return httpResponse(body, HttpStatus.OK);
+	private static String errorJsonString = "{}";
+	private static Resource errorJsonResource = new ByteArrayResource(errorJsonString.getBytes());
+
+	public static ResponseEntity<Resource> httpResourceResponse(HttpStatus httpStatus) {
+		return ResponseEntity.status(httpStatus)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(errorJsonResource);
+	}
+
+	public static ResponseEntity<Resource> httpResourceResponse(Resource resource, MediaType mediaType) {
+		return ResponseEntity.ok()
+				.contentType(mediaType)
+				.body(resource);
+	}
+
+	public static ResponseEntity<String> httpStringResponse(HttpStatus httpStatus) {
+		return ResponseEntity.status(httpStatus)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(errorJsonString);
+	}
+
+	public static ResponseEntity<String> httpStringResponse(JSONObject body) {
+		return ResponseEntity.ok()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(body.toString());
 	}
 
 }

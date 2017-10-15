@@ -22,7 +22,7 @@ public class RootApi {
 	public ResponseEntity<String> versions(HttpServletRequest request) throws JSONException {
 		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 		JSONObject teamOneAndroid = new JSONObject();
 		teamOneAndroid.put("required", 360);
@@ -36,16 +36,16 @@ public class RootApi {
 		body.put("versions", versions);
 		body.put("clients", clients);
 		//
-		return Util.httpResponse(body);
+		return Util.httpStringResponse(body);
 	}
 
 	@RequestMapping("*") // does not work for some unknown reason
 	public ResponseEntity<String> fallback(HttpServletRequest request) throws JSONException {
 		User user = Util.getCurrentUser(request, userRepository);
 		if (user == null)
-			return Util.httpResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.httpResponse(HttpStatus.SERVICE_UNAVAILABLE);
+		return Util.httpStringResponse(HttpStatus.SERVICE_UNAVAILABLE);
 	}
 
 }
