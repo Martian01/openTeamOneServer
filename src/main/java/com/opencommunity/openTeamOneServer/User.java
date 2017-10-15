@@ -12,10 +12,9 @@ import java.util.ArrayList;
 
 
 interface UserRepository extends CrudRepository<User, String> {
-	// for contacts (still needs to be joined with person table)
-	Iterable<User> findByPersonIdNotNullAndHasUserRoleTrue();
-	// for isContact()
+	// for contacts
 	long countByPersonIdAndHasUserRoleTrue(String personId);
+	Iterable<User> findByPersonIdNotNullAndHasUserRoleTrue();
 	// for admins
 	Iterable<User> findByHasAdminRoleTrue();
 }
@@ -57,13 +56,13 @@ public class User {
 	}
 
 	public JSONObject toJson() throws JSONException {
-		JSONObject user = new JSONObject();
-		user.put("userId", userId);
-		user.put("passwordHash", passwordHash);
-		user.put("personId", personId);
-		user.put("hasUserRole", hasUserRole);
-		user.put("hasAdminRole", hasAdminRole);
-		return user;
+		JSONObject item = new JSONObject();
+		item.put("userId", userId);
+		item.put("passwordHash", passwordHash);
+		item.put("personId", personId);
+		item.put("hasUserRole", hasUserRole);
+		item.put("hasAdminRole", hasAdminRole);
+		return item;
 	}
 
 	public static Iterable<User> fromJsonArray(JSONArray array) throws JSONException {
@@ -124,13 +123,11 @@ public class User {
 
 	@Override
 	public String toString() {
-		return "User{" +
-				"userId='" + userId + '\'' +
-				", passwordHash='" + passwordHash + '\'' +
-				", personId='" + personId + '\'' +
-				", hasUserRole=" + hasUserRole +
-				", hasAdminRole=" + hasAdminRole +
-				'}';
+		String output = getClass().getSimpleName();
+		try {
+			output += toJson().toString();
+		} catch (JSONException e) { }
+		return output;
 	}
 
 	public void setPassword(String password) {

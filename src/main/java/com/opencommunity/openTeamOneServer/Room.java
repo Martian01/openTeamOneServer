@@ -44,32 +44,25 @@ public class Room {
 
 	public Room(JSONObject item) throws JSONException {
 		roomId = JsonUtil.getString(item, "roomId");
-		JSONObject roomStatus = JsonUtil.getJSONObject(item, "roomStatus");
-		changedAt = JsonUtil.getIsoDate(roomStatus, "dataChangedAt");
-		JSONObject roomData = JsonUtil.getJSONObject(item, "roomData");
-		name = JsonUtil.getString(roomData, "name");
-		shortName = JsonUtil.getString(roomData, "shortName");
-		pictureId = JsonUtil.getString(roomData, "pictureId");
-		roomType = JsonUtil.getString(roomData, "roomType");
+		name = JsonUtil.getString(item, "name");
+		shortName = JsonUtil.getString(item, "shortName");
+		roomType = JsonUtil.getString(item, "roomType");
+		pictureId = JsonUtil.getString(item, "pictureId");
+		changedAt = JsonUtil.getIsoDate(item, "changedAt");
 		//
 		if (roomId == null)
 			roomId = Util.getUuid();
 	}
 
 	public JSONObject toJson() throws JSONException {
-		JSONObject roomStatus = new JSONObject();
-		roomStatus.put("dataChangedAt", JsonUtil.toIsoDate(changedAt));
-		JSONObject roomData = new JSONObject();
-		JsonUtil.put(roomData, "name", name);
-		JsonUtil.put(roomData, "shortName", shortName);
-		JsonUtil.put(roomData, "roomType", roomType);
-		JsonUtil.put(roomData, "pictureId", pictureId);
-		JSONObject room = new JSONObject();
-		room.put("roomId", roomId);
-		room.put("roomStatus", roomStatus);
-		room.put("roomData", roomData);
-		room.put("roomContent", new JSONObject());
-		return room;
+		JSONObject item = new JSONObject();
+		item.put("roomId", roomId);
+		item.put("name", name);
+		item.put("shortName", shortName);
+		item.put("roomType", roomType);
+		item.put("pictureId", pictureId);
+		item.put("changedAt", JsonUtil.toIsoDate(changedAt));
+		return item;
 	}
 
 	public static Iterable<Room> fromJsonArray(JSONArray array) throws JSONException {
@@ -138,13 +131,10 @@ public class Room {
 
 	@Override
 	public String toString() {
-		return "Room{" +
-				"roomId='" + roomId + '\'' +
-				", name='" + name + '\'' +
-				", shortName='" + shortName + '\'' +
-				", roomType='" + roomType + '\'' +
-				", pictureId='" + pictureId + '\'' +
-				", changedAt=" + changedAt +
-				'}';
+		String output = getClass().getSimpleName();
+		try {
+			output += toJson().toString();
+		} catch (JSONException e) { }
+		return output;
 	}
 }

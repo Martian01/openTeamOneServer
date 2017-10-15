@@ -1,5 +1,8 @@
 package com.opencommunity.openTeamOneServer;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,15 +24,22 @@ public class Session {
 		csrfToken = Util.getUuid();
 	}
 
+	public JSONObject toJson() throws JSONException {
+		JSONObject item = new JSONObject();
+		item.put("sessionId", sessionId);
+		item.put("userId", userId);
+		item.put("startTime", JsonUtil.toIsoDate(startTime));
+		item.put("lastAccessTime", JsonUtil.toIsoDate(lastAccessTime));
+		return item;
+	}
+
 	@Override
 	public String toString() {
-		return "Session{" +
-				"sessionId='" + sessionId + '\'' +
-				", userId='" + userId + '\'' +
-				", startTime=" + startTime +
-				", lastAccessTime=" + lastAccessTime +
-				", csrfToken='" + csrfToken + '\'' +
-				'}';
+		String output = getClass().getSimpleName();
+		try {
+			output += toJson().toString();
+		} catch (JSONException e) { }
+		return output;
 	}
 
 	public String getNewCsrfToken() {

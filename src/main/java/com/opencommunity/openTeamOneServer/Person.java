@@ -50,13 +50,13 @@ public class Person {
 	}
 
 	public JSONObject toJson() throws JSONException {
-		JSONObject person = new JSONObject();
-		person.put("personId", personId);
-		JsonUtil.put(person, "lastName", lastName);
-		JsonUtil.put(person, "firstName", firstName);
-		JsonUtil.put(person, "nickName", nickName);
-		JsonUtil.put(person, "pictureId", pictureId);
-		return person;
+		JSONObject item = new JSONObject();
+		item.put("personId", personId);
+		item.put("lastName", lastName);
+		item.put("firstName", firstName);
+		item.put("nickName", nickName);
+		item.put("pictureId", pictureId);
+		return item;
 	}
 
 	public static Iterable<Person> fromJsonArray(JSONArray array) throws JSONException {
@@ -117,12 +117,10 @@ public class Person {
 
 	@Override
 	public String toString() {
-		return "Person{" +
-				"personId='" + personId + '\'' +
-				", lastName='" + lastName + '\'' +
-				", firstName='" + firstName + '\'' +
-				", nickName='" + nickName + '\'' +
-				", pictureId='" + pictureId + '\'' +
-				'}';
+		String output = getClass().getSimpleName();
+		try {
+			output += toJson().toString();
+		} catch (JSONException e) { }
+		return output;
 	}
 }

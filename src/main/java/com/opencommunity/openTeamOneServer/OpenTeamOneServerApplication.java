@@ -24,7 +24,7 @@ public class OpenTeamOneServerApplication {
 			AttachmentRepository ar,
 			ViewedConfirmationRepository vcr
 	) {
-		final PersistenceService ps = new PersistenceService(tpr, ur, pr, rr, rmr, mr, ar, vcr);
+		final ContentService ps = new ContentService(tpr, ur, pr, rr, rmr, mr, ar, vcr);
 		return new CommandLineRunner() {
 			@Override
 			public void run(String... args) throws Exception {

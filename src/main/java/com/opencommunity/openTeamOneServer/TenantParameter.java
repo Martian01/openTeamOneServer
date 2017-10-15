@@ -35,10 +35,10 @@ public class TenantParameter {
 	}
 
 	public JSONObject toJson() throws JSONException {
-		JSONObject tenantParameter = new JSONObject();
-		tenantParameter.put("key", key);
-		tenantParameter.put("value", value);
-		return tenantParameter;
+		JSONObject item = new JSONObject();
+		item.put("key", key);
+		item.put("value", value);
+		return item;
 	}
 
 	public static Iterable<TenantParameter> fromJsonArray(JSONArray array) throws JSONException {
@@ -75,9 +75,11 @@ public class TenantParameter {
 
 	@Override
 	public String toString() {
-		return "TenantParameter{" +
-				"key='" + key + '\'' +
-				", value='" + value + '\'' +
-				'}';
+		String output = getClass().getSimpleName();
+		try {
+			output += toJson().toString();
+		} catch (JSONException e) { }
+		return output;
 	}
+
 }

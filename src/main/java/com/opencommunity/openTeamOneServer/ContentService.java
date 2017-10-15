@@ -4,7 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class PersistenceService {
+public class ContentService {
 
 	private TenantParameterRepository tpr;
 	private UserRepository ur;
@@ -15,7 +15,7 @@ public class PersistenceService {
 	private AttachmentRepository ar;
 	private ViewedConfirmationRepository vcr;
 
-	public PersistenceService(TenantParameterRepository tpr, UserRepository ur, PersonRepository pr, RoomRepository rr, RoomMemberRepository rmr, MessageRepository mr, AttachmentRepository ar, ViewedConfirmationRepository vcr) {
+	public ContentService(TenantParameterRepository tpr, UserRepository ur, PersonRepository pr, RoomRepository rr, RoomMemberRepository rmr, MessageRepository mr, AttachmentRepository ar, ViewedConfirmationRepository vcr) {
 		this.tpr = tpr;
 		this.ur = ur;
 		this.pr = pr;
@@ -70,9 +70,9 @@ public class PersistenceService {
 		if (attachments != null)
 			ar.save(attachments);
 		item = JsonUtil.getJSONArray(jsonObject, "viewedConfirmations");
-		Iterable<User> viewedConfirmations = User.fromJsonArray(item);
+		Iterable<ViewedConfirmation> viewedConfirmations = ViewedConfirmation.fromJsonArray(item);
 		if (viewedConfirmations != null)
-			ur.save(viewedConfirmations);
+			vcr.save(viewedConfirmations);
 	}
 
 	public void createModelData() throws JSONException {
@@ -113,23 +113,23 @@ public class PersistenceService {
 		mr.save(m3 = new Message(null, "cm3", r2.roomId, p2.personId, now - 300000, "Can you see my picture?", false, now - 300000));
 		mr.save(m4 = new Message(null, "cm4", r2.roomId, p1.personId, now - 200000, "Sorry, I cannot. \uD83D\uDE1E", false, now - 200000));
 		mr.save(m5 = new Message(null, "cm5", r3.roomId, p1.personId, now - 600000, "Hi Peter", false, now - 600000));
-		mr.save(m6 = new Message(null, "cm6", r3.roomId, p2.personId, now - 300000, "Hey Thomas, everything allright?", false, now - 300000));
+		mr.save(m6 = new Message(null, "cm6", r3.roomId, p2.personId, now - 300000, "Hey Tom, everything allright?", false, now - 300000));
 		//
 		ar.save(new Attachment(null, m3.messageId, "Attachment 1", "image/png", "FileId1"));
 		//
-		vcr.save(new ViewedConfirmation(m1.messageId, p1.personId, m1.roomId, m1.postedAt));
-		vcr.save(new ViewedConfirmation(m1.messageId, p2.personId, m1.roomId, m1.postedAt));
-		vcr.save(new ViewedConfirmation(m1.messageId, p3.personId, m1.roomId, m1.postedAt));
-		vcr.save(new ViewedConfirmation(m2.messageId, p1.personId, m2.roomId, m2.postedAt));
-		vcr.save(new ViewedConfirmation(m2.messageId, p3.personId, m2.roomId, m2.postedAt));
-		vcr.save(new ViewedConfirmation(m3.messageId, p1.personId, m3.roomId, m3.postedAt));
-		vcr.save(new ViewedConfirmation(m3.messageId, p2.personId, m3.roomId, m3.postedAt));
-		vcr.save(new ViewedConfirmation(m3.messageId, p3.personId, m3.roomId, m3.postedAt));
-		vcr.save(new ViewedConfirmation(m4.messageId, p1.personId, m4.roomId, m4.postedAt));
-		vcr.save(new ViewedConfirmation(m4.messageId, p2.personId, m4.roomId, m4.postedAt));
-		vcr.save(new ViewedConfirmation(m5.messageId, p1.personId, m5.roomId, m5.postedAt));
-		vcr.save(new ViewedConfirmation(m5.messageId, p2.personId, m5.roomId, m5.postedAt));
-		vcr.save(new ViewedConfirmation(m6.messageId, p2.personId, m6.roomId, m6.postedAt));
+		vcr.save(new ViewedConfirmation(m1.messageId, p1.personId, m1.roomId, m1.postedAt, now));
+		vcr.save(new ViewedConfirmation(m1.messageId, p2.personId, m1.roomId, m1.postedAt, now));
+		vcr.save(new ViewedConfirmation(m1.messageId, p3.personId, m1.roomId, m1.postedAt, now));
+		vcr.save(new ViewedConfirmation(m2.messageId, p1.personId, m2.roomId, m2.postedAt, now));
+		vcr.save(new ViewedConfirmation(m2.messageId, p3.personId, m2.roomId, m2.postedAt, now));
+		vcr.save(new ViewedConfirmation(m3.messageId, p1.personId, m3.roomId, m3.postedAt, now));
+		vcr.save(new ViewedConfirmation(m3.messageId, p2.personId, m3.roomId, m3.postedAt, now));
+		vcr.save(new ViewedConfirmation(m3.messageId, p3.personId, m3.roomId, m3.postedAt, now));
+		vcr.save(new ViewedConfirmation(m4.messageId, p1.personId, m4.roomId, m4.postedAt, now));
+		vcr.save(new ViewedConfirmation(m4.messageId, p2.personId, m4.roomId, m4.postedAt, now));
+		vcr.save(new ViewedConfirmation(m5.messageId, p1.personId, m5.roomId, m5.postedAt, now));
+		vcr.save(new ViewedConfirmation(m5.messageId, p2.personId, m5.roomId, m5.postedAt, now));
+		vcr.save(new ViewedConfirmation(m6.messageId, p2.personId, m6.roomId, m6.postedAt, now));
 	}
 
 }

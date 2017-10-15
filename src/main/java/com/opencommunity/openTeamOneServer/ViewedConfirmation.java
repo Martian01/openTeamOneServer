@@ -11,15 +11,17 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import java.util.ArrayList;
 
-interface ViewedConfirmationRepository extends CrudRepository<ViewedConfirmation, String> {
+interface ViewedConfirmationRepository extends CrudRepository<ViewedConfirmation, ViewedConfirmationKey> {
 	// for message confirmations
 	Iterable<ViewedConfirmation> findByMessageId(String messageId);
 	// for viewedCount (simple version)
 	long countByMessageId(String messageId);
 	// for badgeCount etc.
-	ViewedConfirmation findTopByPersonIdAndRoomIdOrderByTimestampDesc(String personId, String roomId);
+	ViewedConfirmation findTopByPersonIdAndRoomIdOrderByMessagePostedAtDesc(String personId, String messageRoomId);
 	// for viewedAt
 	ViewedConfirmation findTopByMessageIdAndPersonId(String messageId, String personId);
+	// for debugging
+	Iterable<ViewedConfirmation> findByPersonId(String personId);
 }
 
 @Entity
@@ -33,32 +35,37 @@ public class ViewedConfirmation {
 	@Column
 	public String roomId;
 	@Column
-	public long timestamp;
+	public long messagePostedAt;
+	@Column
+	public long confirmedAt;
 
 	public ViewedConfirmation() {
 	}
 
-	public ViewedConfirmation(String messageId, String personId, String roomId, long timestamp) {
+	public ViewedConfirmation(String messageId, String personId, String roomId, long messagePostedAt, long confirmedAt) {
 		this.messageId = messageId;
 		this.personId = personId;
 		this.roomId = roomId;
-		this.timestamp = timestamp;
+		this.messagePostedAt = messagePostedAt;
+		this.confirmedAt = confirmedAt;
 	}
 
 	public ViewedConfirmation(JSONObject item) throws JSONException {
 		messageId = JsonUtil.getString(item, "messageId");
 		personId = JsonUtil.getString(item, "personId");
 		roomId = JsonUtil.getString(item, "roomId");
-		timestamp = JsonUtil.getIsoDate(item, "timestamp");
+		messagePostedAt = JsonUtil.getIsoDate(item, "messagePostedAt");
+		confirmedAt = JsonUtil.getIsoDate(item, "confirmedAt");
 	}
 
 	public JSONObject toJson() throws JSONException {
-		JSONObject roomMember = new JSONObject();
-		roomMember.put("messageId", messageId);
-		roomMember.put("personId", personId);
-		roomMember.put("roomId", roomId);
-		roomMember.put("timestamp", JsonUtil.toIsoDate(timestamp));
-		return roomMember;
+		JSONObject item = new JSONObject();
+		item.put("messageId", messageId);
+		item.put("personId", personId);
+		item.put("roomId", roomId);
+		item.put("messagePostedAt", JsonUtil.toIsoDate(messagePostedAt));
+		item.put("confirmedAt", JsonUtil.toIsoDate(confirmedAt));
+		return item;
 	}
 
 	public static Iterable<ViewedConfirmation> fromJsonArray(JSONArray array) throws JSONException {
@@ -101,22 +108,29 @@ public class ViewedConfirmation {
 		this.roomId = roomId;
 	}
 
-	public long getTimestamp() {
-		return timestamp;
+	public long getMessagePostedAt() {
+		return messagePostedAt;
 	}
 
-	public void setTimestamp(long timestamp) {
-		this.timestamp = timestamp;
+	public void setMessagePostedAt(long messagePostedAt) {
+		this.messagePostedAt = messagePostedAt;
+	}
+
+	public long getConfirmedAt() {
+		return confirmedAt;
+	}
+
+	public void setConfirmedAt(long confirmedAt) {
+		this.confirmedAt = confirmedAt;
 	}
 
 	@Override
 	public String toString() {
-		return "ViewedConfirmation{" +
-				"messageId='" + messageId + '\'' +
-				", personId='" + personId + '\'' +
-				", roomId='" + roomId + '\'' +
-				", timestamp='" + timestamp + '\'' +
-				'}';
+		String output = getClass().getSimpleName();
+		try {
+			output += toJson().toString();
+		} catch (JSONException e) { }
+		return output;
 	}
 
 }

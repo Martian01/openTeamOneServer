@@ -40,30 +40,24 @@ public class Attachment {
 	}
 
 	public Attachment(JSONObject item) throws JSONException {
-		attachmentId = JsonUtil.getString(item, "assetId");
-		JSONObject attachmentContent = JsonUtil.getJSONObject(item, "assetContent");
-		text = JsonUtil.getString(attachmentContent, "text");
-		mimeType = JsonUtil.getString(attachmentContent, "mimeType");
-		JSONObject sapSportsFile = JsonUtil.getJSONObject(attachmentContent, "sapSportsFile");
-		fileId = JsonUtil.getString(sapSportsFile, "fileId");
-		mimeType = JsonUtil.getString(sapSportsFile, "mimeType");
+		attachmentId = JsonUtil.getString(item, "attachmentId");
+		messageId = JsonUtil.getString(item, "messageId");
+		text = JsonUtil.getString(item, "text");
+		mimeType = JsonUtil.getString(item, "mimeType");
+		fileId = JsonUtil.getString(item, "fileId");
 		//
 		if (attachmentId == null)
 			attachmentId = Util.getUuid();
 	}
 
 	public JSONObject toJson() throws JSONException {
-		JSONObject sapSportsFile = new JSONObject();
-		sapSportsFile.put("fileId", fileId);
-		sapSportsFile.put("mimeType", mimeType);
-		JSONObject attachmentContent = new JSONObject();
-		JsonUtil.put(attachmentContent, "text", text);
-		JsonUtil.put(attachmentContent, "mimeType", "application/vnd.sap.sports.file");
-		JsonUtil.put(attachmentContent, "sapSportsFile", sapSportsFile);
-		JSONObject attachment = new JSONObject();
-		attachment.put("assetId", attachmentId);
-		attachment.put("assetContent", attachmentContent);
-		return attachment;
+		JSONObject item = new JSONObject();
+		item.put("attachmentId", attachmentId);
+		item.put("messageId", messageId);
+		item.put("text", text);
+		item.put("mimeType", mimeType);
+		item.put("fileId", fileId);
+		return item;
 	}
 
 	public static Iterable<Attachment> fromJsonArray(JSONArray array) throws JSONException {
@@ -124,13 +118,11 @@ public class Attachment {
 
 	@Override
 	public String toString() {
-		return "Attachment{" +
-				"attachmentId='" + attachmentId + '\'' +
-				", messageId='" + messageId + '\'' +
-				", text='" + text + '\'' +
-				", mimeType='" + mimeType + '\'' +
-				", fileId='" + fileId + '\'' +
-				'}';
+		String output = getClass().getSimpleName();
+		try {
+			output += toJson().toString();
+		} catch (JSONException e) { }
+		return output;
 	}
 
 }

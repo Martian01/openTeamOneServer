@@ -14,25 +14,28 @@ import java.util.ArrayList;
 
 interface MessageRepository extends CrudRepository<Message, String> {
 	// for latest message
-	Message findTopByRoomIdOrderByPostedAtDesc(String roomId);
+	Message findTopByRoomIdAndIsDeletedFalseOrderByPostedAtDesc(String roomId);
 	// for badge count
 	long countByRoomIdAndPostedAtGreaterThan(String roomId, long postedAt);
-	// for messagesSince
+	// for messages since
 	Iterable<Message> findByRoomIdAndUpdatedAtGreaterThanAndPostedAtGreaterThanEqual(String roomId, long updatedAt, long postedAt);
 	Iterable<Message> findByRoomIdAndUpdatedAtGreaterThan(String roomId, long updatedAt);
 	Iterable<Message> findByRoomIdAndPostedAtGreaterThanEqual(String roomId, long postedAt);
-	// for messagesUntil
+	// for messages until
 	Page<Message> findByRoomIdAndPostedAtLessThanOrderByPostedAtDesc(String roomId, long postedAt, Pageable pageable);
 	Page<Message> findByRoomIdOrderByPostedAtDesc(String roomId, Pageable pageable);
 	Iterable<Message> findByRoomIdAndPostedAtBetween(String roomId, long postedAtLow, long postedAtHigh);
 	Iterable<Message> findByRoomIdAndPostedAtLessThan(String roomId, long postedAt);
+	// for messages since/until
+	Iterable<Message> findTop100ByRoomId(String roomId);
 	// for viewed confirmations
-	Iterable<Message> findByRoomIdAndSenderPersonIdAndPostedAtGreaterThan(String roomId, String senderPersonId, long postedAt);
-	Iterable<Message> findByRoomIdAndSenderPersonIdAndPostedAtGreaterThanAndPostedAtLessThanEqual(String roomId, String senderPersonId, long postedAtLow, long postedAtHigh);
-	Iterable<Message> findTop1ByRoomIdAndSenderPersonIdOrderByPostedAtDesc(String roomId, String senderPersonId);
-	Iterable<Message> findTop1ByRoomIdAndSenderPersonIdAndPostedAtLessThanEqualOrderByPostedAtDesc(String roomId, String senderPersonId, long postedAt);
-	// for all
+	Iterable<Message> findByRoomIdAndPostedAtGreaterThan(String roomId, long postedAt);
+	Iterable<Message> findByRoomIdAndPostedAtGreaterThanAndPostedAtLessThanEqual(String roomId, long postedAtLow, long postedAtHigh);
+	Iterable<Message> findTop1ByRoomIdOrderByPostedAtDesc(String roomId);
+	Iterable<Message> findTop1ByRoomIdAndPostedAtLessThanEqualOrderByPostedAtDesc(String roomId, long postedAt);
+	// for debugging
 	Iterable<Message> findByRoomId(String roomId);
+	Message findTopByClientMessageId(String clientMessageId);
 }
 
 @Entity
@@ -72,36 +75,28 @@ public class Message {
 	public Message(JSONObject item) throws JSONException {
 		messageId = JsonUtil.getString(item, "messageId");
 		clientMessageId = JsonUtil.getString(item, "clientMessageId");
-		JSONObject messageContent = JsonUtil.getJSONObject(item, "messageData");
-		roomId = JsonUtil.getString(messageContent, "roomId");
-		senderPersonId = JsonUtil.getString(messageContent, "senderPersonId");
-		postedAt = JsonUtil.getIsoDate(messageContent, "postedAt");
-		text = JsonUtil.getString(messageContent, "text");
-		JSONObject messageStatus = JsonUtil.getJSONObject(item, "messageStatus");
-		isDeleted = JsonUtil.getBoolean(messageStatus, "isDeleted");
-		updatedAt = JsonUtil.getIsoDate(messageStatus, "updatedAt");
+		roomId = JsonUtil.getString(item, "roomId");
+		senderPersonId = JsonUtil.getString(item, "senderPersonId");
+		postedAt = JsonUtil.getIsoDate(item, "postedAt");
+		text = JsonUtil.getString(item, "text");
+		isDeleted = JsonUtil.getBoolean(item, "isDeleted");
+		updatedAt = JsonUtil.getIsoDate(item, "updatedAt");
 		//
 		if (messageId == null)
 			messageId = Util.getUuid();
 	}
 
 	public JSONObject toJson() throws JSONException {
-		JSONObject messageContent = new JSONObject();
-		JsonUtil.put(messageContent, "roomId", roomId);
-		JsonUtil.put(messageContent, "senderPersonId", senderPersonId);
-		JsonUtil.put(messageContent, "postedAt", JsonUtil.toIsoDate(postedAt));
-		JsonUtil.put(messageContent, "text", text);
-		JSONObject messageStatus = new JSONObject();
-		messageStatus.put("isDeleted", isDeleted);
-		messageStatus.put("updatedAt", JsonUtil.toIsoDate(updatedAt));
-		messageStatus.put("postedMessageStatus", new JSONObject());
-		messageStatus.put("receivedMessageStatus", new JSONObject());
-		JSONObject message = new JSONObject();
-		message.put("messageId", messageId);
-		message.put("clientMessageId", clientMessageId);
-		message.put("messageContent", messageContent);
-		message.put("messageStatus", messageStatus);
-		return message;
+		JSONObject item = new JSONObject();
+		item.put("messageId", messageId);
+		item.put("clientMessageId", clientMessageId);
+		item.put("roomId", roomId);
+		item.put("senderPersonId", senderPersonId);
+		item.put("postedAt", JsonUtil.toIsoDate(postedAt));
+		item.put("text", text);
+		item.put("isDeleted", isDeleted);
+		item.put("updatedAt", JsonUtil.toIsoDate(updatedAt));
+		return item;
 	}
 
 	public static Iterable<Message> fromJsonArray(JSONArray array) throws JSONException {
@@ -186,15 +181,10 @@ public class Message {
 
 	@Override
 	public String toString() {
-		return "Message{" +
-				"messageId='" + messageId + '\'' +
-				", clientMessageId='" + clientMessageId + '\'' +
-				", roomId='" + roomId + '\'' +
-				", senderPersonId='" + senderPersonId + '\'' +
-				", postedAt=" + postedAt +
-				", text='" + text + '\'' +
-				", isDeleted=" + isDeleted +
-				", updatedAt=" + updatedAt +
-				'}';
+		String output = getClass().getSimpleName();
+		try {
+			output += toJson().toString();
+		} catch (JSONException e) { }
+		return output;
 	}
 }

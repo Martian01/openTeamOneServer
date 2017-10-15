@@ -10,7 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import java.util.ArrayList;
 
-interface RoomMemberRepository extends CrudRepository<RoomMember, String> {
+interface RoomMemberRepository extends CrudRepository<RoomMember, RoomMemberKey> {
 	// for members
 	Iterable<RoomMember> findByRoomId(String roomId);
 	// for rooms
@@ -42,10 +42,10 @@ public class RoomMember {
 	}
 
 	public JSONObject toJson() throws JSONException {
-		JSONObject roomMember = new JSONObject();
-		roomMember.put("roomId", roomId);
-		roomMember.put("personId", personId);
-		return roomMember;
+		JSONObject item = new JSONObject();
+		item.put("roomId", roomId);
+		item.put("personId", personId);
+		return item;
 	}
 
 	public static Iterable<RoomMember> fromJsonArray(JSONArray array) throws JSONException {
@@ -82,9 +82,11 @@ public class RoomMember {
 
 	@Override
 	public String toString() {
-		return "RoomMember{" +
-				"roomId='" + roomId + '\'' +
-				", personId='" + personId + '\'' +
-				'}';
+		String output = getClass().getSimpleName();
+		try {
+			output += toJson().toString();
+		} catch (JSONException e) { }
+		return output;
 	}
+
 }
