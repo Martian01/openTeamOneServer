@@ -34,40 +34,12 @@ public class MediaApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/picture/v1/service/rest/picture/{itemId}")
 	public ResponseEntity<Resource> picture(HttpServletRequest request, @PathVariable String itemId) throws Exception {
-		User user = Util.getCurrentUser(request, userRepository);
-		if (user == null)
-			return Util.httpResourceResponse(HttpStatus.UNAUTHORIZED);
-		//
-		Attachment attachment = attachmentRepository.findOne(itemId);
-		if (attachment == null)
-			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
-		if (getDataDirectory() == null)
-			return Util.httpResourceResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		String filename = dataDirectory + "/picture/" + itemId;
-		File file = new File(filename);
-		if (!file.canRead())
-			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
-		Resource resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
-		return Util.httpResourceResponse(resource, MediaType.parseMediaType(attachment.mimeType));
+		return sendFileContent(request, itemId, "/picture/");
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{itemId}/content")
 	public ResponseEntity<Resource> mediaFileContent(HttpServletRequest request, @PathVariable String itemId) throws Exception {
-		User user = Util.getCurrentUser(request, userRepository);
-		if (user == null)
-			return Util.httpResourceResponse(HttpStatus.UNAUTHORIZED);
-		//
-		Attachment attachment = attachmentRepository.findOne(itemId);
-		if (attachment == null)
-			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
-		if (getDataDirectory() == null)
-			return Util.httpResourceResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		String filename = dataDirectory + "/file/" + itemId;
-		File file = new File(filename);
-		if (!file.canRead())
-			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
-		Resource resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
-		return Util.httpResourceResponse(resource, MediaType.parseMediaType(attachment.mimeType));
+		return sendFileContent(request, itemId, "/file/");
 	}
 
 	/* The following API calls are intentionally not implemented */
@@ -80,7 +52,7 @@ public class MediaApi {
 
 	private String dataDirectory = null;
 
-	public String getDataDirectory() {
+	public void initDataDirectory() {
 		if (dataDirectory == null) {
 			TenantParameter tp = tenantParameterRepository.findOne("dataDirectory");
 			if (tp == null)
@@ -88,7 +60,25 @@ public class MediaApi {
 			else
 				dataDirectory = tp.value;
 		}
-		return dataDirectory;
+	}
+
+	public ResponseEntity<Resource> sendFileContent(HttpServletRequest request, String itemId, String directory) throws Exception {
+		User user = Util.getCurrentUser(request, userRepository);
+		if (user == null)
+			return Util.httpResourceResponse(HttpStatus.UNAUTHORIZED);
+		//
+		Attachment attachment = attachmentRepository.findOne(itemId);
+		if (attachment == null)
+			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
+		initDataDirectory();
+		if (dataDirectory == null)
+			return Util.httpResourceResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+		String filename = dataDirectory + directory + itemId;
+		File file = new File(filename);
+		if (!file.canRead())
+			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
+		Resource resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+		return Util.httpResourceResponse(resource, MediaType.parseMediaType(attachment.mimeType));
 	}
 
 }

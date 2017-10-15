@@ -86,8 +86,8 @@ public class ContentService {
 		Person p0, p1, p2, p3;
 		pr.save(p0 = new Person(null, "Byrd", "Robert", "Dickie", null));
 		pr.save(p1 = new Person(null, "Tank", "Thomas", "Tom", "profile1"));
-		pr.save(p2 = new Person(null, "Smith", "Peter", "Pete", "profile2"));
-		pr.save(p3 = new Person(null, "Potter", "Harry", "Arry", "profile3"));
+		pr.save(p2 = new Person(null, "Smith", "Peter", null, "profile2"));
+		pr.save(p3 = new Person(null, "Potter", "Harry", null, "profile3"));
 		//
 		ur.save(new User("admin01", "pass", p0.personId, false, true));
 		ur.save(new User("player01", "pass", p1.personId, true, false));
