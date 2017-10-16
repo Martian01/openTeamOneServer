@@ -1,5 +1,7 @@
 # Open Team One Server
 
+![Logo](src/main/resources/static/admin/logo128.png)
+
 Open Team One Server is a backend component to support the communication
 function of SAP Team One mobile apps.
 
