@@ -41,7 +41,7 @@ public class MessagingApi {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/device/subscription")
 	public ResponseEntity<String> deviceSubscription(HttpServletRequest request) throws JSONException {
-		User user = Util.getCurrentUser(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
@@ -50,7 +50,7 @@ public class MessagingApi {
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/device/subscription")
 	public ResponseEntity<String> deviceSubscriptionDelete(HttpServletRequest request) throws JSONException {
-		User user = Util.getCurrentUser(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
@@ -59,7 +59,7 @@ public class MessagingApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/me")
 	public ResponseEntity<String> me(HttpServletRequest request) throws JSONException {
-		User user = Util.getCurrentUser(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
@@ -83,7 +83,7 @@ public class MessagingApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/person/{personId}")
 	public ResponseEntity<String> person(HttpServletRequest request, @PathVariable String personId) throws JSONException {
-		User user = Util.getCurrentUser(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
@@ -101,7 +101,7 @@ public class MessagingApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/contacts")
 	public ResponseEntity<String> contacts(HttpServletRequest request) throws JSONException {
-		User user = Util.getCurrentUser(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
@@ -123,7 +123,7 @@ public class MessagingApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/contact/{contactId}/roomId")
 	public ResponseEntity<String> contactRoomId(HttpServletRequest request, @PathVariable String contactId) throws JSONException {
-		User user = Util.getCurrentUser(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
@@ -141,7 +141,7 @@ public class MessagingApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/rooms")
 	public ResponseEntity<String> rooms(HttpServletRequest request) throws JSONException {
-		User user = Util.getCurrentUser(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
@@ -156,7 +156,7 @@ public class MessagingApi {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/members")
 	public ResponseEntity<String> roomMembers(HttpServletRequest request, @PathVariable String roomId) throws JSONException {
-		User user = Util.getCurrentUser(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
@@ -172,7 +172,7 @@ public class MessagingApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/messagesSince")
 	public ResponseEntity<String> roomMessagesSince(HttpServletRequest request, @PathVariable String roomId, @RequestParam(required = false) Long since, @RequestParam(required = false) Long notBefore) throws JSONException {
-		User user = Util.getCurrentUser(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
@@ -203,7 +203,7 @@ public class MessagingApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/messagesUntil")
 	public ResponseEntity<String> roomMessagesUntil(HttpServletRequest request, @PathVariable String roomId, @RequestParam(required = false) Integer count, @RequestParam(required = false) Long until) throws JSONException {
-		User user = Util.getCurrentUser(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
@@ -243,7 +243,7 @@ public class MessagingApi {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/message")
 	public ResponseEntity<String> roomMessage(HttpServletRequest request, @PathVariable String roomId) throws JSONException {
-		User user = Util.getCurrentUser(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
@@ -255,7 +255,7 @@ public class MessagingApi {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/viewedConfirmation")
 	public ResponseEntity<String> roomViewedConfirmation(HttpServletRequest request, @PathVariable String roomId, @RequestParam(required = false) Long until) throws JSONException {
-		User user = Util.getCurrentUser(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
@@ -294,7 +294,7 @@ public class MessagingApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/message/{messageId}/confirmations")
 	public ResponseEntity<String> messageConfirmations(HttpServletRequest request, @PathVariable String messageId) throws JSONException {
-		User user = Util.getCurrentUser(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
@@ -313,7 +313,7 @@ public class MessagingApi {
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/message/{messageId}")
 	public ResponseEntity<String> messageDelete(HttpServletRequest request, @PathVariable String messageId) throws JSONException {
-		User user = Util.getCurrentUser(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//

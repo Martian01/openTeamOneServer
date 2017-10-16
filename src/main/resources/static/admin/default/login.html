@@ -1,0 +1,21 @@
+<html>
+<head>
+    <title>Open Team One Administration</title>
+    <link href="css/login.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <h1>Open Team One Administration</h1>
+    <h2>Please log in</h2>
+    <form action="/sap/hana/xs/formLogin/ui/login" method="post">
+        <fieldset>
+            <legend>Login Credentials</legend>
+            Username:<br>
+            <input type="text" name="ui-username"><br/>
+            Password:<br>
+            <input type="password" name="ui-password"><br/><br/>
+            <input type="hidden" name="ui-forward" value="/admin/">
+            <input type="submit" value="Log In">
+        </fieldset>
+    </form>
+</body>
+</html>

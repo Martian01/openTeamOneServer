@@ -3,30 +3,104 @@ package com.opencommunity.openTeamOneServer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.util.Iterator;
+
+@Service
 public class ContentService {
 
-	private TenantParameterRepository tpr;
-	private UserRepository ur;
-	private PersonRepository pr;
-	private RoomRepository rr;
-	private RoomMemberRepository rmr;
-	private MessageRepository mr;
-	private AttachmentRepository ar;
-	private ViewedConfirmationRepository vcr;
+	private static ContentService instance = null;
 
-	public ContentService(TenantParameterRepository tpr, UserRepository ur, PersonRepository pr, RoomRepository rr, RoomMemberRepository rmr, MessageRepository mr, AttachmentRepository ar, ViewedConfirmationRepository vcr) {
-		this.tpr = tpr;
-		this.ur = ur;
-		this.pr = pr;
-		this.rr = rr;
-		this.rmr = rmr;
-		this.mr = mr;
-		this.ar = ar;
-		this.vcr = vcr;
+	private static String dataDirectory = null;
+	private static String pageStyle = null;
+
+	/* public services */
+
+	public static String getDataDirectory() {
+		if (dataDirectory == null && instance != null) {
+			TenantParameter tp = instance.tpr.findOne("dataDirectory");
+			if (tp == null)
+				System.out.println("Error: data directory not configured");
+			else
+				dataDirectory = tp.value;
+		}
+		return dataDirectory;
 	}
 
-	public JSONObject exportJson() throws JSONException {
+	public static String getPageStyle() {
+		if (pageStyle == null && instance != null) {
+			TenantParameter tp = instance.tpr.findOne("pageStyle");
+			if (tp == null)
+				System.out.println("Error: page style not configured");
+			else
+				pageStyle = tp.value;
+		}
+		return pageStyle;
+	}
+
+	public static JSONObject exportToJson() throws JSONException {
+		if (instance != null)
+			return instance._exportToJson();
+		return null;
+	}
+
+	public static void importFromJson(JSONObject jsonObject, boolean delete, String protectedUserId) throws JSONException {
+		if (instance != null)
+			instance._importFromJson(jsonObject, delete, protectedUserId);
+	}
+
+	public static void deleteAll(String protectedUserId) throws JSONException {
+		if (instance != null)
+			instance._deleteAll(protectedUserId);
+	}
+
+	public static void loadModelData() throws JSONException {
+		if (instance != null)
+			instance._loadModelData();
+	}
+
+	/* instance methods and properties */
+
+	@Autowired
+	private TenantParameterRepository tpr;
+	@Autowired
+	private UserRepository ur;
+	@Autowired
+	private PersonRepository pr;
+	@Autowired
+	private RoomRepository rr;
+	@Autowired
+	private RoomMemberRepository rmr;
+	@Autowired
+	private MessageRepository mr;
+	@Autowired
+	private AttachmentRepository ar;
+	@Autowired
+	private ViewedConfirmationRepository vcr;
+
+	public ContentService() {
+		instance = this;
+	}
+
+	@PostConstruct
+	private void init() {
+		if (tpr.findOne("name") == null)
+			tpr.save(new TenantParameter("name", "OpenTeamOne"));
+		if (tpr.findOne("pictureId") == null)
+			tpr.save(new TenantParameter("pictureId", "logo"));
+		if (tpr.findOne("pageStyle") == null)
+			tpr.save(new TenantParameter("pageStyle", "default"));
+		if (tpr.findOne("dataDirectory") == null)
+			tpr.save(new TenantParameter("dataDirectory", "/tmp"));
+		//
+		if (ur.countByHasAdminRoleTrue() == 0)
+			ur.save(new User("admin", "admin", null, false, true));
+	}
+
+	private JSONObject _exportToJson() throws JSONException {
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("tenantParameters", TenantParameter.toJsonArray(tpr.findAll()));
 		jsonObject.put("users", User.toJsonArray(ur.findAll()));
@@ -39,57 +113,93 @@ public class ContentService {
 		return jsonObject;
 	}
 
-	public void importJson(JSONObject jsonObject) throws JSONException {
+	private void _importFromJson(JSONObject jsonObject, boolean delete, String protectedUserId) throws JSONException {
 		JSONArray item;
 		item = JsonUtil.getJSONArray(jsonObject, "tenantParameters");
-		Iterable<TenantParameter> tenantParameters = TenantParameter.fromJsonArray(item);
-		if (tenantParameters != null)
-			tpr.save(tenantParameters);
+		if (item != null) {
+			if (delete) {
+				tpr.deleteAll();
+				dataDirectory = null;
+				pageStyle = null;
+			}
+			tpr.save(TenantParameter.fromJsonArray(item));
+		}
 		item = JsonUtil.getJSONArray(jsonObject, "users");
-		Iterable<User> users = User.fromJsonArray(item);
-		if (users != null)
+		if (item != null && protectedUserId != null) {
+			if (delete)
+				ur.delete(ur.findByUserIdNot(protectedUserId));
+			Iterable<User> users = User.fromJsonArray(item);
+			Iterator<User> iterator = users.iterator();
+			while (iterator.hasNext())
+				if (protectedUserId.equals(iterator.next().userId))
+					iterator.remove();
 			ur.save(users);
+		}
 		item = JsonUtil.getJSONArray(jsonObject, "persons");
-		Iterable<Person> persons = Person.fromJsonArray(item);
-		if (persons != null)
-			pr.save(persons);
+		if (item != null) {
+			if (delete)
+				pr.deleteAll();
+			pr.save(Person.fromJsonArray(item));
+		}
 		item = JsonUtil.getJSONArray(jsonObject, "rooms");
-		Iterable<Room> rooms = Room.fromJsonArray(item);
-		if (rooms != null)
-			rr.save(rooms);
+		if (item != null) {
+			if (delete)
+				rr.deleteAll();
+			rr.save(Room.fromJsonArray(item));
+		}
 		item = JsonUtil.getJSONArray(jsonObject, "roomMembers");
-		Iterable<RoomMember> roomMembers = RoomMember.fromJsonArray(item);
-		if (roomMembers != null)
-			rmr.save(roomMembers);
+		if (item != null) {
+			if (delete)
+				rmr.deleteAll();
+			rmr.save(RoomMember.fromJsonArray(item));
+		}
 		item = JsonUtil.getJSONArray(jsonObject, "messages");
-		Iterable<Message> messages = Message.fromJsonArray(item);
-		if (messages != null)
-			mr.save(messages);
+		if (item != null) {
+			if (delete)
+				mr.deleteAll();
+			mr.save(Message.fromJsonArray(item));
+		}
 		item = JsonUtil.getJSONArray(jsonObject, "attachments");
-		Iterable<Attachment> attachments = Attachment.fromJsonArray(item);
-		if (attachments != null)
-			ar.save(attachments);
+		if (item != null) {
+			if (delete)
+				ar.deleteAll();
+			ar.save(Attachment.fromJsonArray(item));
+		}
 		item = JsonUtil.getJSONArray(jsonObject, "viewedConfirmations");
-		Iterable<ViewedConfirmation> viewedConfirmations = ViewedConfirmation.fromJsonArray(item);
-		if (viewedConfirmations != null)
-			vcr.save(viewedConfirmations);
+		if (item != null) {
+			if (delete)
+				vcr.deleteAll();
+			vcr.save(ViewedConfirmation.fromJsonArray(item));
+		}
 	}
 
-	public void createModelData() throws JSONException {
+	private void _deleteAll(String protectedUserId) {
+		tpr.deleteAll();
+		dataDirectory = null;
+		pageStyle = null;
+		if (protectedUserId != null)
+			ur.delete(ur.findByUserIdNot(protectedUserId));
+		pr.deleteAll();
+		rr.deleteAll();
+		rmr.deleteAll();
+		mr.deleteAll();
+		ar.deleteAll();
+		vcr.deleteAll();
+	}
+
+	private void _loadModelData() {
 		long now = System.currentTimeMillis();
 		//
 		tpr.save(new TenantParameter("name", "OpenTeamOne"));
 		tpr.save(new TenantParameter("pictureId", "tenant"));
-		tpr.save(new TenantParameter("pagestyle", "default"));
+		tpr.save(new TenantParameter("pageStyle", "default"));
 		tpr.save(new TenantParameter("dataDirectory", "/var/cache/openTeamOne"));
 		//
-		Person p0, p1, p2, p3;
-		pr.save(p0 = new Person(null, "Byrd", "Robert", "Dickie", null));
+		Person p1, p2, p3;
 		pr.save(p1 = new Person(null, "Tank", "Thomas", "Tom", "profile1"));
 		pr.save(p2 = new Person(null, "Smith", "Peter", null, "profile2"));
 		pr.save(p3 = new Person(null, "Potter", "Harry", null, "profile3"));
 		//
-		ur.save(new User("admin01", "pass", p0.personId, false, true));
 		ur.save(new User("player01", "pass", p1.personId, true, false));
 		ur.save(new User("player02", "pass", p2.personId, true, false));
 		ur.save(new User("player03", "pass", p3.personId, true, false));

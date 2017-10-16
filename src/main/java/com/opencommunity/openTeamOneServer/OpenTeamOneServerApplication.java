@@ -11,32 +11,22 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @SpringBootApplication
 public class OpenTeamOneServerApplication extends WebMvcConfigurerAdapter {
 
-	public static void main(String[] args) {
-		SpringApplication.run(OpenTeamOneServerApplication.class, args);
-	}
-
 	@Override
 	public void configurePathMatch(PathMatchConfigurer matcher) {
 		matcher.setUseSuffixPatternMatch(false);
 	}
 
+	public static void main(String[] args) {
+		SpringApplication.run(OpenTeamOneServerApplication.class, args);
+	}
+
 	@Bean
-	public CommandLineRunner initPersistence(
-			TenantParameterRepository tpr,
-			UserRepository ur,
-			PersonRepository pr,
-			RoomRepository rr,
-			RoomMemberRepository rmr,
-			MessageRepository mr,
-			AttachmentRepository ar,
-			ViewedConfirmationRepository vcr
-	) {
-		final ContentService contentService = new ContentService(tpr, ur, pr, rr, rmr, mr, ar, vcr);
+	public CommandLineRunner loadContent() {
 		return new CommandLineRunner() {
 			@Override
 			public void run(String... args) throws Exception {
-				contentService.createModelData();
-				System.out.println("\n" + contentService.exportJson().toString(4) + "\n");
+				ContentService.loadModelData();
+				System.out.println("\n" + ContentService.exportToJson().toString(4) + "\n");
 			}
 		};
 	}

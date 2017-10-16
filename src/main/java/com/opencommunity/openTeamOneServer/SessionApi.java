@@ -7,7 +7,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -24,9 +27,8 @@ public class SessionApi {
 	private static final String unsafeCsrfToken = "unsafe";
 
 	@RequestMapping(method = RequestMethod.GET, value = "/token.xsjs")
-	@ResponseBody
 	public ResponseEntity<String> token(HttpServletRequest request) {
-		String sessionId = request.getHeader("Cookie");
+		String sessionId = Util.getSessionId(request);
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		User user = session == null ? null : userRepository.findOne(session.userId);
 		//
@@ -38,9 +40,8 @@ public class SessionApi {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/login.xscfunc")
-	@ResponseBody
 	public ResponseEntity<String> login(HttpServletRequest request, @RequestBody String input) throws JSONException {
-		Map<String, String> formData = Util.split(input);
+		Map<String, String> formData = Util.splitQueryString(input);
 		String userId = formData.get("xs-username");
 		String password = formData.get("xs-password");
 		if (userId != null)
@@ -56,23 +57,21 @@ public class SessionApi {
 		//
 		HttpHeaders httpHeaders= new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-		if (session != null)
-			httpHeaders.set("Set-Cookie", session.sessionId);
+		httpHeaders.set("Set-Cookie", Util.getSessionCookie(session == null ? null : session.sessionId));
 		if ("Fetch".equals(request.getHeader("X-CSRF-Token")))
 			httpHeaders.set("X-CSRF-Token", session == null ? unsafeCsrfToken : session.getNewCsrfToken());
 		return new ResponseEntity<>(body.toString(), httpHeaders, session == null ? HttpStatus.FORBIDDEN : HttpStatus.OK);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/pwchange.xscfunc")
-	@ResponseBody
 	public ResponseEntity<String> pwchange(HttpServletRequest request, @RequestBody String input) throws JSONException {
-		Map<String, String> formData = Util.split(input);
+		Map<String, String> formData = Util.splitQueryString(input);
 		String userId = formData.get("xs-username").toLowerCase();
 		String passwordNew = formData.get("xs-password-new");
 		String passwordOld = formData.get("xs-password-old");
 		boolean passwordOldConfirmed = false;
 		if (passwordOld == null) {
-			String oldSessionId = request.getHeader("Cookie");
+			String oldSessionId = Util.getSessionId(request);
 			Session oldSession = oldSessionId == null ? null : Session.getSession(oldSessionId);
 			User oldSessionUser = oldSession == null ? null : userRepository.findOne(oldSession.userId);
 			passwordOldConfirmed = oldSessionUser != null & userId.equals(oldSession.userId);
@@ -91,25 +90,60 @@ public class SessionApi {
 		//
 		HttpHeaders httpHeaders= new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-		if (session != null)
-			httpHeaders.set("Set-Cookie", session.sessionId);
+		httpHeaders.set("Set-Cookie", Util.getSessionCookie(session == null ? null : session.sessionId));
 		if ("Fetch".equals(request.getHeader("X-CSRF-Token")))
 			httpHeaders.set("X-CSRF-Token", session == null ? unsafeCsrfToken : session.getNewCsrfToken());
 		return new ResponseEntity<>(body.toString(), httpHeaders, session == null ? HttpStatus.FORBIDDEN : HttpStatus.OK);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/logout.xscfunc")
-	@ResponseBody
 	public ResponseEntity<String> logout(HttpServletRequest request) {
-		String sessionId = request.getHeader("Cookie");
-		if (sessionId != null)
+		HttpHeaders httpHeaders= new HttpHeaders();
+		String sessionId = Util.getSessionId(request);
+		if (sessionId != null) {
 			Session.invalidateSession(sessionId);
+			httpHeaders.set("Set-Cookie", Util.getSessionCookie(null));
+		}
+		//
+		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+		return new ResponseEntity<>("{}", httpHeaders, HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/ui/login")
+	public ResponseEntity<String> uiLogin(HttpServletRequest request, @RequestBody String input) throws JSONException {
+		Map<String, String> formData = Util.splitQueryString(input);
+		String userId = formData.get("ui-username");
+		String password = formData.get("ui-password");
+		String forward = formData.get("ui-forward");
+		if (userId != null)
+			userId = userId.toLowerCase();
+		User user = userId == null ? null : userRepository.findOne(userId);
+		Session session = user != null && user.matches(password) ? Session.newSession(userId) : null;
 		//
 		HttpHeaders httpHeaders= new HttpHeaders();
-		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-		if ("Fetch".equals(request.getHeader("X-CSRF-Token")))
-			httpHeaders.set("X-CSRF-Token", unsafeCsrfToken);
-		return new ResponseEntity<>("{}", httpHeaders, HttpStatus.OK);
+		httpHeaders.set("Set-Cookie", Util.getSessionCookie(session == null ? null : session.sessionId));
+		if (forward != null)
+			httpHeaders.set("Location", forward);
+		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
+		return new ResponseEntity<>(session == null ? "Error" : "Success", httpHeaders, forward == null ? (session == null ? HttpStatus.FORBIDDEN : HttpStatus.OK) : HttpStatus.SEE_OTHER);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/ui/logout")
+	public ResponseEntity<String> uiLogout(HttpServletRequest request, @RequestBody String input) throws JSONException {
+		Map<String, String> formData = Util.splitQueryString(input);
+		String forward = formData.get("ui-forward");
+		//
+		HttpHeaders httpHeaders= new HttpHeaders();
+		String sessionId = Util.getSessionId(request);
+		if (sessionId != null) {
+			Session.invalidateSession(sessionId);
+			httpHeaders.set("Set-Cookie", Util.getSessionCookie(null));
+		}
+		//
+		if (forward != null)
+			httpHeaders.set("Location", forward);
+		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
+		return new ResponseEntity<>("Success", httpHeaders, forward == null ? HttpStatus.OK : HttpStatus.SEE_OTHER);
 	}
 
 }

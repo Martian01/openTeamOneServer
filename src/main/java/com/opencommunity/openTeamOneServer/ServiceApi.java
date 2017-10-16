@@ -12,15 +12,15 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/admin")
-public class AdminApi {
+@RequestMapping("/svc")
+public class ServiceApi {
 
 	@Autowired
 	private UserRepository userRepository;
 
 	@RequestMapping(method = RequestMethod.GET, value = "/db/export")
 	public ResponseEntity<String> versions(HttpServletRequest request) throws JSONException {
-		User user = Util.getCurrentAdminUser(request, userRepository);
+		User user = Util.getSessionAdmin(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//

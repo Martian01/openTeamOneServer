@@ -3,6 +3,7 @@ package com.opencommunity.openTeamOneServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,16 @@ public class MediaApi {
 	@Autowired
 	private AttachmentRepository attachmentRepository;
 
+	@Autowired
+	private ResourceLoader resourceLoader;
+
 	/* API implementation */
+
+	@RequestMapping(method = RequestMethod.GET, value = "/picture/v1/service/rest/picture/logo")
+	public ResponseEntity<Resource> pictureDefault(HttpServletRequest request) throws Exception {
+		Resource resource = resourceLoader.getResource("classpath:/static/admin/logo256.png");
+		return Util.httpResourceResponse(resource, MediaType.IMAGE_PNG);
+	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/picture/v1/service/rest/picture/{itemId}")
 	public ResponseEntity<Resource> picture(HttpServletRequest request, @PathVariable String itemId) throws Exception {
@@ -50,27 +60,15 @@ public class MediaApi {
 
 	/* helper functions */
 
-	private String dataDirectory = null;
-
-	public void initDataDirectory() {
-		if (dataDirectory == null) {
-			TenantParameter tp = tenantParameterRepository.findOne("dataDirectory");
-			if (tp == null)
-				System.out.println("Error: data directory not configured");
-			else
-				dataDirectory = tp.value;
-		}
-	}
-
 	public ResponseEntity<Resource> sendFileContent(HttpServletRequest request, String itemId, String directory) throws Exception {
-		User user = Util.getCurrentUser(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpResourceResponse(HttpStatus.UNAUTHORIZED);
 		//
 		Attachment attachment = attachmentRepository.findOne(itemId);
 		if (attachment == null)
 			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
-		initDataDirectory();
+		String dataDirectory = ContentService.getDataDirectory();
 		if (dataDirectory == null)
 			return Util.httpResourceResponse(HttpStatus.INTERNAL_SERVER_ERROR);
 		String filename = dataDirectory + directory + itemId;

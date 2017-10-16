@@ -20,7 +20,7 @@ public class RootApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/sap/sports/pe/api/messaging/versions")
 	public ResponseEntity<String> versions(HttpServletRequest request) throws JSONException {
-		User user = Util.getCurrentUser(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
@@ -39,13 +39,14 @@ public class RootApi {
 		return Util.httpStringResponse(body);
 	}
 
-	@RequestMapping("*") // does not work for some unknown reason
-	public ResponseEntity<String> fallback(HttpServletRequest request) throws JSONException {
-		User user = Util.getCurrentUser(request, userRepository);
-		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
-		//
-		return Util.httpStringResponse(HttpStatus.SERVICE_UNAVAILABLE);
+	@RequestMapping(method = RequestMethod.GET, value = {"", "/", "/admin", "/admin/"})
+	public ResponseEntity<String> admin(HttpServletRequest request) throws JSONException {
+		User user = Util.getSessionUser(request, userRepository);
+		String page = user == null ? "/login.html" : (user.hasAdminRole ? "/index.html" : "/login2.html");
+		String pageStyle = ContentService.getPageStyle();
+		if (pageStyle == null)
+			pageStyle = "default";
+		return Util.httpForwardResponse("/admin/", pageStyle, page); // in theory the URI should be absolute...
 	}
 
 }
