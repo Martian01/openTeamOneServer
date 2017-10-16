@@ -109,41 +109,4 @@ public class SessionApi {
 		return new ResponseEntity<>("{}", httpHeaders, HttpStatus.OK);
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/ui/login")
-	public ResponseEntity<String> uiLogin(HttpServletRequest request, @RequestBody String input) throws JSONException {
-		Map<String, String> formData = Util.splitQueryString(input);
-		String userId = formData.get("ui-username");
-		String password = formData.get("ui-password");
-		String forward = formData.get("ui-forward");
-		if (userId != null)
-			userId = userId.toLowerCase();
-		User user = userId == null ? null : userRepository.findOne(userId);
-		Session session = user != null && user.matches(password) ? Session.newSession(userId) : null;
-		//
-		HttpHeaders httpHeaders= new HttpHeaders();
-		httpHeaders.set("Set-Cookie", Util.getSessionCookie(session == null ? null : session.sessionId));
-		if (forward != null)
-			httpHeaders.set("Location", forward);
-		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		return new ResponseEntity<>(session == null ? "Error" : "Success", httpHeaders, forward == null ? (session == null ? HttpStatus.FORBIDDEN : HttpStatus.OK) : HttpStatus.SEE_OTHER);
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/ui/logout")
-	public ResponseEntity<String> uiLogout(HttpServletRequest request, @RequestBody String input) throws JSONException {
-		Map<String, String> formData = Util.splitQueryString(input);
-		String forward = formData.get("ui-forward");
-		//
-		HttpHeaders httpHeaders= new HttpHeaders();
-		String sessionId = Util.getSessionId(request);
-		if (sessionId != null) {
-			Session.invalidateSession(sessionId);
-			httpHeaders.set("Set-Cookie", Util.getSessionCookie(null));
-		}
-		//
-		if (forward != null)
-			httpHeaders.set("Location", forward);
-		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		return new ResponseEntity<>("Success", httpHeaders, forward == null ? HttpStatus.OK : HttpStatus.SEE_OTHER);
-	}
-
 }
