@@ -16,6 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 public class RootApi {
 
 	@Autowired
+	private TenantParameterRepository tenantParameterRepository;
+	@Autowired
 	private UserRepository userRepository;
 
 	@RequestMapping(method = RequestMethod.GET, value = "/sap/sports/pe/api/messaging/versions")
@@ -42,11 +44,10 @@ public class RootApi {
 	@RequestMapping(method = RequestMethod.GET, value = {"", "/", "/admin", "/admin/"})
 	public ResponseEntity<String> admin(HttpServletRequest request) throws JSONException {
 		User user = Util.getSessionUser(request, userRepository);
-		String page = user == null ? "/login.html" : (user.hasAdminRole ? "/index.html" : "/login2.html");
-		String pageStyle = ContentService.getPageStyle();
-		if (pageStyle == null)
-			pageStyle = "default";
-		return Util.httpForwardResponse("/admin/", pageStyle, page); // in theory the URI should be absolute...
+		String parameter = user == null ? "startPageNoLogon" : (user.hasAdminRole ? "startPageAdmin" : "startPageNoAdmin");
+		TenantParameter tp = tenantParameterRepository.findOne(parameter);
+		String page = tp == null ? "/admin/default/index.html" : tp.value;
+		return Util.httpForwardResponse(page); // in theory the URI should be absolute...
 	}
 
 }

@@ -14,32 +14,7 @@ public class ContentService {
 
 	private static ContentService instance = null;
 
-	private static String dataDirectory = null;
-	private static String pageStyle = null;
-
 	/* public services */
-
-	public static String getDataDirectory() {
-		if (dataDirectory == null && instance != null) {
-			TenantParameter tp = instance.tpr.findOne("dataDirectory");
-			if (tp == null)
-				System.out.println("Error: data directory not configured");
-			else
-				dataDirectory = tp.value;
-		}
-		return dataDirectory;
-	}
-
-	public static String getPageStyle() {
-		if (pageStyle == null && instance != null) {
-			TenantParameter tp = instance.tpr.findOne("pageStyle");
-			if (tp == null)
-				System.out.println("Error: page style not configured");
-			else
-				pageStyle = tp.value;
-		}
-		return pageStyle;
-	}
 
 	public static JSONObject exportToJson() throws JSONException {
 		if (instance != null)
@@ -91,8 +66,12 @@ public class ContentService {
 			tpr.save(new TenantParameter("name", "OpenTeamOne"));
 		if (tpr.findOne("pictureId") == null)
 			tpr.save(new TenantParameter("pictureId", "logo"));
-		if (tpr.findOne("pageStyle") == null)
-			tpr.save(new TenantParameter("pageStyle", "default"));
+		if (tpr.findOne("startPageNoLogon") == null)
+			tpr.save(new TenantParameter("startPageNoLogon", "/admin/default/index.html"));
+		if (tpr.findOne("startPageNoAdmin") == null)
+			tpr.save(new TenantParameter("startPageNoAdmin", "/admin/default/index.html"));
+		if (tpr.findOne("startPageAdmin") == null)
+			tpr.save(new TenantParameter("startPageAdmin", "/admin/default/index.html"));
 		if (tpr.findOne("dataDirectory") == null)
 			tpr.save(new TenantParameter("dataDirectory", "/tmp"));
 		//
@@ -117,11 +96,8 @@ public class ContentService {
 		JSONArray item;
 		item = JsonUtil.getJSONArray(jsonObject, "tenantParameters");
 		if (item != null) {
-			if (delete) {
+			if (delete)
 				tpr.deleteAll();
-				dataDirectory = null;
-				pageStyle = null;
-			}
 			tpr.save(TenantParameter.fromJsonArray(item));
 		}
 		item = JsonUtil.getJSONArray(jsonObject, "users");
@@ -175,8 +151,6 @@ public class ContentService {
 
 	private void _deleteAll(String protectedUserId) {
 		tpr.deleteAll();
-		dataDirectory = null;
-		pageStyle = null;
 		if (protectedUserId != null)
 			ur.delete(ur.findByUserIdNot(protectedUserId));
 		pr.deleteAll();
@@ -192,7 +166,6 @@ public class ContentService {
 		//
 		tpr.save(new TenantParameter("name", "OpenTeamOne"));
 		tpr.save(new TenantParameter("pictureId", "tenant"));
-		tpr.save(new TenantParameter("pageStyle", "default"));
 		tpr.save(new TenantParameter("dataDirectory", "/var/cache/openTeamOne"));
 		//
 		Person p1, p2, p3;

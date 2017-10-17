@@ -68,10 +68,10 @@ public class MediaApi {
 		Attachment attachment = attachmentRepository.findOne(itemId);
 		if (attachment == null)
 			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
-		String dataDirectory = ContentService.getDataDirectory();
-		if (dataDirectory == null)
+		TenantParameter tp = tenantParameterRepository.findOne("dataDirectory");
+		if (tp == null)
 			return Util.httpResourceResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		String filename = dataDirectory + directory + itemId;
+		String filename = tp.value + directory + itemId;
 		File file = new File(filename);
 		if (!file.canRead())
 			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);

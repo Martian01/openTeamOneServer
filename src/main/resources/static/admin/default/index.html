@@ -2,6 +2,33 @@
 <head>
     <title>Open Team One Administration</title>
     <link href="css/default.css" rel="stylesheet" type="text/css" />
+    <script>
+        function setVisibility(id, isVisible) {
+            var element = document.getElementById(id)
+            if (element)
+                element.style.display = isVisible ? "block" : "none";
+        }
+        function checkSessionState() {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function() {
+                if (this.readyState === 4 && this.status === 200) {
+                    var response = JSON.parse(this.responseText);
+                    var isLoggedIn = response && response.user;
+                    var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
+                    //
+                    document.getElementById("infoLine").innerText =
+                        isLoggedIn ?
+                            (isLoggedInAsAdmin ? 'Logged in as administrator "' + response.user.userId + '"':
+                                'Logged in as "' + response.user.userId + '". Please log in as administrator.') :
+                            'Please log in';
+                    setVisibility("logoutForm", isLoggedInAsAdmin);
+                    setVisibility("loginForm", !isLoggedInAsAdmin);
+                }
+            };
+            xmlhttp.open("GET", "/svc/ui/session", true);
+            xmlhttp.send();
+        }
+    </script>
 </head>
 <body>
     <h1>Open Team One Administration</h1>
@@ -14,9 +41,25 @@
     <p>There are already measures in place to support multiple styles or skins so that competing designs can co-exist.</p>
     <p>Watch this space!</p>
     <br />
-    <form action="/svc/ui/logout" method="post">
+    <h2 id="infoLine"></h2>
+    <form id="logoutForm" action="/svc/ui/logout" method="post" style="display: none;">
         <input type="hidden" name="ui-forward" value="/admin/">
         <input type="submit" value="Log Out">
      </form>
+    <form id="loginForm" action="/svc/ui/login" method="post" style="display: none;">
+        <fieldset>
+            <legend>Login Credentials</legend>
+            Username:<br>
+            <input type="text" name="ui-username"><br/>
+            Password:<br>
+            <input type="password" name="ui-password"><br/><br/>
+            <input type="hidden" name="ui-forward" value="/admin/">
+            <input type="submit" value="Log In">
+        </fieldset>
+    </form>
+    <script>
+        checkSessionState();
+    </script>
+    <noscript>Info: JavaScript must be enabled to log in.</noscript>
 </body>
 </html>

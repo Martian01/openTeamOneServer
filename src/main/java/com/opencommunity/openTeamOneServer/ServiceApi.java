@@ -21,6 +21,8 @@ public class ServiceApi {
 
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private PersonRepository personRepository;
 
 	@RequestMapping(method = RequestMethod.POST, value = "/ui/login")
 	public ResponseEntity<String> uiLogin(HttpServletRequest request, @RequestBody String input) throws JSONException {
@@ -57,6 +59,26 @@ public class ServiceApi {
 			httpHeaders.set("Location", forward);
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		return new ResponseEntity<>("Success", httpHeaders, forward == null ? HttpStatus.OK : HttpStatus.SEE_OTHER);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/ui/session")
+	public ResponseEntity<String> info(HttpServletRequest request) throws JSONException {
+		String sessionId = Util.getSessionId(request);
+		Session session = sessionId == null ? null : Session.getSession(sessionId);
+		//
+		JSONObject body = new JSONObject();
+		if (session != null) {
+			body.put("session", session.toJson());
+			User user = session.userId == null ? null : userRepository.findOne(session.userId);
+			if (user != null) {
+				body.put("user", user.toJson());
+				Person person = user.personId == null ? null : personRepository.findOne(user.personId);
+				if (person != null)
+					body.put("person", person.toJson());
+			}
+		}
+		//
+		return Util.httpStringResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/db/export")
