@@ -8,6 +8,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,9 +41,9 @@ public class Util {
 	public static Map<String, String> splitCookieString(String cookieString) {
 		Map<String, String> map = new HashMap<>();
 		if (cookieString != null) {
-			String[] assignments = cookieString.split(";");
-			for (String assignment : assignments) {
-				String[] parts = assignment.trim().split("=");
+			String[] components = cookieString.split(";");
+			for (String component : components) {
+				String[] parts = component.trim().split("=");
 				if (parts.length == 2)
 					map.put(parts[0], parts[1]);
 			}
@@ -92,6 +95,12 @@ public class Util {
 				.body(resource);
 	}
 
+	public static ResponseEntity<String> httpStringResponse(JSONObject body, HttpStatus httpStatus) {
+		return ResponseEntity.status(httpStatus)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(body.toString());
+	}
+
 	public static ResponseEntity<String> httpStringResponse(HttpStatus httpStatus) {
 		return ResponseEntity.status(httpStatus)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -110,12 +119,26 @@ public class Util {
 				.body(null);
 	}
 
-	public static ResponseEntity<String> httpForwardResponse(String targetUri, String... suffixes) {
-		for (String suffix : suffixes)
-			targetUri += suffix;
-		return ResponseEntity.status(HttpStatus.SEE_OTHER)
-				.header("Location", targetUri)
-				.body(null);
+	private static final int MAX_BUFFER_SIZE = 2 * 1024 * 1024;
+
+	public static void pipeStream(InputStream inputStream, OutputStream outputStream) throws IOException {
+		try {
+			// note: file data seems to be read in chunks of maximum length,
+			// socket data seems to be read in small chunks (2048 bytes max.)
+			byte[] buffer = new byte[MAX_BUFFER_SIZE];
+			int bytesRead = inputStream.read(buffer, 0, MAX_BUFFER_SIZE);
+			while (bytesRead > 0) {
+				outputStream.write(buffer, 0, bytesRead);
+				bytesRead = inputStream.read(buffer, 0, MAX_BUFFER_SIZE);
+			}
+		} finally {
+			if (inputStream != null) {
+				inputStream.close();
+			}
+			if (outputStream != null) {
+				outputStream.close();
+			}
+		}
 	}
 
 }

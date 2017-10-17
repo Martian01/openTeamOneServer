@@ -10,8 +10,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @RestController
@@ -145,7 +151,6 @@ public class MessagingApi {
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
-//System.out.println("ROM 1: " + ViewedConfirmation.toJsonArray(viewedConfirmationRepository.findByPersonId(user.personId)).toString());
 		JSONObject body = new JSONObject();
 		Iterable<Room> rooms = roomRepository.findAll();
 		Iterable<RoomMember> roomMembers = roomMemberRepository.findAll();
@@ -179,7 +184,6 @@ public class MessagingApi {
 		if (!isRoomMember(roomId, user.personId))
 			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
-//System.out.println("MSG 1: " + Message.toJsonArray(messageRepository.findByRoomId(roomId)).toString());
 		JSONObject body = new JSONObject();
 		Iterable<Message> messages;
 		if (since != null) {
@@ -195,7 +199,6 @@ public class MessagingApi {
 				messages = messageRepository.findTop100ByRoomId(roomId);
 			}
 		}
-//System.out.println("MSG R: " + Message.toJsonArray(messages).toString());
 		body.put("messages", messagesToJsonArray(messages, user.personId));
 		//
 		return Util.httpStringResponse(body);
@@ -242,15 +245,55 @@ public class MessagingApi {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/message")
-	public ResponseEntity<String> roomMessage(HttpServletRequest request, @PathVariable String roomId) throws JSONException {
-		User user = Util.getSessionContact(request, userRepository);
+	public ResponseEntity<String> roomMessage(MultipartHttpServletRequest multipartRequest, @PathVariable String roomId) throws Exception {
+		User user = Util.getSessionContact(multipartRequest, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 		if (!isRoomMember(roomId, user.personId))
 			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
-		return Util.httpStringResponse(HttpStatus.SERVICE_UNAVAILABLE); // TODO
+		long now = System.currentTimeMillis();
+		TenantParameter tp = tenantParameterRepository.findOne("dataDirectory");
+		if (tp == null)
+			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+		File directory = new File(tp.value + "/file");
+		directory.mkdirs();
+		// scan message part
+		String parameter = multipartRequest.getParameter("message");
+		if (parameter == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		MessageTransfer mt = getMessageTransfer(new JSONObject(parameter));
+		if (mt == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		// add mime types and save attachments in file system
+		if (mt.attachmentTransfers != null) {
+			for (AttachmentTransfer at : mt.attachmentTransfers) {
+				MultipartFile multipartFile = multipartRequest.getFile(at.clientId);
+				if (multipartFile == null)
+					return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+				at.mimeType = multipartFile.getContentType();
+				File file = new File(directory, at.attachmentId);
+				Util.pipeStream(multipartFile.getInputStream(), new BufferedOutputStream(new FileOutputStream(file)));
+			}
+		}
+		// create BOs
+		Message message = new Message(mt.messageId, mt.clientId, roomId, user.personId, now, mt.text, false, now);
+		ArrayList<Attachment> attachments = null;
+		if (mt.attachmentTransfers != null) {
+			attachments = new ArrayList<>();
+			for (AttachmentTransfer at : mt.attachmentTransfers) {
+				attachments.add(new Attachment(at.attachmentId, at.mimeType, at.text, mt.messageId));
+			}
+		}
+		// save without lock by saving the dependent items first
+		attachmentRepository.save(attachments);
+		messageRepository.save(message);
+		// construct response
+		JSONObject body = new JSONObject();
+		JsonUtil.put(body, "message", messageToJson(message, user.personId, attachments));
+		//
+		return Util.httpStringResponse(body, HttpStatus.CREATED);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/viewedConfirmation")
@@ -263,11 +306,8 @@ public class MessagingApi {
 			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
 		long now = System.currentTimeMillis();
-//System.out.println("CNF 1: " + ViewedConfirmation.toJsonArray(viewedConfirmationRepository.findByPersonId(user.personId)).toString());
 		Iterable<Message> messages;
 		Long watermark = getWatermark(user.personId, roomId);
-//System.out.println("Watermark: " + JsonUtil.toIsoDate(watermark));
-//System.out.println("Until    : " + JsonUtil.toIsoDate(until));
 		if (watermark != null) {
 			if (until != null) {
 				messages = messageRepository.findByRoomIdAndIsDeletedFalseAndPostedAtGreaterThanAndPostedAtLessThanEqual(roomId, watermark, until);
@@ -281,13 +321,10 @@ public class MessagingApi {
 				messages = messageRepository.findTop1ByRoomIdAndIsDeletedFalseOrderByPostedAtDesc(roomId);
 			}
 		}
-//System.out.println("CNF R: " + Message.toJsonArray(messages).toString());
 		ArrayList<ViewedConfirmation> confirmations = new ArrayList<>();
 		for (Message message : messages)
 			confirmations.add(new ViewedConfirmation(message.messageId, user.personId, message.roomId, message.postedAt, now));
-//System.out.println("CNF N: " + ViewedConfirmation.toJsonArray(confirmations).toString());
 		viewedConfirmationRepository.save(confirmations);
-//System.out.println("CNF 2: " + ViewedConfirmation.toJsonArray(viewedConfirmationRepository.findByPersonId(user.personId)).toString());
 		//
 		return Util.httpStringResponse(HttpStatus.OK);
 	}
@@ -300,7 +337,7 @@ public class MessagingApi {
 		//
 		Message message = messageId == null ? null : messageRepository.findOne(messageId);
 		if (message == null)
-			return Util.httpStringResponse(HttpStatus.GONE);
+			return Util.httpStringResponse(HttpStatus.NOT_FOUND);
 		if (!user.personId.equals(message.senderPersonId))
 			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
@@ -323,12 +360,10 @@ public class MessagingApi {
 		if (!user.personId.equals(message.senderPersonId))
 			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
-//System.out.println("DEL 1: " + Message.toJsonArray(messageRepository.findByRoomId(message.roomId)).toString());
 		// TODO: physically delete text and attachments
 		message.isDeleted = true;
 		message.updatedAt = System.currentTimeMillis();
 		messageRepository.save(message);
-//System.out.println("DEL 2: " + Message.toJsonArray(messageRepository.findByRoomId(message.roomId)).toString());
 		//
 		return Util.httpStringResponse(HttpStatus.OK);
 	}
@@ -382,8 +417,7 @@ public class MessagingApi {
 			if (privateRoomId == null) {
 				Room room = new Room(null, "PM", "PM", "private", null, System.currentTimeMillis());
 				privateRoomId = room.roomId;
-				// create the room members first assuming concurrent reads will read a room before its members...
-				// the clean solution would be a read-write lock
+				// save without lock by saving the dependent items first
 				roomMemberRepository.save(new RoomMember(privateRoomId, personId1));
 				roomMemberRepository.save(new RoomMember(privateRoomId, personId2));
 				roomRepository.save(room);
@@ -401,7 +435,7 @@ public class MessagingApi {
 
 	/* the following JSON formats are simply different from the straight-forward entity JSON formats */
 
-	public JSONObject personToJson(Person person) throws JSONException {
+	private JSONObject personToJson(Person person) throws JSONException {
 		if (person == null)
 			return null;
 		JSONObject item = new JSONObject();
@@ -429,7 +463,7 @@ public class MessagingApi {
 		return array;
 	}
 
-	public JSONObject attachmentToJson(Attachment attachment) throws JSONException {
+	private JSONObject attachmentToJson(Attachment attachment) throws JSONException {
 		if (attachment == null)
 			return null;
 		JSONObject sapSportsFile = new JSONObject();
@@ -445,7 +479,7 @@ public class MessagingApi {
 		return item;
 	}
 
-	public JSONArray attachmentsToJsonArray(Iterable<Attachment> attachments) throws JSONException {
+	private JSONArray attachmentsToJsonArray(Iterable<Attachment> attachments) throws JSONException {
 		JSONArray array = new JSONArray();
 		for (Attachment attachment : attachments)
 			array.put(attachmentToJson(attachment));
@@ -454,7 +488,7 @@ public class MessagingApi {
 
 	/* the following JSON formats are complex and include data from outside the actual entity parsed */
 
-	private JSONObject messageToJson(Message message, String personId) throws JSONException {
+	private JSONObject messageToJson(Message message, String personId, Iterable<Attachment> attachments) throws JSONException {
 		if (message == null)
 			return null;
 		JSONObject messageContent = new JSONObject();
@@ -463,7 +497,6 @@ public class MessagingApi {
 		messageContent.put("postedAt", JsonUtil.toIsoDate(message.postedAt));
 		messageContent.put("text", message.text);
 		messageContent.put("isOwnMessage", personId.equals(message.senderPersonId));
-		Iterable<Attachment> attachments = attachmentRepository.findByMessageId(message.messageId);
 		if (attachments != null)
 			messageContent.put("assets", attachmentsToJsonArray(attachments));
 		JSONObject messageStatus = new JSONObject();
@@ -485,14 +518,18 @@ public class MessagingApi {
 		return item;
 	}
 
-	public JSONArray messagesToJsonArray(Iterable<Message> messages, String personId) throws JSONException {
+	private JSONObject messageToJson(Message message, String personId) throws JSONException {
+		return messageToJson(message, personId, attachmentRepository.findByMessageId(message.messageId));
+	}
+
+	private JSONArray messagesToJsonArray(Iterable<Message> messages, String personId) throws JSONException {
 		JSONArray array = new JSONArray();
 		for (Message message : messages)
 			array.put(messageToJson(message, personId));
 		return array;
 	}
 
-	public JSONObject roomToJson(Room room, JSONArray currentMemberIds, String personId) throws JSONException {
+	private JSONObject roomToJson(Room room, JSONArray currentMemberIds, String personId) throws JSONException {
 		if (room == null)
 			return null;
 		JSONObject roomStatus = new JSONObject();
@@ -519,7 +556,7 @@ public class MessagingApi {
 		return item;
 	}
 
-	public JSONArray roomsToJsonArray(Iterable<Room> rooms, Iterable<RoomMember> roomMembers, String personId) throws JSONException {
+	private JSONArray roomsToJsonArray(Iterable<Room> rooms, Iterable<RoomMember> roomMembers, String personId) throws JSONException {
 		// set up two helper maps
 		Set<String> userRooms = new HashSet<>();
 		Map<String, JSONArray> membersMap = new HashMap<>();
@@ -539,6 +576,64 @@ public class MessagingApi {
 			if (userRooms.contains(room.roomId))
 				array.put(roomToJson(room, membersMap.get(room.roomId), personId));
 		return array;
+	}
+
+	private class AttachmentTransfer {
+		String attachmentId;
+		String clientId;
+		String text;
+		String mimeType;
+
+		public AttachmentTransfer() {
+			attachmentId = Util.getUuid();
+		}
+	}
+
+	private AttachmentTransfer getAttachmentTransfer(JSONObject item) throws JSONException {
+		if (item == null)
+			return null;
+		AttachmentTransfer at = new AttachmentTransfer();
+		at.clientId = JsonUtil.getString(item, "payloadMultipartName");
+		if (at.clientId == null)
+			return null;
+		at.text = JsonUtil.getString(item, "text");
+		return at;
+	}
+
+	private class MessageTransfer {
+		String messageId;
+		String clientId;
+		String text;
+		List<AttachmentTransfer> attachmentTransfers;
+
+		public MessageTransfer() {
+			messageId = Util.getUuid();
+		}
+	}
+
+	private MessageTransfer getMessageTransfer(JSONObject item) throws JSONException {
+		if (item == null)
+			return null;
+		MessageTransfer mt = new MessageTransfer();
+		mt.clientId = JsonUtil.getString(item, "clientMessageId");
+		if (mt.clientId == null)
+			return null;
+		JSONObject messageContent = JsonUtil.getJSONObject(item, "messageContent");
+		if (messageContent == null)
+			return null;
+		mt.text = JsonUtil.getString(messageContent, "text");
+		JSONArray attachments = JsonUtil.getJSONArray(messageContent, "assets");
+		if (attachments != null) {
+			mt.attachmentTransfers = new ArrayList<>();
+			for (int i = 0; i < attachments.length(); i++) {
+				JSONObject attachment = JsonUtil.getJSONObject(attachments.getJSONObject(i), "assetContent");
+				AttachmentTransfer at = getAttachmentTransfer(attachment);
+				if (at == null)
+					return null;
+				mt.attachmentTransfers.add(at);
+			}
+		}
+		return mt;
 	}
 
 }
