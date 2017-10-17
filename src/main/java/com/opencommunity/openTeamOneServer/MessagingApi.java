@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @RestController
@@ -263,28 +262,27 @@ public class MessagingApi {
 		String parameter = multipartRequest.getParameter("message");
 		if (parameter == null)
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		MessageTransfer mt = getMessageTransfer(new JSONObject(parameter));
-		if (mt == null)
+		protoMessage protoMessage = getProtoMessage(new JSONObject(parameter));
+		if (protoMessage == null)
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
 		// add mime types and save attachments in file system
-		if (mt.attachmentTransfers != null) {
-			for (AttachmentTransfer at : mt.attachmentTransfers) {
-				MultipartFile multipartFile = multipartRequest.getFile(at.clientId);
+		if (protoMessage.protoAttachments != null) {
+			for (protoAttachment protoAttachment : protoMessage.protoAttachments) {
+				MultipartFile multipartFile = multipartRequest.getFile(protoAttachment.clientId);
 				if (multipartFile == null)
 					return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-				at.mimeType = multipartFile.getContentType();
-				File file = new File(directory, at.attachmentId);
+				protoAttachment.mimeType = multipartFile.getContentType();
+				File file = new File(directory, protoAttachment.attachmentId);
 				Util.pipeStream(multipartFile.getInputStream(), new BufferedOutputStream(new FileOutputStream(file)));
 			}
 		}
 		// create BOs
-		Message message = new Message(mt.messageId, mt.clientId, roomId, user.personId, now, mt.text, false, now);
+		Message message = new Message(protoMessage.messageId, protoMessage.clientId, roomId, user.personId, now, protoMessage.text, false, now);
 		ArrayList<Attachment> attachments = null;
-		if (mt.attachmentTransfers != null) {
+		if (protoMessage.protoAttachments != null) {
 			attachments = new ArrayList<>();
-			for (AttachmentTransfer at : mt.attachmentTransfers) {
-				attachments.add(new Attachment(at.attachmentId, at.mimeType, at.text, mt.messageId));
-			}
+			for (protoAttachment protoAttachment : protoMessage.protoAttachments)
+				attachments.add(new Attachment(protoAttachment.attachmentId, protoAttachment.mimeType, protoAttachment.text, protoMessage.messageId));
 		}
 		// save without lock by saving the dependent items first
 		attachmentRepository.save(attachments);
@@ -519,6 +517,8 @@ public class MessagingApi {
 	}
 
 	private JSONObject messageToJson(Message message, String personId) throws JSONException {
+		if (message == null)
+			return null;
 		return messageToJson(message, personId, attachmentRepository.findByMessageId(message.messageId));
 	}
 
@@ -578,62 +578,62 @@ public class MessagingApi {
 		return array;
 	}
 
-	private class AttachmentTransfer {
+	private class protoAttachment {
 		String attachmentId;
 		String clientId;
 		String text;
 		String mimeType;
 
-		public AttachmentTransfer() {
+		public protoAttachment() {
 			attachmentId = Util.getUuid();
 		}
 	}
 
-	private AttachmentTransfer getAttachmentTransfer(JSONObject item) throws JSONException {
+	private protoAttachment getProtoAttachment(JSONObject item) throws JSONException {
 		if (item == null)
 			return null;
-		AttachmentTransfer at = new AttachmentTransfer();
-		at.clientId = JsonUtil.getString(item, "payloadMultipartName");
-		if (at.clientId == null)
+		protoAttachment protoAttachment = new protoAttachment();
+		protoAttachment.clientId = JsonUtil.getString(item, "payloadMultipartName");
+		if (protoAttachment.clientId == null)
 			return null;
-		at.text = JsonUtil.getString(item, "text");
-		return at;
+		protoAttachment.text = JsonUtil.getString(item, "text");
+		return protoAttachment;
 	}
 
-	private class MessageTransfer {
+	private class protoMessage {
 		String messageId;
 		String clientId;
 		String text;
-		List<AttachmentTransfer> attachmentTransfers;
+		List<protoAttachment> protoAttachments;
 
-		public MessageTransfer() {
+		public protoMessage() {
 			messageId = Util.getUuid();
 		}
 	}
 
-	private MessageTransfer getMessageTransfer(JSONObject item) throws JSONException {
+	private protoMessage getProtoMessage(JSONObject item) throws JSONException {
 		if (item == null)
 			return null;
-		MessageTransfer mt = new MessageTransfer();
-		mt.clientId = JsonUtil.getString(item, "clientMessageId");
-		if (mt.clientId == null)
+		protoMessage protoMessage = new protoMessage();
+		protoMessage.clientId = JsonUtil.getString(item, "clientMessageId");
+		if (protoMessage.clientId == null)
 			return null;
 		JSONObject messageContent = JsonUtil.getJSONObject(item, "messageContent");
 		if (messageContent == null)
 			return null;
-		mt.text = JsonUtil.getString(messageContent, "text");
+		protoMessage.text = JsonUtil.getString(messageContent, "text");
 		JSONArray attachments = JsonUtil.getJSONArray(messageContent, "assets");
 		if (attachments != null) {
-			mt.attachmentTransfers = new ArrayList<>();
+			protoMessage.protoAttachments = new ArrayList<>();
 			for (int i = 0; i < attachments.length(); i++) {
 				JSONObject attachment = JsonUtil.getJSONObject(attachments.getJSONObject(i), "assetContent");
-				AttachmentTransfer at = getAttachmentTransfer(attachment);
-				if (at == null)
+				protoAttachment protoAttachment = getProtoAttachment(attachment);
+				if (protoAttachment == null)
 					return null;
-				mt.attachmentTransfers.add(at);
+				protoMessage.protoAttachments.add(protoAttachment);
 			}
 		}
-		return mt;
+		return protoMessage;
 	}
 
 }
