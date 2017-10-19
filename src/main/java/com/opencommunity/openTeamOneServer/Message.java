@@ -31,8 +31,6 @@ interface MessageRepository extends CrudRepository<Message, String> {
 	Page<Message> findByRoomIdOrderByPostedAtDesc(String roomId, Pageable pageable);
 	Iterable<Message> findByRoomIdAndPostedAtBetween(String roomId, long postedAtLow, long postedAtHigh);
 	Iterable<Message> findByRoomIdAndPostedAtLessThan(String roomId, long postedAt);
-	// for messages since/until
-	Iterable<Message> findTop100ByRoomId(String roomId);
 	// for debugging
 	Iterable<Message> findByRoomId(String roomId);
 	Message findTopByClientMessageId(String clientMessageId);

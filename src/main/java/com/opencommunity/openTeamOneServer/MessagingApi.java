@@ -195,7 +195,7 @@ public class MessagingApi {
 			if (notBefore != null) {
 				messages = messageRepository.findByRoomIdAndPostedAtGreaterThanEqual(roomId, notBefore);
 			} else {
-				messages = messageRepository.findTop100ByRoomId(roomId);
+				messages = getMessagesByPage(roomId, 100, null);
 			}
 		}
 		body.put("messages", messagesToJsonArray(messages, user.personId));
@@ -215,27 +215,12 @@ public class MessagingApi {
 		JSONObject body = new JSONObject();
 		Iterable<Message> messages;
 		if (count != null) {
-			Page<Message> page;
-			Pageable pageable = new PageRequest(0, count);
-			if (until != null) {
-				page = messageRepository.findByRoomIdAndPostedAtLessThanOrderByPostedAtDesc(roomId, until, pageable);
-			} else {
-				page = messageRepository.findByRoomIdOrderByPostedAtDesc(roomId, pageable);
-			}
-			// re-read messages by posting time
-			// (for the unlikely case that the end of the interval falls in between messages with the same posting time)
-			List<Message> content = page.getContent();
-			if (content.size() > 0) {
-				long max = content.get(0).postedAt;
-				long min = content.get(content.size() - 1).postedAt;
-				messages = messageRepository.findByRoomIdAndPostedAtBetween(roomId, min, max);
-			} else
-				messages = new ArrayList<>();
+			messages = getMessagesByPage(roomId, count, until);
 		} else {
 			if (until != null) {
 				messages = messageRepository.findByRoomIdAndPostedAtLessThan(roomId, until);
 			} else {
-				messages = messageRepository.findTop100ByRoomId(roomId);
+				messages = getMessagesByPage(roomId, 100, null);
 			}
 		}
 		body.put("messages", messagesToJsonArray(messages, user.personId));
@@ -258,6 +243,8 @@ public class MessagingApi {
 			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
 		File directory = new File(tp.value + "/file");
 		directory.mkdirs();
+		if (!directory.isDirectory())
+			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
 		// scan message part
 		String parameter = multipartRequest.getParameter("message");
 		if (parameter == null)
@@ -429,6 +416,27 @@ public class MessagingApi {
 		return viewedConfirmation == null ? null : viewedConfirmation.messagePostedAt;
 	}
 
+	private Iterable<Message> getMessagesByPage(String roomId, int count, Long until) {
+		if (count > 0) {
+			Page<Message> page;
+			Pageable pageable = new PageRequest(0, count);
+			if (until != null) {
+				page = messageRepository.findByRoomIdAndPostedAtLessThanOrderByPostedAtDesc(roomId, until, pageable);
+			} else {
+				page = messageRepository.findByRoomIdOrderByPostedAtDesc(roomId, pageable);
+			}
+			// re-read messages by posting time
+			// (for the unlikely case that the end of the interval falls in between messages with the same posting time)
+			List<Message> content = page.getContent();
+			if (content.size() > 0) {
+				long max = content.get(0).postedAt;
+				long min = content.get(content.size() - 1).postedAt;
+				return messageRepository.findByRoomIdAndPostedAtBetween(roomId, min, max);
+			}
+		}
+		return new ArrayList<>();
+	}
+
 	/* API JSON formats */
 
 	/* the following JSON formats are simply different from the straight-forward entity JSON formats */
@@ -501,7 +509,7 @@ public class MessagingApi {
 		messageStatus.put("isDeleted", message.isDeleted);
 		messageStatus.put("updatedAt", JsonUtil.toIsoDate(message.updatedAt));
 		JSONObject postedMessageStatus = new JSONObject();
-		postedMessageStatus.put("viewedCount", viewedConfirmationRepository.countByMessageId(message.messageId));
+		postedMessageStatus.put("viewedCount", viewedConfirmationRepository.countByMessageIdAndPersonIdNot(message.messageId, personId));
 		messageStatus.put("postedMessageStatus", postedMessageStatus);
 		JSONObject receivedMessageStatus = new JSONObject();
 		ViewedConfirmation confirmation = viewedConfirmationRepository.findTopByMessageIdAndPersonId(message.messageId, personId);
@@ -529,14 +537,37 @@ public class MessagingApi {
 		return array;
 	}
 
+	private String prefix(String str, int n) {
+		return str == null || str.length() <= n ? str : str.substring(0, n);
+	}
+
+	private String[] getPrivateRoomNames(String roomId, String personId) {
+		String roomName = null;
+		String shortRoomName = null;
+		RoomMember partnerMember = roomMemberRepository.findTopByRoomIdAndPersonIdNot(roomId, personId);
+		Person partner = partnerMember == null || partnerMember.personId == null ? null : personRepository.findOne(partnerMember.personId);
+		if (partner != null) {
+			String nickName = partner.nickName == null ? "" : partner.nickName.trim();
+			String firstName = partner.firstName == null ? "" : partner.firstName.trim();
+			String lastName = partner.lastName == null ? "" : partner.lastName.trim();
+			roomName = nickName.length() == 0 ? (firstName + " " + lastName).trim() : nickName;
+			shortRoomName = prefix(nickName, 4).trim();
+			if (shortRoomName.length() == 0)
+				shortRoomName = prefix(firstName, 1) + prefix(lastName, 1);
+		}
+		return new String[] {roomName, shortRoomName};
+	}
+
 	private JSONObject roomToJson(Room room, JSONArray currentMemberIds, String personId) throws JSONException {
 		if (room == null)
 			return null;
+		boolean isPrivateRoom = "private".equals(room.roomType);
+		String[] privateRoomNames = isPrivateRoom ? getPrivateRoomNames(room.roomId, personId) : null;
 		JSONObject roomStatus = new JSONObject();
 		roomStatus.put("dataChangedAt", JsonUtil.toIsoDate(room.changedAt));
 		JSONObject roomData = new JSONObject();
-		JsonUtil.put(roomData, "name", room.name);
-		JsonUtil.put(roomData, "shortName", room.shortName);
+		JsonUtil.put(roomData, "name", isPrivateRoom ? privateRoomNames[0] : room.name);
+		JsonUtil.put(roomData, "shortName", isPrivateRoom ? privateRoomNames[1] : room.shortName);
 		JsonUtil.put(roomData, "roomType", room.roomType);
 		JsonUtil.put(roomData, "pictureId", room.pictureId);
 		JsonUtil.put(roomData, "currentMemberIds", currentMemberIds);
