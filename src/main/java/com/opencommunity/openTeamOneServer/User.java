@@ -3,6 +3,7 @@ package com.opencommunity.openTeamOneServer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.data.repository.CrudRepository;
 
 import javax.persistence.Column;
@@ -35,16 +36,12 @@ public class User {
 	@Column
 	public boolean hasAdminRole;
 
-	public static String hash(String password) {
-		return Integer.toHexString(password.hashCode());
-	}
-
 	public User() {
 	}
 
 	public User(String userId, String password, String personId, boolean hasUserRole, boolean hasAdminRole) {
 		this.userId = userId.toLowerCase();
-		this.passwordHash = hash(password);
+		setPassword(password);
 		this.personId = personId;
 		this.hasUserRole = hasUserRole;
 		this.hasAdminRole = hasAdminRole;
@@ -134,10 +131,10 @@ public class User {
 	}
 
 	public void setPassword(String password) {
-		this.passwordHash = hash(password);
+		passwordHash = BCrypt.hashpw(password, BCrypt.gensalt());
 	}
 
 	public boolean matches(String password) {
-		return password != null && passwordHash.equals(hash(password));
+		return password != null && BCrypt.checkpw(password, passwordHash);
 	}
 }

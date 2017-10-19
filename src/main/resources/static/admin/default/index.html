@@ -1,65 +1,90 @@
 <html>
 <head>
-    <title>Open Team One Administration</title>
-    <link href="css/default.css" rel="stylesheet" type="text/css" />
-    <script>
-        function setVisibility(id, isVisible) {
-            var element = document.getElementById(id)
-            if (element)
-                element.style.display = isVisible ? "block" : "none";
-        }
-        function checkSessionState() {
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.onreadystatechange = function() {
-                if (this.readyState === 4 && this.status === 200) {
-                    var response = JSON.parse(this.responseText);
-                    var isLoggedIn = response && response.user;
-                    var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
-                    //
-                    document.getElementById("infoLine").innerText =
-                        isLoggedIn ?
-                            (isLoggedInAsAdmin ? 'Logged in as administrator "' + response.user.userId + '"':
-                                'Logged in as "' + response.user.userId + '". Please log in as administrator.') :
-                            'Please log in';
-                    setVisibility("logoutForm", isLoggedInAsAdmin);
-                    setVisibility("loginForm", !isLoggedInAsAdmin);
-                }
-            };
-            xmlhttp.open("GET", "/svc/ui/session", true);
-            xmlhttp.send();
-        }
-    </script>
+	<title>Open Team One Administration</title>
+	<link href="css/default.css" rel="stylesheet" type="text/css" />
+	<script>
+		function setVisibility(id, isVisible) {
+			var element = document.getElementById(id)
+			if (element)
+				element.style.display = isVisible ? "block" : "none";
+		}
+		function checkSessionState() {
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (this.readyState === 4 && this.status === 200) {
+					var response = JSON.parse(this.responseText);
+					var isLoggedIn = response && response.user;
+					var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
+					//
+					document.getElementById("infoLine").innerText =
+						isLoggedIn ?
+							(isLoggedInAsAdmin ? 'Logged in as administrator "' + response.user.userId + '"':
+								'Logged in as "' + response.user.userId + '". Please log in as administrator.') :
+							'Please log in';
+					setVisibility("loginForm", !isLoggedInAsAdmin);
+					setVisibility("logoutForm", isLoggedInAsAdmin);
+					setVisibility("snapshots", isLoggedInAsAdmin);
+				}
+			};
+			xmlhttp.open("GET", "/svc/ui/session", true);
+			xmlhttp.send();
+		}
+	</script>
 </head>
 <body>
-    <h1>Open Team One Administration</h1>
-    <img src="/admin/logo128.png" width="128" height="128"/>
-    <p>This page is a placeholder for the upcoming admin function.</p>
-    <p>The minimum functionality should contain export and import of database content in JSON format, allowing for offline maintenance.
-        Eventually it should enable the complete tenant configuration plus user and master data maintenance. </p>
-    <p>It would be great if we could have a modern and pretty web app at some point, with smooth CSS animations and the like.
-        This is defintely an area where experienced web developers can contribute. ^_^</p>
-    <p>There are already measures in place to support multiple styles or skins so that competing designs can co-exist.</p>
-    <p>Watch this space!</p>
-    <br />
-    <h2 id="infoLine"></h2>
-    <form id="logoutForm" action="/svc/ui/logout" method="post" style="display: none;">
-        <input type="hidden" name="ui-forward" value="/admin/">
-        <input type="submit" value="Log Out">
-     </form>
-    <form id="loginForm" action="/svc/ui/login" method="post" style="display: none;">
-        <fieldset>
-            <legend>Login Credentials</legend>
-            Username:<br>
-            <input type="text" name="ui-username"><br/>
-            Password:<br>
-            <input type="password" name="ui-password"><br/><br/>
-            <input type="hidden" name="ui-forward" value="/admin/">
-            <input type="submit" value="Log In">
-        </fieldset>
-    </form>
-    <script>
-        checkSessionState();
-    </script>
-    <noscript>Info: JavaScript must be enabled to log in.</noscript>
+	<h1>Open Team One Administration</h1>
+	<img src="/admin/logo128.png" width="128" height="128"/>
+	<p>This page is a placeholder for the upcoming admin function.</p>
+	<p>The minimum functionality should contain export and import of database content in JSON format, allowing for offline maintenance.
+		Eventually it should enable the complete tenant configuration plus user and master data maintenance. </p>
+	<p>It would be great if we could have a modern and pretty web app at some point, with smooth CSS animations and the like.
+		This is defintely an area where experienced web developers can contribute. ^_^</p>
+	<p>There are already measures in place to support multiple styles or skins so that competing designs can co-exist.</p>
+	<p>Watch this space!</p>
+	<br/>
+	<div>
+		<h2 id="infoLine"></h2>
+		<form id="loginForm" action="/svc/ui/login" method="post" style="display: none;">
+			<fieldset>
+				<legend>Login Credentials</legend>
+				Username:<br>
+				<input type="text" name="username"><br/>
+				Password:<br>
+				<input type="password" name="password"><br/><br/>
+				<input type="hidden" name="forward" value="/">
+				<input type="submit" value="Log In">
+			</fieldset>
+		</form>
+		<form id="logoutForm" action="/svc/ui/logout" method="post" style="display: none;">
+			<input type="hidden" name="forward" value="/">
+			<input type="submit" value="Log Out">
+		</form>
+	</div>
+	<div id="snapshots" style="display: none;">
+		<h2>Server-side Snapshots</h2>
+		<form id="save" action="/svc/snapshot/save" method="post">
+			<fieldset>
+				<legend>Save a snapshot on the server</legend>
+				File name:<br>
+				<input type="text" name="filename"><br/><br/>
+				<input type="hidden" name="forward" value="/">
+				<input type="submit" value="Save">
+			</fieldset>
+		</form>
+		<form id="load" action="/svc/snapshot/load" method="post">
+			<fieldset>
+				<legend>Load a snapshot from the server</legend>
+				File name:<br>
+				<input type="text" name="filename"><br/><br/>
+				<input type="hidden" name="forward" value="/">
+				<input type="submit" value="Load">
+			</fieldset>
+		</form>
+	</div>
+	<br/>
+	<script>
+		checkSessionState();
+	</script>
+	<noscript>Info: JavaScript must be enabled to log in.</noscript>
 </body>
 </html>

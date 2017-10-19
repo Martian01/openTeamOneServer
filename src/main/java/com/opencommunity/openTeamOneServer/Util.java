@@ -8,9 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -114,31 +112,48 @@ public class Util {
 	}
 
 	public static ResponseEntity<String> httpForwardResponse(String targetUri) {
+		if (targetUri == null)
+			return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body("Success");
 		return ResponseEntity.status(HttpStatus.SEE_OTHER)
 				.header("Location", targetUri)
+				.contentType(MediaType.TEXT_PLAIN)
 				.body(null);
 	}
 
 	private static final int MAX_BUFFER_SIZE = 2 * 1024 * 1024;
 
-	public static void pipeStream(InputStream inputStream, OutputStream outputStream) throws IOException {
-		try {
-			// note: file data seems to be read in chunks of maximum length,
-			// socket data seems to be read in small chunks (2048 bytes max.)
-			byte[] buffer = new byte[MAX_BUFFER_SIZE];
-			int bytesRead = inputStream.read(buffer, 0, MAX_BUFFER_SIZE);
-			while (bytesRead > 0) {
-				outputStream.write(buffer, 0, bytesRead);
-				bytesRead = inputStream.read(buffer, 0, MAX_BUFFER_SIZE);
-			}
-		} finally {
-			if (inputStream != null) {
-				inputStream.close();
-			}
-			if (outputStream != null) {
-				outputStream.close();
-			}
+	private static void pipeStream(InputStream inputStream, OutputStream outputStream) throws IOException {
+		byte[] buffer = new byte[MAX_BUFFER_SIZE];
+		int bytesRead = inputStream.read(buffer, 0, MAX_BUFFER_SIZE);
+		while (bytesRead > 0) {
+			outputStream.write(buffer, 0, bytesRead);
+			bytesRead = inputStream.read(buffer, 0, MAX_BUFFER_SIZE);
 		}
+	}
+
+	public static void writeFile(InputStream inputStream, File targetFile) throws IOException {
+		if (targetFile.exists())
+			targetFile.delete();
+		BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(targetFile));
+		Util.pipeStream(inputStream, outputStream);
+		outputStream.close();
+	}
+
+	public static void writeFile(byte[] content, File targetFile) throws IOException {
+		if (targetFile.exists())
+			targetFile.delete();
+		FileOutputStream outputStream = new FileOutputStream(targetFile);
+		outputStream.write(content, 0 , content.length);
+		outputStream.close();
+	}
+
+	public static byte[] readFile(File file) throws IOException {
+		FileInputStream inputStream = new FileInputStream(file);
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		pipeStream(inputStream, outputStream);
+		outputStream.close();
+		inputStream.close();
+		return outputStream.toByteArray();
 	}
 
 }

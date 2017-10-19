@@ -44,12 +44,12 @@ public class MediaApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/picture/v1/service/rest/picture/{itemId}")
 	public ResponseEntity<Resource> picture(HttpServletRequest request, @PathVariable String itemId) throws Exception {
-		return sendFileContent(request, itemId, "/picture/");
+		return sendFileContent(request, itemId, "/pictures/");
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{itemId}/content")
 	public ResponseEntity<Resource> mediaFileContent(HttpServletRequest request, @PathVariable String itemId) throws Exception {
-		return sendFileContent(request, itemId, "/file/");
+		return sendFileContent(request, itemId, "/files/");
 	}
 
 	/* The following API calls are intentionally not implemented */

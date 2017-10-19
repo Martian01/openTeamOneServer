@@ -260,7 +260,7 @@ public class MessagingApi {
 		TenantParameter tp = tenantParameterRepository.findOne("dataDirectory");
 		if (tp == null)
 			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		File directory = new File(tp.value + "/file");
+		File directory = new File(tp.value + "/files");
 		directory.mkdirs();
 		if (!directory.isDirectory())
 			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -279,7 +279,7 @@ public class MessagingApi {
 					return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
 				protoAttachment.mimeType = multipartFile.getContentType();
 				File file = new File(directory, protoAttachment.attachmentId);
-				Util.pipeStream(multipartFile.getInputStream(), new BufferedOutputStream(new FileOutputStream(file)));
+				Util.writeFile(multipartFile.getInputStream(), file);
 			}
 		}
 		// create BOs
@@ -370,7 +370,7 @@ public class MessagingApi {
 			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
 		Iterable<Attachment> attachments = attachmentRepository.findByMessageId(messageId);
 		for (Attachment attachment : attachments) {
-			String filename = tp.value + "/file/" + attachment.attachmentId;
+			String filename = tp.value + "/files/" + attachment.attachmentId;
 			File file = new File(filename);
 			if (file.exists())
 				file.delete();
