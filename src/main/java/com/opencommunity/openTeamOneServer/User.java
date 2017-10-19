@@ -19,6 +19,7 @@ interface UserRepository extends CrudRepository<User, String> {
 	long countByHasAdminRoleTrue();
 	// for deletion
 	Iterable<User> findByUserIdNot(String userId);
+	Iterable<User> findByHasAdminRoleFalseAndUserIdNot(String userId);
 }
 
 @Entity

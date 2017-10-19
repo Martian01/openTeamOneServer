@@ -41,25 +41,44 @@ public class MessagingApi {
 	private AttachmentRepository attachmentRepository;
 	@Autowired
 	private ViewedConfirmationRepository viewedConfirmationRepository;
+	@Autowired
+	private SubscriptionLogRepository slr;
 
 	/* API implementation */
 
 	@RequestMapping(method = RequestMethod.POST, value = "/device/subscription")
-	public ResponseEntity<String> deviceSubscription(HttpServletRequest request) throws JSONException {
+	public ResponseEntity<String> deviceSubscription(HttpServletRequest request, @RequestBody String input) throws JSONException {
 		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.httpStringResponse(HttpStatus.OK); // TODO
+		if (input == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		// write subscription log for statistical purposes
+		SubscriptionLog log = getSubscriptionLog(new JSONObject(input), user.userId);
+		if (log == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		slr.save(log);
+		// note: subscriptions are not used in this version (since push is not implemented)
+		// sr.save(new Subscription(log))
+		return Util.httpStringResponse(HttpStatus.OK);
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/device/subscription")
-	public ResponseEntity<String> deviceSubscriptionDelete(HttpServletRequest request) throws JSONException {
+	public ResponseEntity<String> deviceSubscriptionDelete(HttpServletRequest request, @RequestBody String input) throws JSONException {
 		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
-		return Util.httpStringResponse(HttpStatus.OK); // TODO
+		if (input == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		SubscriptionKey key = getSubscriptionKey(new JSONObject(input), user.userId);
+		if (key == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		// note: subscriptions are not used in this version (since push is not implemented)
+		// Subscription subscription = sr.findByKey(key) yadda yadda
+		// if (subscription != null) sr.delete(subscription)
+		return Util.httpStringResponse(HttpStatus.OK);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/me")
@@ -158,7 +177,7 @@ public class MessagingApi {
 		return Util.httpStringResponse(body);
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/members")
+	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/members")
 	public ResponseEntity<String> roomMembers(HttpServletRequest request, @PathVariable String roomId) throws JSONException {
 		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
@@ -249,12 +268,12 @@ public class MessagingApi {
 		String parameter = multipartRequest.getParameter("message");
 		if (parameter == null)
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		protoMessage protoMessage = getProtoMessage(new JSONObject(parameter));
+		ProtoMessage protoMessage = getProtoMessage(new JSONObject(parameter));
 		if (protoMessage == null)
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
 		// add mime types and save attachments in file system
 		if (protoMessage.protoAttachments != null) {
-			for (protoAttachment protoAttachment : protoMessage.protoAttachments) {
+			for (ProtoAttachment protoAttachment : protoMessage.protoAttachments) {
 				MultipartFile multipartFile = multipartRequest.getFile(protoAttachment.clientId);
 				if (multipartFile == null)
 					return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
@@ -268,7 +287,7 @@ public class MessagingApi {
 		ArrayList<Attachment> attachments = null;
 		if (protoMessage.protoAttachments != null) {
 			attachments = new ArrayList<>();
-			for (protoAttachment protoAttachment : protoMessage.protoAttachments)
+			for (ProtoAttachment protoAttachment : protoMessage.protoAttachments)
 				attachments.add(new Attachment(protoAttachment.attachmentId, protoAttachment.mimeType, protoAttachment.text, protoMessage.messageId));
 		}
 		// save without lock by saving the dependent items first
@@ -345,7 +364,20 @@ public class MessagingApi {
 		if (!user.personId.equals(message.senderPersonId))
 			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
-		// TODO: physically delete text and attachments
+		// delete attachments (DB objects and files)
+		TenantParameter tp = tenantParameterRepository.findOne("dataDirectory");
+		if (tp == null)
+			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+		Iterable<Attachment> attachments = attachmentRepository.findByMessageId(messageId);
+		for (Attachment attachment : attachments) {
+			String filename = tp.value + "/file/" + attachment.attachmentId;
+			File file = new File(filename);
+			if (file.exists())
+				file.delete();
+		}
+		attachmentRepository.delete(attachments);
+		// delete text and mark message as deleted
+		message.text = null;
 		message.isDeleted = true;
 		message.updatedAt = System.currentTimeMillis();
 		messageRepository.save(message);
@@ -609,21 +641,21 @@ public class MessagingApi {
 		return array;
 	}
 
-	private class protoAttachment {
+	private class ProtoAttachment {
 		String attachmentId;
 		String clientId;
 		String text;
 		String mimeType;
 
-		public protoAttachment() {
+		public ProtoAttachment() {
 			attachmentId = Util.getUuid();
 		}
 	}
 
-	private protoAttachment getProtoAttachment(JSONObject item) throws JSONException {
+	private ProtoAttachment getProtoAttachment(JSONObject item) throws JSONException {
 		if (item == null)
 			return null;
-		protoAttachment protoAttachment = new protoAttachment();
+		ProtoAttachment protoAttachment = new ProtoAttachment();
 		protoAttachment.clientId = JsonUtil.getString(item, "payloadMultipartName");
 		if (protoAttachment.clientId == null)
 			return null;
@@ -631,21 +663,21 @@ public class MessagingApi {
 		return protoAttachment;
 	}
 
-	private class protoMessage {
+	private class ProtoMessage {
 		String messageId;
 		String clientId;
 		String text;
-		List<protoAttachment> protoAttachments;
+		List<ProtoAttachment> protoAttachments;
 
-		public protoMessage() {
+		public ProtoMessage() {
 			messageId = Util.getUuid();
 		}
 	}
 
-	private protoMessage getProtoMessage(JSONObject item) throws JSONException {
+	private ProtoMessage getProtoMessage(JSONObject item) throws JSONException {
 		if (item == null)
 			return null;
-		protoMessage protoMessage = new protoMessage();
+		ProtoMessage protoMessage = new ProtoMessage();
 		protoMessage.clientId = JsonUtil.getString(item, "clientMessageId");
 		if (protoMessage.clientId == null)
 			return null;
@@ -658,7 +690,7 @@ public class MessagingApi {
 			protoMessage.protoAttachments = new ArrayList<>();
 			for (int i = 0; i < attachments.length(); i++) {
 				JSONObject attachment = JsonUtil.getJSONObject(attachments.getJSONObject(i), "assetContent");
-				protoAttachment protoAttachment = getProtoAttachment(attachment);
+				ProtoAttachment protoAttachment = getProtoAttachment(attachment);
 				if (protoAttachment == null)
 					return null;
 				protoMessage.protoAttachments.add(protoAttachment);
@@ -667,4 +699,37 @@ public class MessagingApi {
 		return protoMessage;
 	}
 
+	private SubscriptionLog getSubscriptionLog(JSONObject item, String userId) throws JSONException {
+		if (item == null)
+			return null;
+		SubscriptionLog subscriptionLog = new SubscriptionLog();
+		subscriptionLog.targetType = JsonUtil.getString(item, "targetType");
+		subscriptionLog.appId = JsonUtil.getString(item, "appId");
+		subscriptionLog.deviceToken = JsonUtil.getString(item, "deviceToken");
+		subscriptionLog.userId = userId;
+		subscriptionLog.language = JsonUtil.getString(item, "language");
+		subscriptionLog.clientAccountId = JsonUtil.getString(item, "clientAccountId");
+		subscriptionLog.userConsent = JsonUtil.getBoolean(item, "userConsent");
+		subscriptionLog.changedAt = System.currentTimeMillis();
+		JSONObject stats = JsonUtil.getJSONObject(item, "stats");
+		subscriptionLog.deviceId = JsonUtil.getString(stats, "deviceId");
+		subscriptionLog.deviceType = JsonUtil.getString(stats, "deviceType");
+		subscriptionLog.osVersion = JsonUtil.getString(stats, "osVersion");
+		subscriptionLog.encryption = JsonUtil.getString(stats, "encryption");
+		subscriptionLog.appVersion = JsonUtil.getString(stats, "appVersion");
+		return subscriptionLog;
+	}
+
+	private SubscriptionKey getSubscriptionKey(JSONObject item, String userId) throws JSONException {
+		if (item == null)
+			return null;
+		SubscriptionKey subscriptionKey = new SubscriptionKey();
+		subscriptionKey.targetType = JsonUtil.getString(item, "targetType");
+		subscriptionKey.appId = JsonUtil.getString(item, "appId");
+		subscriptionKey.deviceToken = JsonUtil.getString(item, "deviceToken");
+		subscriptionKey.userId = userId;
+		return subscriptionKey;
+	}
+
 }
+

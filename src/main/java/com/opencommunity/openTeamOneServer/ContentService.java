@@ -22,9 +22,9 @@ public class ContentService {
 		return null;
 	}
 
-	public static void importFromJson(JSONObject jsonObject, boolean delete, String protectedUserId) throws JSONException {
+	public static void importFromJson(JSONObject jsonObject, boolean includeConfiguration, boolean delete, String protectedUserId) throws JSONException {
 		if (instance != null)
-			instance._importFromJson(jsonObject, delete, protectedUserId);
+			instance._importFromJson(jsonObject, includeConfiguration, delete, protectedUserId);
 	}
 
 	public static void deleteAll(String protectedUserId) throws JSONException {
@@ -55,6 +55,8 @@ public class ContentService {
 	private AttachmentRepository ar;
 	@Autowired
 	private ViewedConfirmationRepository vcr;
+	@Autowired
+	private SubscriptionLogRepository slr;
 
 	public ContentService() {
 		instance = this;
@@ -89,26 +91,32 @@ public class ContentService {
 		jsonObject.put("messages", Message.toJsonArray(mr.findAll()));
 		jsonObject.put("attachments", Attachment.toJsonArray(ar.findAll()));
 		jsonObject.put("viewedConfirmations", ViewedConfirmation.toJsonArray(vcr.findAll()));
+		jsonObject.put("subscriptionLogs", SubscriptionLog.toJsonArray(slr.findAll()));
 		return jsonObject;
 	}
 
-	private void _importFromJson(JSONObject jsonObject, boolean delete, String protectedUserId) throws JSONException {
+	private void _importFromJson(JSONObject jsonObject, boolean includeConfiguration, boolean delete, String protectedUserId) throws JSONException {
 		JSONArray item;
 		item = JsonUtil.getJSONArray(jsonObject, "tenantParameters");
-		if (item != null) {
+		if (item != null && includeConfiguration) {
 			if (delete)
 				tpr.deleteAll();
 			tpr.save(TenantParameter.fromJsonArray(item));
 		}
 		item = JsonUtil.getJSONArray(jsonObject, "users");
 		if (item != null && protectedUserId != null) {
-			if (delete)
-				ur.delete(ur.findByUserIdNot(protectedUserId));
-			Iterable<User> users = User.fromJsonArray(item);
+			Iterable<User> users;
+			if (delete) {
+				users = includeConfiguration ? ur.findByUserIdNot(protectedUserId) : ur.findByHasAdminRoleFalseAndUserIdNot(protectedUserId);
+				ur.delete(users);
+			}
+			users = User.fromJsonArray(item);
 			Iterator<User> iterator = users.iterator();
-			while (iterator.hasNext())
-				if (protectedUserId.equals(iterator.next().userId))
+			while (iterator.hasNext()) {
+				User user = iterator.next();
+				if ((!includeConfiguration && user.hasAdminRole) || protectedUserId.equals(user.userId))
 					iterator.remove();
+			}
 			ur.save(users);
 		}
 		item = JsonUtil.getJSONArray(jsonObject, "persons");
@@ -146,6 +154,12 @@ public class ContentService {
 			if (delete)
 				vcr.deleteAll();
 			vcr.save(ViewedConfirmation.fromJsonArray(item));
+		}
+		item = JsonUtil.getJSONArray(jsonObject, "subscriptionLogs");
+		if (item != null) {
+			if (delete)
+				slr.deleteAll();
+			slr.save(SubscriptionLog.fromJsonArray(item));
 		}
 	}
 
