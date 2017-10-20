@@ -42,12 +42,9 @@ public class RootApi {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = {"", "/", "/admin", "/admin/"})
-	public ResponseEntity<String> admin(HttpServletRequest request) throws JSONException {
+	public ResponseEntity<String> admin(HttpServletRequest request) {
 		User user = Util.getSessionUser(request, userRepository);
-		String parameter = user == null ? "startPageNoLogon" : (user.hasAdminRole ? "startPageAdmin" : "startPageNoAdmin");
-		TenantParameter tp = tenantParameterRepository.findOne(parameter);
-		String page = tp == null ? "/admin/default/index.html" : tp.value;
-		return Util.httpForwardResponse(page); // in theory the URI should be absolute...
+		return Util.httpForwardResponse(tenantParameterRepository, user, null);
 	}
 
 }

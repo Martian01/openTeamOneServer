@@ -44,12 +44,12 @@ public class MediaApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/picture/v1/service/rest/picture/{itemId}")
 	public ResponseEntity<Resource> picture(HttpServletRequest request, @PathVariable String itemId) throws Exception {
-		return sendFileContent(request, itemId, "/pictures/");
+		return sendFileContent(request, itemId, "pictures");
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{itemId}/content")
 	public ResponseEntity<Resource> mediaFileContent(HttpServletRequest request, @PathVariable String itemId) throws Exception {
-		return sendFileContent(request, itemId, "/files/");
+		return sendFileContent(request, itemId, "files");
 	}
 
 	/* The following API calls are intentionally not implemented */
@@ -60,7 +60,7 @@ public class MediaApi {
 
 	/* helper functions */
 
-	public ResponseEntity<Resource> sendFileContent(HttpServletRequest request, String itemId, String directory) throws Exception {
+	public ResponseEntity<Resource> sendFileContent(HttpServletRequest request, String itemId, String subDirectory) throws Exception {
 		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpResourceResponse(HttpStatus.UNAUTHORIZED);
@@ -68,11 +68,10 @@ public class MediaApi {
 		Attachment attachment = attachmentRepository.findOne(itemId);
 		if (attachment == null)
 			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
-		TenantParameter tp = tenantParameterRepository.findOne("dataDirectory");
-		if (tp == null)
+		File directory = Util.getDataDirectory(tenantParameterRepository, subDirectory);
+		if (directory == null)
 			return Util.httpResourceResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		String filename = tp.value + directory + itemId;
-		File file = new File(filename);
+		File file = new File(directory, itemId);
 		if (!file.canRead())
 			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
 		Resource resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));

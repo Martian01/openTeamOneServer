@@ -16,6 +16,8 @@ import java.util.UUID;
 
 public class Util {
 
+	/* Misc */
+
 	public static String getUuid() {
 		return UUID.randomUUID().toString().replace("-", "").toUpperCase();
 	}
@@ -49,6 +51,8 @@ public class Util {
 		return map;
 	}
 
+	/* User sessions */
+
 	private static final String SESSION_COOKIE_NAME = "sid";
 
 	public static String getSessionCookie(String sessionId) {
@@ -77,6 +81,8 @@ public class Util {
 		User user = getSessionUser(request, userRepository);
 		return user == null || !user.hasAdminRole ? null : user;
 	}
+
+	/* HTTP responses */
 
 	private static String errorJsonString = "{}";
 	private static Resource errorJsonResource = new ByteArrayResource(errorJsonString.getBytes());
@@ -111,14 +117,33 @@ public class Util {
 				.body(body.toString());
 	}
 
-	public static ResponseEntity<String> httpForwardResponse(String targetUri) {
+	public static String getDefaultTarget(TenantParameterRepository tpr, User user) {
+		String parameter = user == null ? "startPageNoLogon" : (user.hasAdminRole ? "startPageAdmin" : "startPageNoAdmin");
+		TenantParameter tp = tpr.findOne(parameter);
+		return tp == null ? "/admin/default/index.html" : tp.value; // in theory a forwarding URI should be absolute...
+	}
+
+	public static ResponseEntity<String> httpForwardResponse(TenantParameterRepository tpr, User user, String targetUri) {
 		if (targetUri == null)
-			return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.TEXT_PLAIN).body("Success");
+			targetUri = getDefaultTarget(tpr, user);
 		return ResponseEntity.status(HttpStatus.SEE_OTHER)
 				.header("Location", targetUri)
 				.contentType(MediaType.TEXT_PLAIN)
 				.body(null);
 	}
+
+	public static File getDataDirectory(TenantParameterRepository tpr, String subdirectory) {
+		TenantParameter tp = tpr.findOne("dataDirectory");
+		if (tp == null)
+			return null;
+		File directory = new File(tp.value);
+		if (subdirectory != null)
+			directory = new File(directory, subdirectory);
+		directory.mkdirs();
+		return directory.isDirectory() ? directory : null;
+	}
+
+	/* Files and Streams */
 
 	private static final int MAX_BUFFER_SIZE = 2 * 1024 * 1024;
 

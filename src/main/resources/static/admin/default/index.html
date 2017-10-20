@@ -26,7 +26,7 @@
 					setVisibility("snapshots", isLoggedInAsAdmin);
 				}
 			};
-			xmlhttp.open("GET", "/svc/ui/session", true);
+			xmlhttp.open("GET", "/svc/session/info", true);
 			xmlhttp.send();
 		}
 	</script>
@@ -47,36 +47,34 @@
 		<form id="loginForm" action="/svc/ui/login" method="post" style="display: none;">
 			<fieldset>
 				<legend>Login Credentials</legend>
-				Username:<br>
+				Username:<br/>
 				<input type="text" name="username"><br/>
-				Password:<br>
+				Password:<br/>
 				<input type="password" name="password"><br/><br/>
-				<input type="hidden" name="forward" value="/">
 				<input type="submit" value="Log In">
 			</fieldset>
 		</form>
 		<form id="logoutForm" action="/svc/ui/logout" method="post" style="display: none;">
-			<input type="hidden" name="forward" value="/">
+			<input type="hidden" name="dummy" value="">
 			<input type="submit" value="Log Out">
 		</form>
 	</div>
 	<div id="snapshots" style="display: none;">
 		<h2>Server-side Snapshots</h2>
-		<form id="save" action="/svc/snapshot/save" method="post">
+		<form id="save" action="/svc/ui/snapshot/save" method="post">
 			<fieldset>
 				<legend>Save a snapshot on the server</legend>
-				File name:<br>
+				File name:<br/>
 				<input type="text" name="filename"><br/><br/>
-				<input type="hidden" name="forward" value="/">
 				<input type="submit" value="Save">
 			</fieldset>
 		</form>
-		<form id="load" action="/svc/snapshot/load" method="post">
+		<form id="load" action="/svc/ui/snapshot/load" method="post">
 			<fieldset>
 				<legend>Load a snapshot from the server</legend>
-				File name:<br>
+				File name:<br/>
 				<input type="text" name="filename"><br/><br/>
-				<input type="hidden" name="forward" value="/">
+				<input type="checkbox" name="config">&nbsp;Include configuration data<br/><br/>
 				<input type="submit" value="Load">
 			</fieldset>
 		</form>

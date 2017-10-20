@@ -11,13 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import javax.persistence.Column;
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.Map;
 
 @RestController
@@ -31,6 +27,8 @@ public class ServiceApi {
 	@Autowired
 	private PersonRepository personRepository;
 
+	/* Services with UI control (forwarding responses) */
+
 	@RequestMapping(method = RequestMethod.POST, value = "/ui/login")
 	public ResponseEntity<String> uiLogin(HttpServletRequest request, @RequestBody String input) throws JSONException {
 		Map<String, String> formData = Util.splitQueryString(input);
@@ -42,12 +40,11 @@ public class ServiceApi {
 		User user = userId == null ? null : userRepository.findOne(userId);
 		Session session = user != null && user.matches(password) ? Session.newSession(userId) : null;
 		//
-		HttpHeaders httpHeaders= new HttpHeaders();
-		httpHeaders.set("Set-Cookie", Util.getSessionCookie(session == null ? null : session.sessionId));
-		if (forward != null)
-			httpHeaders.set("Location", forward);
-		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		return new ResponseEntity<>(session == null ? "Error" : "Success", httpHeaders, forward == null ? (session == null ? HttpStatus.FORBIDDEN : HttpStatus.OK) : HttpStatus.SEE_OTHER);
+		return ResponseEntity.status(HttpStatus.SEE_OTHER)
+				.header("Location", forward == null ? Util.getDefaultTarget(tenantParameterRepository, user) : forward)
+				.header("Set-Cookie", Util.getSessionCookie(session == null ? null : session.sessionId))
+				.contentType(MediaType.TEXT_PLAIN)
+				.body(null);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/ui/logout")
@@ -62,13 +59,59 @@ public class ServiceApi {
 			httpHeaders.set("Set-Cookie", Util.getSessionCookie(null));
 		}
 		//
-		if (forward != null)
-			httpHeaders.set("Location", forward);
-		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
-		return new ResponseEntity<>("Success", httpHeaders, forward == null ? HttpStatus.OK : HttpStatus.SEE_OTHER);
+		return Util.httpForwardResponse(tenantParameterRepository, null, forward);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/ui/session")
+	@RequestMapping(method = RequestMethod.POST, value = "/ui/snapshot/save")
+	public ResponseEntity<String> snapshotSave(HttpServletRequest request, @RequestBody String input) throws Exception {
+		User user = Util.getSessionAdmin(request, userRepository);
+		if (user == null)
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		Map<String, String> formData = Util.splitQueryString(input);
+		String filename = formData.get("filename");
+		String forward = formData.get("forward");
+		if (filename == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		File directory = Util.getDataDirectory(tenantParameterRepository, "snapshots");
+		if (directory == null)
+			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+		File file = new File(directory, filename);
+		JSONObject jsonContent = ContentService.exportToJson();
+		String stringContent = jsonContent.toString();
+		Util.writeFile(stringContent.getBytes("UTF-8"), file);
+		//
+		return Util.httpForwardResponse(tenantParameterRepository, user, forward);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/ui/snapshot/load")
+	public ResponseEntity<String> snapshotLoad(HttpServletRequest request, @RequestBody String input) throws Exception {
+		User user = Util.getSessionAdmin(request, userRepository);
+		if (user == null)
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		Map<String, String> formData = Util.splitQueryString(input);
+		String filename = formData.get("filename");
+		boolean includeConfiguration = "on".equals(formData.get("config"));
+		String forward = formData.get("forward");
+		if (filename == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		File directory = Util.getDataDirectory(tenantParameterRepository, "snapshots");
+		if (directory == null)
+			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+		File file = new File(directory, filename);
+		if (!file.canRead())
+			return Util.httpStringResponse(HttpStatus.NOT_FOUND);
+		String stringContent = new String(Util.readFile(file), "UTF-8");
+		JSONObject jsonContent = new JSONObject(stringContent);
+		ContentService.importFromJson(jsonContent, includeConfiguration, true, user.userId);
+		//
+		return Util.httpForwardResponse(tenantParameterRepository, user, forward);
+	}
+
+	/* AJAX Services (JSON responses) */
+
+	@RequestMapping(method = RequestMethod.GET, value = "/session/info")
 	public ResponseEntity<String> uiSession(HttpServletRequest request) throws JSONException {
 		String sessionId = Util.getSessionId(request);
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
@@ -86,60 +129,6 @@ public class ServiceApi {
 		}
 		//
 		return Util.httpStringResponse(body);
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/snapshot/save")
-	public ResponseEntity<String> snapshotSave(HttpServletRequest request, @RequestBody String input) throws Exception {
-		User user = Util.getSessionAdmin(request, userRepository);
-		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
-		//
-		Map<String, String> formData = Util.splitQueryString(input);
-		String filename = formData.get("filename");
-		String forward = formData.get("forward");
-		if (filename == null)
-			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		TenantParameter tp = tenantParameterRepository.findOne("dataDirectory");
-		if (tp == null)
-			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		File directory = new File(tp.value + "/snapshots");
-		directory.mkdirs();
-		if (!directory.isDirectory())
-			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		File file = new File(directory, filename);
-		JSONObject jsonContent = ContentService.exportToJson();
-		String stringContent = jsonContent.toString();
-		Util.writeFile(stringContent.getBytes("UTF-8"), file);
-		//
-		return Util.httpForwardResponse(forward);
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/snapshot/load")
-	public ResponseEntity<String> snapshotLoad(HttpServletRequest request, @RequestBody String input) throws Exception {
-		User user = Util.getSessionAdmin(request, userRepository);
-		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
-		//
-		Map<String, String> formData = Util.splitQueryString(input);
-		String filename = formData.get("filename");
-		String forward = formData.get("forward");
-		if (filename == null)
-			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		TenantParameter tp = tenantParameterRepository.findOne("dataDirectory");
-		if (tp == null)
-			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		File directory = new File(tp.value + "/snapshots");
-		directory.mkdirs();
-		if (!directory.isDirectory())
-			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		File file = new File(directory, filename);
-		if (!file.canRead())
-			return Util.httpStringResponse(HttpStatus.NOT_FOUND);
-		String stringContent = new String(Util.readFile(file), "UTF-8");
-		JSONObject jsonContent = new JSONObject(stringContent);
-		ContentService.importFromJson(jsonContent, false, true, user.userId);
-		//
-		return Util.httpForwardResponse(forward);
 	}
 
 }

@@ -50,6 +50,11 @@ public class User {
 	public User(JSONObject item) throws JSONException {
 		userId = JsonUtil.getString(item, "userId");
 		passwordHash = JsonUtil.getString(item, "passwordHash");
+		// temporary hack until user administration is available
+		String password = JsonUtil.getString(item, "password");
+		if (password != null)
+			setPassword(password);
+		// eoh
 		personId = JsonUtil.getString(item, "personId");
 		hasUserRole = JsonUtil.getBoolean(item, "hasUserRole");
 		hasAdminRole = JsonUtil.getBoolean(item, "hasAdminRole");

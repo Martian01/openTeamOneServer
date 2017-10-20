@@ -14,9 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.*;
 
 @RestController
@@ -257,12 +255,8 @@ public class MessagingApi {
 			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
 		long now = System.currentTimeMillis();
-		TenantParameter tp = tenantParameterRepository.findOne("dataDirectory");
-		if (tp == null)
-			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		File directory = new File(tp.value + "/files");
-		directory.mkdirs();
-		if (!directory.isDirectory())
+		File directory = Util.getDataDirectory(tenantParameterRepository, "files");
+		if (directory == null)
 			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
 		// scan message part
 		String parameter = multipartRequest.getParameter("message");
@@ -365,13 +359,12 @@ public class MessagingApi {
 			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
 		// delete attachments (DB objects and files)
-		TenantParameter tp = tenantParameterRepository.findOne("dataDirectory");
-		if (tp == null)
+		File directory = Util.getDataDirectory(tenantParameterRepository, "files");
+		if (directory == null)
 			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
 		Iterable<Attachment> attachments = attachmentRepository.findByMessageId(messageId);
 		for (Attachment attachment : attachments) {
-			String filename = tp.value + "/files/" + attachment.attachmentId;
-			File file = new File(filename);
+			File file = new File(directory, attachment.attachmentId);
 			if (file.exists())
 				file.delete();
 		}
