@@ -4,17 +4,25 @@
 
 Open Team One Server is a backend component to support the communication function of SAP Team One mobile apps.
 
-At this point in time the software is ready to be used productively, although some areas are still work in progress. More information is found below.
+At this point in time the software is ready to be used productively, although some areas are still work in progress.
 
 ## Scope
 
-tbd
+This software aimes to provide a simple and functional solution of high performance for those needing a communication server under their own control - in terms of source code and operations. Instead of re-inventing the wheel we use freely available mobile clients, namely the SAP Team One mobile apps that are available for multiple platforms.
+
+The SAP Team One apps are normally operated against a SAP Sports One backend that integrates communication with multiple sports applications. Typical examples are Match Insights videos, questionnaires to capture user feedback and performance KPIs, and information packages combining media and editorials. All those integration scenarios are missing from Open Team One for the simple reason that Open Team One is a best-of-breed communication hub for mobile users, not a sports solution.
+
+One function that cannot be provided for legal reasons are push notifications. The delivery of push notifications would require to reverse-engineer a secret API key.
 
 ## Current Limitations
 
-tbd
+At the time of writing there are limitations in two areas. One is the type of database provided which is an in-memory H2 database. Due to the JPA software interface, it should not be difficult to connect a disk-based SQL database like MySQL or similar. In the meantime there is an export/import function that can be used to persist snapshots.
 
-## Quick Guide to Demo
+The other limited area is the web application used by the administrator. Functionally the web app needs to offer maintenance modules for configuration data and master data. At the moment those can only be maintained through the export/import interface. In addition to functional enhancements, the web app needs a good web design and a modern implementation resulting in a pleasant best-of-breed user experience.
+
+In fact, Open Team One has a configuration switch allowing the admin to switch between separate web applications, should there ever be more than one.
+
+## Quick Guide (to run the server with demo content)
 
 A running server instance consists of two data sources: the integrated relational database for structured objects, and the file system for potentially large images and file attachments. The structured objects in the database are sometimes referred to as "business objects". They can be exported and imported in a serialized JSON representation (but internally they strictly live as strongly typed Java objects). The entirety of the database can be exported and imported in the form of large JSON files, which can also be stored in the file system of the server.
 
@@ -22,7 +30,7 @@ Therefore, in order to bootstrap a demo server we need to provide a filesystem d
 
 ### Step 1: Preparation
 
-In step 1 you need to designate a data directory for the server, or rather, for the tenant that this server instance represents. In this example the directory chosen is /var/cache/openTeamOne but you are free to chose any other directory.
+In step 1 you need to designate a data directory for the server, or rather, for the tenant that this server instance represents. In this example the directory chosen is /var/cache/openTeamOne but you are free to choose any other directory.
 
 You copy the demo content from the project directory "demo" into the designated data directory. The result should look like this:
 
@@ -30,7 +38,7 @@ You copy the demo content from the project directory "demo" into the designated 
 
 ### Step 2: Logon
 
-Next step is to start the server and logon to the admin section. Since this project is distributed as source code, you would import it as Java project into a suitable IDE like IntelliJ IDEA or Eclipse. When asked for project types you would probably choose "Maven" since all dependencies are declared in a pom.xml file.
+Next step is to start the server and log in to the admin section. Since this project is distributed as source code, you would import it as Java project into a suitable IDE like IntelliJ IDEA or Eclipse. When asked for project types you would probably choose "Maven" since all dependencies are declared in a pom.xml file.
 
 When the server is running you call up the admin page in a web browser. Assuming your server listens on TCP port 8080 (depends on your run configuration), you would enter the URL http://localhost:8080 in your browser.
 
@@ -40,9 +48,9 @@ The default logon is user "admin" with password "admin".
 
 ### Step 3: Configuration
 
-The server is smart enough to configure itself when it is started the first time. There are not many configuration seetings to begin with, and every setting can be changed by the administrator. However, there is one setting the server cannot guess: the data directory you have chosen in step 1.
+The server is smart enough to configure missing information when it starts up. There are not many configuration seetings to begin with, and every setting can be changed by the administrator. However, there is one setting the server cannot guess: the data directory you have chosen in step 1.
 
-So before you can continue with anything, you need to make this directory known to the server. This is done by providing the tenant parameter "dataDirectory" as shown in the following picture:
+So before you continue with anything, you need to make this directory known to the server. This is done by providing the tenant parameter "dataDirectory" as shown in the following picture:
 
 ![Configuration](docu/demo3.png)
 
