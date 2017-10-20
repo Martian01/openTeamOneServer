@@ -2,5 +2,5 @@ The software is based on other Open Source projects, like the SpringBoot framewo
 
 Those dependencies are included by maven at compile time and are referenced in the pom.xml file.
 
-The icon is a derivative work based on an icon made by Freepik from www.flaticon.com
+The logo is a derivative work based on an icon made by Freepik from www.flaticon.com, available under the Creative Commons license of type "Attributions Share Alike" (BY-SA). Therefore the logo is shared under the same terms.
 

@@ -25,7 +25,7 @@ public class OpenTeamOneServerApplication extends WebMvcConfigurerAdapter {
 		return new CommandLineRunner() {
 			@Override
 			public void run(String... args) throws Exception {
-				ContentService.loadModelData();
+				//ContentService.loadModelData();
 				System.out.println("\n" + ContentService.exportToJson().toString(4) + "\n");
 			}
 		};

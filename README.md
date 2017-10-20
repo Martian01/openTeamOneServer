@@ -13,8 +13,8 @@ will be added.
 Here are a few screenshots of SAP Team One connected against Open Team One Server,
 displaying the default demo content.
 
-![Drawer](extra/screenshot/screenshot1.png)
-![Landing page](extra/screenshot/screenshot2.png)
-![Room content](extra/screenshot/screenshot3.png)
-![Room details](extra/screenshot/screenshot4.png)
+![Drawer](docu/screenshot1.png)
+![Landing page](docu/screenshot2.png)
+![Room content](docu/screenshot3.png)
+![Room details](docu/screenshot4.png)
 

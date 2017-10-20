@@ -23,7 +23,7 @@
 							'Please log in';
 					setVisibility("loginForm", !isLoggedInAsAdmin);
 					setVisibility("logoutForm", isLoggedInAsAdmin);
-					setVisibility("snapshots", isLoggedInAsAdmin);
+					setVisibility("adminFunctions", isLoggedInAsAdmin);
 				}
 			};
 			xmlhttp.open("GET", "/svc/session/info", true);
@@ -59,9 +59,9 @@
 			<input type="submit" value="Log Out">
 		</form>
 	</div>
-	<div id="snapshots" style="display: none;">
+	<div id="adminFunctions" style="display: none;">
 		<h2>Server-side Snapshots</h2>
-		<form id="save" action="/svc/ui/snapshot/save" method="post">
+		<form action="/svc/ui/snapshot/save" method="post">
 			<fieldset>
 				<legend>Save a snapshot on the server</legend>
 				File name:<br/>
@@ -69,13 +69,24 @@
 				<input type="submit" value="Save">
 			</fieldset>
 		</form>
-		<form id="load" action="/svc/ui/snapshot/load" method="post">
+		<form action="/svc/ui/snapshot/load" method="post">
 			<fieldset>
 				<legend>Load a snapshot from the server</legend>
 				File name:<br/>
 				<input type="text" name="filename"><br/><br/>
-				<input type="checkbox" name="config">&nbsp;Include configuration data<br/><br/>
+				<input type="checkbox" name="config">&nbsp;Include tenant parameters and admin users<br/><br/>
 				<input type="submit" value="Load">
+			</fieldset>
+		</form>
+		<h2>Configuration</h2>
+		<form action="/svc/ui/tenant/parameter" method="post">
+			<fieldset>
+				<legend>Set a tenant parameter</legend>
+				Key:<br/>
+				<input type="text" name="key"><br/>
+				Value:<br/>
+				<input type="text" name="value"><br/><br/>
+				<input type="submit" value="Set">
 			</fieldset>
 		</form>
 	</div>

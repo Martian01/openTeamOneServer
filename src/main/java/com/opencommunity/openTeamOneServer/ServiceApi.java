@@ -104,7 +104,25 @@ public class ServiceApi {
 			return Util.httpStringResponse(HttpStatus.NOT_FOUND);
 		String stringContent = new String(Util.readFile(file), "UTF-8");
 		JSONObject jsonContent = new JSONObject(stringContent);
-		ContentService.importFromJson(jsonContent, includeConfiguration, true, user.userId);
+		ContentService.importFromJson(jsonContent, true, includeConfiguration, user.userId);
+		//
+		return Util.httpForwardResponse(tenantParameterRepository, user, forward);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/ui/tenant/parameter")
+	public ResponseEntity<String> tenantParameter(HttpServletRequest request, @RequestBody String input) throws Exception {
+		User user = Util.getSessionAdmin(request, userRepository);
+		if (user == null)
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		Map<String, String> formData = Util.splitQueryString(input);
+		String key = formData.get("key");
+		String value = formData.get("value");
+		String forward = formData.get("forward");
+		if (key == null || value == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		TenantParameter tp = new TenantParameter(key, value);
+		tenantParameterRepository.save(tp);
 		//
 		return Util.httpForwardResponse(tenantParameterRepository, user, forward);
 	}

@@ -36,12 +36,6 @@ public class MediaApi {
 
 	/* API implementation */
 
-	@RequestMapping(method = RequestMethod.GET, value = "/picture/v1/service/rest/picture/logo")
-	public ResponseEntity<Resource> pictureDefault(HttpServletRequest request) throws Exception {
-		Resource resource = resourceLoader.getResource("classpath:/static/admin/logo256.png");
-		return Util.httpResourceResponse(resource, MediaType.IMAGE_PNG);
-	}
-
 	@RequestMapping(method = RequestMethod.GET, value = "/picture/v1/service/rest/picture/{itemId}")
 	public ResponseEntity<Resource> picture(HttpServletRequest request, @PathVariable String itemId) throws Exception {
 		return sendFileContent(request, itemId, "pictures");
@@ -72,8 +66,9 @@ public class MediaApi {
 		if (directory == null)
 			return Util.httpResourceResponse(HttpStatus.INTERNAL_SERVER_ERROR);
 		File file = new File(directory, itemId);
-		if (!file.canRead())
+		if (!file.canRead()) {
 			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
+		}
 		Resource resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
 		return Util.httpResourceResponse(resource, MediaType.parseMediaType(attachment.mimeType));
 	}
