@@ -30,7 +30,7 @@ Therefore, in order to bootstrap a demo server we need to provide a filesystem d
 
 In step 1 you need to designate a data directory for the server, or rather, for the tenant that this server instance represents. In this example the directory chosen is /var/cache/openTeamOne but you are free to choose any other directory.
 
-You copy the demo content from the project directory "demo" into the designated data directory. The result should look like this:
+You copy the complete content of the project directory "demo" into the designated data directory. At the time of writing that would be the three subdirectories "files", "pictures" and "snapshots". The result should look like this:
 
 ![Preparation](docu/demo1.png)
 
@@ -42,7 +42,7 @@ When the server is running you call up the admin page in a web browser. Assuming
 
 The default login is user "admin" with password "admin".
 
-![Logon](docu/demo2.png)
+![Admin Login](docu/demo2.png)
 
 ### Step 3: Configuration
 
@@ -62,7 +62,9 @@ Congratulations! The demo instance is now operational.
 
 ### Step 5: Profit
 
-The demo instance contains 3 users that you can log in as from your mobile devices. The user names are player01, player02 and player03. All 3 of them have the password "pass".
+The demo instance contains 3 users that you can log in as from your mobile devices. The user names are player01, player02 and player03. All 3 of them have the case-sensitive password "pass".
+
+![App Login](docu/screenshot5.png)
 
 Familiarize yourself with the system by creating transactional content through mobile devices, saving database snapshots to the server and studyding the JSON objects inside those snapshots. 
 
