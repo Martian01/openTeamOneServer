@@ -91,7 +91,7 @@ For a first trial it is quite convenient to use the H2 in-memory database as it 
 	> grant all on teamone.* to 'springuser'@'localhost';
 	> quit
 
-In this example the database is called _teamone_ and contains a user _springuser_ with password _dbPassword_. The user name must be _springuser_ but the database name and the password can be freely chosen. In a productive environment, once the database schema has been created, you are advised to reduce the granted authorizations to select, insert, update and delete.
+In this example the database is called _teamone_ and contains a user _springuser_ with password _dbPassword_. The database name, the user name and the password can be freely chosen. In a productive environment, once the database schema has been created, you are advised to reduce the granted authorizations to select, insert, update and delete.
 
 Next you need to add the JDBC database driver to the project. We have already added the following dependency to our Maven file pom.xml:
 
@@ -100,7 +100,7 @@ Next you need to add the JDBC database driver to the project. We have already ad
 		<artifactId>mysql-connector-java</artifactId>
 	</dependency>
 
-So, MariaDB or MySQL are covered out-of-the-box. If you use a different SQL database, you'll have to add the corresponding driver.
+So, for MariaDB or MySQL you don't need to do anything. If you use a different SQL database, you'll have to add the corresponding driver.
 
 Finally we add the following properties to the application.properties file. In fact, you just need to uncomment them and insert the correct names and passwords, and maybe the TCP port of the database server.
 
