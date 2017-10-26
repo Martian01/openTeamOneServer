@@ -116,7 +116,7 @@ public class ServiceApi {
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
 		Map<String, String> formData = Util.splitQueryString(input);
-		String key = formData.get("key");
+		String key = formData.get("name");
 		String value = formData.get("value");
 		String forward = formData.get("forward");
 		if (key == null || value == null)

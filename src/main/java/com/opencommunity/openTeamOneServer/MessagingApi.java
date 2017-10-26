@@ -40,7 +40,7 @@ public class MessagingApi {
 	@Autowired
 	private ViewedConfirmationRepository viewedConfirmationRepository;
 	@Autowired
-	private SubscriptionLogRepository slr;
+	private SubscriptionRepository sr;
 
 	/* API implementation */
 
@@ -52,13 +52,10 @@ public class MessagingApi {
 		//
 		if (input == null)
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		// write subscription log for statistical purposes
-		SubscriptionLog log = getSubscriptionLog(new JSONObject(input), user.userId);
-		if (log == null)
+		Subscription subscription = getSubscription(new JSONObject(input), user.userId);
+		if (subscription == null)
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		slr.save(log);
-		// note: subscriptions are not used in this version (since push is not implemented)
-		// sr.save(new Subscription(log))
+		sr.save(subscription);
 		return Util.httpStringResponse(HttpStatus.OK);
 	}
 
@@ -73,9 +70,12 @@ public class MessagingApi {
 		SubscriptionKey key = getSubscriptionKey(new JSONObject(input), user.userId);
 		if (key == null)
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		// note: subscriptions are not used in this version (since push is not implemented)
-		// Subscription subscription = sr.findByKey(key) yadda yadda
-		// if (subscription != null) sr.delete(subscription)
+		Subscription subscription = sr.findTop1ByTargetTypeAndAppIdAndDeviceTokenAndUserId(key.targetType, key.appId, key.deviceToken, key.userId);
+		if (subscription != null) {
+			subscription.isActive = false;
+			subscription.changedAt = System.currentTimeMillis();
+			sr.save(subscription);
+		}
 		return Util.httpStringResponse(HttpStatus.OK);
 	}
 
@@ -692,25 +692,26 @@ public class MessagingApi {
 		return protoMessage;
 	}
 
-	private SubscriptionLog getSubscriptionLog(JSONObject item, String userId) throws JSONException {
+	private Subscription getSubscription(JSONObject item, String userId) throws JSONException {
 		if (item == null)
 			return null;
-		SubscriptionLog subscriptionLog = new SubscriptionLog();
-		subscriptionLog.targetType = JsonUtil.getString(item, "targetType");
-		subscriptionLog.appId = JsonUtil.getString(item, "appId");
-		subscriptionLog.deviceToken = JsonUtil.getString(item, "deviceToken");
-		subscriptionLog.userId = userId;
-		subscriptionLog.language = JsonUtil.getString(item, "language");
-		subscriptionLog.clientAccountId = JsonUtil.getString(item, "clientAccountId");
-		subscriptionLog.userConsent = JsonUtil.getBoolean(item, "userConsent");
-		subscriptionLog.changedAt = System.currentTimeMillis();
+		Subscription subscription = new Subscription();
+		subscription.targetType = JsonUtil.getString(item, "targetType");
+		subscription.appId = JsonUtil.getString(item, "appId");
+		subscription.deviceToken = JsonUtil.getString(item, "deviceToken");
+		subscription.userId = userId;
+		subscription.language = JsonUtil.getString(item, "language");
+		subscription.clientAccountId = JsonUtil.getString(item, "clientAccountId");
+		subscription.userConsent = JsonUtil.getBoolean(item, "userConsent", Boolean.FALSE);
+		subscription.isActive = JsonUtil.getBoolean(item, "isActive", Boolean.TRUE);
+		subscription.changedAt = System.currentTimeMillis();
 		JSONObject stats = JsonUtil.getJSONObject(item, "stats");
-		subscriptionLog.deviceId = JsonUtil.getString(stats, "deviceId");
-		subscriptionLog.deviceType = JsonUtil.getString(stats, "deviceType");
-		subscriptionLog.osVersion = JsonUtil.getString(stats, "osVersion");
-		subscriptionLog.encryption = JsonUtil.getString(stats, "encryption");
-		subscriptionLog.appVersion = JsonUtil.getString(stats, "appVersion");
-		return subscriptionLog;
+		subscription.deviceId = JsonUtil.getString(stats, "deviceId");
+		subscription.deviceType = JsonUtil.getString(stats, "deviceType");
+		subscription.osVersion = JsonUtil.getString(stats, "osVersion");
+		subscription.encryption = JsonUtil.getString(stats, "encryption");
+		subscription.appVersion = JsonUtil.getString(stats, "appVersion");
+		return subscription;
 	}
 
 	private SubscriptionKey getSubscriptionKey(JSONObject item, String userId) throws JSONException {

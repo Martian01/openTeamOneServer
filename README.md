@@ -54,7 +54,7 @@ So before you continue with anything, you need to make this directory known to t
 
 ### Step 4: Import
 
-As a last step you import the database content of the demo instance from the JSON file "demo". If you followed the previous steps, the server will find it when you hit the "Load" button as in the following picture:
+In the last step you import the database content of the demo instance from the JSON file "demo". If you followed the previous steps, the server will find it when you hit the "Load" button as in the following picture:
 
 ![Import](docu/demo4.png)
 
@@ -78,4 +78,39 @@ Here are a few screenshots of SAP Team One connected against Open Team One Serve
 ![Landing page](docu/screenshot2.png)
 ![Room content](docu/screenshot3.png)
 ![Room details](docu/screenshot4.png)
+
+## Persistence via MariaDB
+
+MariaDB is a popular MySQL fork, so everything written in this section works for MySQL, too.
+
+For a first trial it is quite convenient to use the H2 in-memory database as it comes with Spring Boot and requires no configuration. It is also quite easy to switch to a disk based SQL database, like MariaDB. To do so, you first need to prepare an empty database for a standard user. Having started the database daemon, you simply enter the following three commands in any SQL console connected to the database, for instance the _mysql_ binary:
+
+	mysql --password
+	> create database teamone;
+	> create user 'springuser'@'localhost' identified by 'dbPassword';
+	> grant all on teamone.* to 'springuser'@'localhost';
+	> quit
+
+In this example the database is called _teamone_ and contains a user _springuser_ with password _dbPassword_. The user name must be _springuser_ but the database name and the password can be freely chosen. In a productive environment, once the database schema has been created, you are advised to reduce the granted authorizations to select, insert, update and delete.
+
+Next you need to add the JDBC database driver to the project. We have already added the following dependency to our Maven file pom.xml:
+
+	<dependency>
+		<groupId>mysql</groupId>
+		<artifactId>mysql-connector-java</artifactId>
+	</dependency>
+
+So, MariaDB or MySQL are covered out-of-the-box. If you use a different SQL database, you'll have to add the corresponding driver.
+
+Finally we add the following properties to the application.properties file. In fact, you just need to uncomment them and insert the correct names and passwords, and maybe the TCP port of the database server.
+
+	spring.jpa.hibernate.ddl-auto=update
+	spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+	spring.datasource.url=jdbc:mysql://localhost:3306/teamone
+	spring.datasource.username=springuser
+	spring.datasource.password=dbPassword
+
+Restart Open Team One Server and you're done. If you want to migrate the content over to the new DB, save and import a snapshot via the admin tools. 
+
+Note: we ran into one issue when running the server against MariaDB, caused by a Java property that coincided with a protected SQL identifier. We solved the issue by re-naming the property.
 

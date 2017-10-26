@@ -51,7 +51,7 @@ public class ContentService {
 	@Autowired
 	private ViewedConfirmationRepository vcr;
 	@Autowired
-	private SubscriptionLogRepository slr;
+	private SubscriptionRepository sr;
 
 	public ContentService() {
 		instance = this;
@@ -86,7 +86,7 @@ public class ContentService {
 		jsonObject.put("messages", Message.toJsonArray(mr.findAll()));
 		jsonObject.put("attachments", Attachment.toJsonArray(ar.findAll()));
 		jsonObject.put("viewedConfirmations", ViewedConfirmation.toJsonArray(vcr.findAll()));
-		jsonObject.put("subscriptionLogs", SubscriptionLog.toJsonArray(slr.findAll()));
+		jsonObject.put("subscriptions", Subscription.toJsonArray(sr.findAll()));
 		return jsonObject;
 	}
 
@@ -150,11 +150,11 @@ public class ContentService {
 				vcr.deleteAll();
 			vcr.save(ViewedConfirmation.fromJsonArray(item));
 		}
-		item = JsonUtil.getJSONArray(jsonObject, "subscriptionLogs");
+		item = JsonUtil.getJSONArray(jsonObject, "subscriptions");
 		if (item != null) {
 			if (delete)
-				slr.deleteAll();
-			slr.save(SubscriptionLog.fromJsonArray(item));
+				sr.deleteAll();
+			sr.save(Subscription.fromJsonArray(item));
 		}
 	}
 

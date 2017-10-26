@@ -12,6 +12,7 @@ import javax.persistence.IdClass;
 import java.util.ArrayList;
 
 interface SubscriptionRepository extends CrudRepository<Subscription, SubscriptionKey> {
+	Subscription findTop1ByTargetTypeAndAppIdAndDeviceTokenAndUserId(String targetType, String appId, String deviceToken, String userId);
 }
 
 @Entity
@@ -33,20 +34,22 @@ public class Subscription {
 	@Column
 	public boolean userConsent;
 	@Column
+	public boolean isActive;
+	@Column
 	public long changedAt;
 
-	public Subscription() {
-	}
+	@Column
+	public String deviceId;
+	@Column
+	public String deviceType;
+	@Column
+	public String osVersion;
+	@Column
+	public String encryption;
+	@Column
+	public String appVersion;
 
-	public Subscription(SubscriptionLog log) {
-		targetType = log.targetType;
-		appId = log.appId;
-		deviceToken = log.deviceToken;
-		userId = log.userId;
-		language = log.language;
-		clientAccountId = log.clientAccountId;
-		userConsent = log.userConsent;
-		changedAt = log.changedAt;
+	public Subscription() {
 	}
 
 	public Subscription(JSONObject item) throws JSONException {
@@ -57,7 +60,13 @@ public class Subscription {
 		language = JsonUtil.getString(item, "language");
 		clientAccountId = JsonUtil.getString(item, "clientAccountId");
 		userConsent = JsonUtil.getBoolean(item, "userConsent");
+		isActive = JsonUtil.getBoolean(item, "isActive");
 		changedAt = JsonUtil.getIsoDate(item, "changedAt");
+		deviceId = JsonUtil.getString(item, "deviceId");
+		deviceType = JsonUtil.getString(item, "deviceType");
+		osVersion = JsonUtil.getString(item, "osVersion");
+		encryption = JsonUtil.getString(item, "encryption");
+		appVersion = JsonUtil.getString(item, "appVersion");
 	}
 
 	public JSONObject toJson() throws JSONException {
@@ -69,7 +78,13 @@ public class Subscription {
 		item.put("language", language);
 		item.put("clientAccountId", clientAccountId);
 		item.put("userConsent", userConsent);
+		item.put("isActive", isActive);
 		item.put("changedAt", JsonUtil.toIsoDate(changedAt));
+		item.put("deviceId", deviceId);
+		item.put("deviceType", deviceType);
+		item.put("osVersion", osVersion);
+		item.put("encryption", encryption);
+		item.put("appVersion", appVersion);
 		return item;
 	}
 
@@ -82,9 +97,9 @@ public class Subscription {
 		return subscriptionList;
 	}
 
-	public static JSONArray toJsonArray(Iterable<Subscription> subscriptions) throws JSONException {
+	public static JSONArray toJsonArray(Iterable<Subscription> subscriptionLogs) throws JSONException {
 		JSONArray array = new JSONArray();
-		for (Subscription subscription : subscriptions)
+		for (Subscription subscription : subscriptionLogs)
 			array.put(subscription.toJson());
 		return array;
 	}
@@ -145,12 +160,60 @@ public class Subscription {
 		this.userConsent = userConsent;
 	}
 
+	public boolean isActive() {
+		return isActive;
+	}
+
+	public void setActive(boolean active) {
+		isActive = active;
+	}
+
 	public long getChangedAt() {
 		return changedAt;
 	}
 
 	public void setChangedAt(long changedAt) {
 		this.changedAt = changedAt;
+	}
+
+	public String getDeviceId() {
+		return deviceId;
+	}
+
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
+	}
+
+	public String getDeviceType() {
+		return deviceType;
+	}
+
+	public void setDeviceType(String deviceType) {
+		this.deviceType = deviceType;
+	}
+
+	public String getOsVersion() {
+		return osVersion;
+	}
+
+	public void setOsVersion(String osVersion) {
+		this.osVersion = osVersion;
+	}
+
+	public String getEncryption() {
+		return encryption;
+	}
+
+	public void setEncryption(String encryption) {
+		this.encryption = encryption;
+	}
+
+	public String getAppVersion() {
+		return appVersion;
+	}
+
+	public void setAppVersion(String appVersion) {
+		this.appVersion = appVersion;
 	}
 
 	@Override
@@ -161,4 +224,5 @@ public class Subscription {
 		} catch (JSONException e) { }
 		return output;
 	}
+
 }

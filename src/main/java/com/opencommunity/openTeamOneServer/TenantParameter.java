@@ -17,26 +17,26 @@ interface TenantParameterRepository extends CrudRepository<TenantParameter, Stri
 @Entity
 public class TenantParameter {
 	@Id
-	public String key;
+	public String name;
 	@Column
 	public String value;
 
 	public TenantParameter() {
 	}
 
-	public TenantParameter(String key, String value) {
-		this.key = key;
+	public TenantParameter(String name, String value) {
+		this.name = name;
 		this.value = value;
 	}
 
 	public TenantParameter(JSONObject item) throws JSONException {
-		key = JsonUtil.getString(item, "key");
+		name = JsonUtil.getString(item, "name");
 		value = JsonUtil.getString(item, "value");
 	}
 
 	public JSONObject toJson() throws JSONException {
 		JSONObject item = new JSONObject();
-		item.put("key", key);
+		item.put("name", name);
 		item.put("value", value);
 		return item;
 	}
@@ -57,12 +57,12 @@ public class TenantParameter {
 		return array;
 	}
 
-	public String getKey() {
-		return key;
+	public String getName() {
+		return name;
 	}
 
-	public void setKey(String key) {
-		this.key = key;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getValue() {
