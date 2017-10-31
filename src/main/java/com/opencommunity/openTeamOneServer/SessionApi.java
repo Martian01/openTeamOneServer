@@ -40,8 +40,8 @@ public class SessionApi {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/login.xscfunc")
-	public ResponseEntity<String> login(HttpServletRequest request, @RequestBody String input) throws JSONException {
-		Map<String, String> formData = Util.splitQueryString(input);
+	public ResponseEntity<String> login(HttpServletRequest request, @RequestBody String requestBody) throws JSONException {
+		Map<String, String> formData = Util.splitQueryString(requestBody);
 		String userId = formData.get("xs-username");
 		String password = formData.get("xs-password");
 		if (userId != null)
@@ -64,8 +64,8 @@ public class SessionApi {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/pwchange.xscfunc")
-	public ResponseEntity<String> pwchange(HttpServletRequest request, @RequestBody String input) throws JSONException {
-		Map<String, String> formData = Util.splitQueryString(input);
+	public ResponseEntity<String> pwchange(HttpServletRequest request, @RequestBody String requestBody) throws JSONException {
+		Map<String, String> formData = Util.splitQueryString(requestBody);
 		String userId = formData.get("xs-username").toLowerCase();
 		String passwordNew = formData.get("xs-password-new");
 		String passwordOld = formData.get("xs-password-old");

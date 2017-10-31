@@ -21,7 +21,7 @@ public class Session {
 		this.userId = userId;
 		startTime = System.currentTimeMillis();
 		lastAccessTime = startTime;
-		csrfToken = Util.getUuid();
+		csrfToken = Util.getUuid(); // TODO
 	}
 
 	public JSONObject toJson() throws JSONException {

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Open Team One Administration</title>
+	<link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="css/default.css" />
+	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+	<script>
+	</script>
+</head>
+<body>
+	<div style="display: none;">
+		<div id="dialog" title="Person Dialog">
+			<form id="form">
+				<label for="personId">Person Id:</label><br/>
+				<input id="personId" type="text" size="32" readonly disabled name="personId" value="personId"><br/><br/>
+				<label for="firstName">First Name:</label><br/>
+				<input id="firstName" type="text" name="firstName"><br/><br/>
+				<label for="lastName">Last Name:</label><br/>
+				<input id="lastName" type="text" name="lastName"><br/><br/>
+				<label for="nickName">Nickname:</label><br/>
+				<input id="nickName" type="text" name="nickName"><br/><br/>
+				<label for="pictureId">Picture Id:</label><br/>
+				<input id="pictureId" type="text" size="32" name="pictureId"><br/><br/>
+			</form>
+		</div>
+	</div>
+	<h1>Persons</h1>
+	<table id="personTable" class="display" width="100%" cellspacing="0">
+		<thead>
+		<tr>
+			<th>Person Id</th>
+			<th>First Name</th>
+			<th>Last Name</th>
+			<th>Nickname</th>
+			<th>Picture Id</th>
+		</tr>
+		</thead>
+	</table>
+	<br/>
+	<input id="createPerson" type="button" value="Create New Person" />
+	<br/><br/>
+	<div>
+		<h2>Menu</h2>
+		<a href="index.html">Admin Home</a><br/>
+		<a href="parameters.html">Tenant Parameters</a><br/>
+		<a href="users.html">Users</a><br/>
+		<a href="persons.html">Persons</a><br/>
+		<a href="rooms.html">Rooms</a><br/>
+		<a href="members.html">Room Members</a><br/>
+		<a href="messages.html">Messages</a><br/>
+		<a href="attachments.html">Attachments</a><br/>
+		<a href="confirmations.html">Viewed Confirmations</a><br/>
+		<a href="subscriptions.html">Subscriptions</a><br/>
+	</div>
+	<br/>
+	<script>
+		$(document).ready( function () {
+			var dialog = $("#dialog");
+			function setPerson(person) {
+				$("#personId").val((person && person.personId) || null);
+				$("#lastName").val((person && person.lastName) || null);
+				$("#firstName").val((person && person.firstName) || null);
+				$("#nickName").val((person && person.nickName) || null);
+				$("#pictureId").val((person && person.pictureId) || null);
+			}
+			function getPerson() {
+				function set(object, property, value) {
+					if (value)
+						object[property] = value;
+				}
+				var person = {};
+				set(person, "personId", $("#personId").val());
+				set(person, "lastName", $("#lastName").val());
+				set(person, "firstName", $("#firstName").val());
+				set(person, "nickName", $("#nickName").val());
+				set(person, "pictureId", $("#pictureId").val());
+				return person;
+			}
+			function deletePerson() {
+				dialog.dialog("close");
+				var person = getPerson();
+				if (person.personId) {
+					//alert("delete person " + JSON.stringify(person));
+					$.ajax({
+						url: "/svc/person/" + person.personId,
+						method: "DELETE",
+						success: table.ajax.reload.bind(null, null, false),
+						error: alert.bind(null, "Deletion failure")
+					});
+				}
+			}
+			function postPerson() {
+				dialog.dialog("close");
+				var person = getPerson();
+				var body = JSON.stringify(person);
+				//alert("post person " + body);
+				$.ajax({
+					url: "/svc/person",
+					method: "POST",
+					contentType: "application/json; charset=UTF-8'",
+					data: body,
+					processData: false,
+					success: table.ajax.reload.bind(null, null, false),
+					error: alert.bind(null, "Posting failure")
+				});
+			}
+			dialog.dialog({
+				autoOpen: false,
+				  height: 500,
+				  width: 360,
+				  modal: true,
+				  buttons: {
+					Delete: deletePerson,
+					Save: postPerson
+				  },
+				  close: function() {
+				  }
+			});
+			var table = $("#personTable").DataTable({
+				pageLength: 25,
+				ajax: {
+					url: "/svc/persons",
+					dataSrc: ""
+				},
+				columns: [
+					{ data: "personId", defaultContent: "" },
+					{ data: "firstName", defaultContent: "" },
+					{ data: "lastName", defaultContent: "" },
+					{ data: "nickName", defaultContent: "" },
+					{ data: "pictureId", defaultContent: "" },
+				]
+			});
+			$("#personTable tbody").on("click", "tr", function () {
+				setPerson(table.row(this).data());
+				dialog.dialog("open");
+			});
+			$("#createPerson").on("click", function() {
+				setPerson(null);
+				dialog.dialog("open");
+			});
+    	});
+	</script>
+	<noscript>Info: JavaScript must be enabled.</noscript>
+</body>
+</html>

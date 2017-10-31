@@ -42,7 +42,7 @@ public class Attachment {
 		text = JsonUtil.getString(item, "text");
 		messageId = JsonUtil.getString(item, "messageId");
 		//
-		if (attachmentId == null)
+		if (attachmentId == null || attachmentId.length() == 0)
 			attachmentId = Util.getUuid();
 	}
 

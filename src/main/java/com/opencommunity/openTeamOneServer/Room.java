@@ -34,7 +34,7 @@ public class Room {
 	}
 
 	public Room(String roomId, String name, String shortName, String roomType, String pictureId, long changedAt) {
-		this.roomId = roomId == null ? Util.getUuid() : roomId;
+		this.roomId = roomId == null || roomId.length() == 0 ? Util.getUuid() : roomId;
 		this.name = name;
 		this.shortName = shortName;
 		this.roomType = roomType;
@@ -50,7 +50,7 @@ public class Room {
 		pictureId = JsonUtil.getString(item, "pictureId");
 		changedAt = JsonUtil.getIsoDate(item, "changedAt");
 		//
-		if (roomId == null)
+		if (roomId == null || roomId.length() == 0)
 			roomId = Util.getUuid();
 	}
 

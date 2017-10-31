@@ -60,7 +60,7 @@ public class Message {
 	}
 
 	public Message(String messageId, String clientMessageId, String roomId, String senderPersonId, long postedAt, String text, boolean isDeleted, long updatedAt) {
-		this.messageId =  messageId == null ? Util.getUuid() : messageId;
+		this.messageId =  messageId == null || messageId.length() == 0 ? Util.getUuid() : messageId;
 		this.clientMessageId = clientMessageId;
 		this.roomId = roomId;
 		this.senderPersonId = senderPersonId;
@@ -80,7 +80,7 @@ public class Message {
 		isDeleted = JsonUtil.getBoolean(item, "isDeleted");
 		updatedAt = JsonUtil.getIsoDate(item, "updatedAt");
 		//
-		if (messageId == null)
+		if (messageId == null || messageId.length() == 0)
 			messageId = Util.getUuid();
 	}
 

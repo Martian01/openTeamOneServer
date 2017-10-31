@@ -64,7 +64,7 @@ public class JsonUtil {
 	}
 
 	public static void put(JSONObject item, String key, String value) throws JSONException {
-		if (item != null && key != null && value != null)
+		if (item != null && key != null)
 			item.put(key, value);
 	}
 

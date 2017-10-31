@@ -1,5 +1,6 @@
 package com.opencommunity.openTeamOneServer;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -112,6 +113,12 @@ public class Util {
 	}
 
 	public static ResponseEntity<String> httpStringResponse(JSONObject body) {
+		return ResponseEntity.ok()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(body.toString());
+	}
+
+	public static ResponseEntity<String> httpStringResponse(JSONArray body) {
 		return ResponseEntity.ok()
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(body.toString());

@@ -1,7 +1,10 @@
+<!DOCTYPE html>
 <html>
 <head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Open Team One Administration</title>
-	<link href="css/default.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="css/default.css" />
 	<script>
 		function setVisibility(id, isVisible) {
 			var element = document.getElementById(id)
@@ -24,9 +27,12 @@
 					setVisibility("loginForm", !isLoggedInAsAdmin);
 					setVisibility("logoutForm", isLoggedInAsAdmin);
 					setVisibility("adminFunctions", isLoggedInAsAdmin);
+					if (response && response.dataDirectory) {
+						document.getElementById("dataDirectory").value = response.dataDirectory;
+					}
 				}
 			};
-			xmlhttp.open("GET", "/svc/session/info", true);
+			xmlhttp.open("GET", "/svc/session", true);
 			xmlhttp.send();
 		}
 	</script>
@@ -34,34 +40,51 @@
 <body>
 	<h1>Open Team One Administration</h1>
 	<img src="/admin/logo128.png" width="128" height="128"/>
-	<p>This page is a placeholder for the upcoming admin function.</p>
-	<p>The minimum functionality should contain export and import of database content in JSON format, allowing for offline maintenance.
-		Eventually it should enable the complete tenant configuration plus user and master data maintenance. </p>
+	<p>This is a first and unrefined version of a web app for server administration. It requires Javascript in the browser.</p>
 	<p>It would be great if we could have a modern and pretty web app at some point, with smooth CSS animations and the like.
-		This is defintely an area where experienced web developers can contribute. ^_^</p>
+		This is definitely an area where experienced web developers can contribute. ^_^</p>
 	<p>There are already measures in place to support multiple styles or skins so that competing designs can co-exist.</p>
 	<p>Watch this space!</p>
 	<br/>
 	<div>
 		<h2 id="infoLine"></h2>
-		<form id="loginForm" action="/svc/ui/login" method="post" style="display: none;">
+		<form id="loginForm" action="/ui/login" method="post" style="display: none;">
 			<fieldset>
 				<legend>Login Credentials</legend>
-				Username:<br/>
-				<input type="text" name="username"><br/>
-				Password:<br/>
-				<input type="password" name="password"><br/><br/>
+				<label for="username">Username:</label><br/>
+				<input id="username" type="text" name="username"><br/>
+				<label for="password">Password:</label><br/>
+				<input id="password" type="password" name="password"><br/><br/>
 				<input type="submit" value="Log In">
 			</fieldset>
 		</form>
-		<form id="logoutForm" action="/svc/ui/logout" method="post" style="display: none;">
+		<form id="logoutForm" action="/ui/logout" method="post" style="display: none;">
 			<input type="hidden" name="dummy" value="">
 			<input type="submit" value="Log Out">
 		</form>
 	</div>
 	<div id="adminFunctions" style="display: none;">
+		<h2>Configuration</h2>
+		<form action="/ui/tenant/parameter" method="post">
+			<fieldset>
+				<legend>Set server-side data directory</legend>
+				<input type="hidden" name="name" value="dataDirectory">
+				<label for="dataDirectory">Data Directory:</label><br/>
+				<input id="dataDirectory" type="text" name="value"><br/><br/>
+				<input type="submit" value="Set">
+			</fieldset>
+		</form>
 		<h2>Server-side Snapshots</h2>
-		<form action="/svc/ui/snapshot/save" method="post">
+		<form action="/ui/snapshot/load" method="post">
+			<fieldset>
+				<legend>Load a snapshot from the server</legend>
+				<label for="filename">File name:</label><br/>
+				<input id="filename" type="text" name="filename"><br/><br/>
+				<input type="checkbox" name="config">&nbsp;Include tenant parameters and admin users<br/><br/>
+				<input type="submit" value="Load">
+			</fieldset>
+		</form>
+		<form action="/ui/snapshot/save" method="post">
 			<fieldset>
 				<legend>Save a snapshot on the server</legend>
 				File name:<br/>
@@ -69,31 +92,23 @@
 				<input type="submit" value="Save">
 			</fieldset>
 		</form>
-		<form action="/svc/ui/snapshot/load" method="post">
-			<fieldset>
-				<legend>Load a snapshot from the server</legend>
-				File name:<br/>
-				<input type="text" name="filename"><br/><br/>
-				<input type="checkbox" name="config">&nbsp;Include tenant parameters and admin users<br/><br/>
-				<input type="submit" value="Load">
-			</fieldset>
-		</form>
-		<h2>Configuration</h2>
-		<form action="/svc/ui/tenant/parameter" method="post">
-			<fieldset>
-				<legend>Set a tenant parameter</legend>
-				Name:<br/>
-				<input type="text" name="name"><br/>
-				Value:<br/>
-				<input type="text" name="value"><br/><br/>
-				<input type="submit" value="Set">
-			</fieldset>
-		</form>
+		<br/><br/>
+		<h2>Menu</h2>
+		<a href="index.html">Admin Home</a><br/>
+		<a href="parameters.html">Tenant Parameters</a><br/>
+		<a href="users.html">Users</a><br/>
+		<a href="persons.html">Persons</a><br/>
+		<a href="rooms.html">Rooms</a><br/>
+		<a href="members.html">Room Members</a><br/>
+		<a href="messages.html">Messages</a><br/>
+		<a href="attachments.html">Attachments</a><br/>
+		<a href="confirmations.html">Viewed Confirmations</a><br/>
+		<a href="subscriptions.html">Subscriptions</a><br/>
 	</div>
 	<br/>
 	<script>
 		checkSessionState();
 	</script>
-	<noscript>Info: JavaScript must be enabled to log in.</noscript>
+	<noscript>Info: JavaScript must be enabled.</noscript>
 </body>
 </html>

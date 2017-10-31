@@ -31,7 +31,7 @@ public class Person {
 	}
 
 	public Person(String personId, String lastName, String firstName, String nickName, String pictureId) {
-		this.personId = personId == null ? Util.getUuid() : personId;
+		this.personId = personId == null || personId.length() == 0 ? Util.getUuid() : personId;
 		this.lastName = lastName;
 		this.firstName = firstName;
 		this.nickName = nickName;
@@ -45,7 +45,7 @@ public class Person {
 		nickName = JsonUtil.getString(item, "nickName");
 		pictureId = JsonUtil.getString(item, "pictureId");
 		//
-		if (personId == null)
+		if (personId == null || personId.length() == 0)
 			personId = Util.getUuid();
 	}
 
