@@ -47,7 +47,7 @@ public class ContentService {
 	@Autowired
 	private MessageRepository mr;
 	@Autowired
-	private AttachmentRepository ar;
+	private SymbolicFileRepository sfr;
 	@Autowired
 	private ViewedConfirmationRepository vcr;
 	@Autowired
@@ -84,7 +84,7 @@ public class ContentService {
 		jsonObject.put("rooms", Room.toJsonArray(rr.findAll()));
 		jsonObject.put("roomMembers", RoomMember.toJsonArray(rmr.findAll()));
 		jsonObject.put("messages", Message.toJsonArray(mr.findAll()));
-		jsonObject.put("attachments", Attachment.toJsonArray(ar.findAll()));
+		jsonObject.put("files", SymbolicFile.toJsonArray(sfr.findAll()));
 		jsonObject.put("viewedConfirmations", ViewedConfirmation.toJsonArray(vcr.findAll()));
 		jsonObject.put("subscriptions", Subscription.toJsonArray(sr.findAll()));
 		return jsonObject;
@@ -138,11 +138,11 @@ public class ContentService {
 				mr.deleteAll();
 			mr.save(Message.fromJsonArray(item));
 		}
-		item = JsonUtil.getJSONArray(jsonObject, "attachments");
+		item = JsonUtil.getJSONArray(jsonObject, "files");
 		if (item != null) {
 			if (delete)
-				ar.deleteAll();
-			ar.save(Attachment.fromJsonArray(item));
+				sfr.deleteAll();
+			sfr.save(SymbolicFile.fromJsonArray(item));
 		}
 		item = JsonUtil.getJSONArray(jsonObject, "viewedConfirmations");
 		if (item != null) {
@@ -167,7 +167,7 @@ public class ContentService {
 		rr.deleteAll();
 		rmr.deleteAll();
 		mr.deleteAll();
-		ar.deleteAll();
+		sfr.deleteAll();
 		vcr.deleteAll();
 	}
 

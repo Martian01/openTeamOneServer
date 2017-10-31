@@ -46,34 +46,34 @@
     }
   ],
   "subscriptionLogs": [],
-  "attachments": [
+  "files": [
     {
-      "attachmentId": "tenant",
+      "fileId": "tenant",
       "mimeType": "image/jpg"
     },
     {
-      "attachmentId": "profile1",
+      "fileId": "profile1",
       "mimeType": "image/jpg"
     },
     {
-      "attachmentId": "profile2",
+      "fileId": "profile2",
       "mimeType": "image/jpg"
     },
     {
-      "attachmentId": "profile3",
+      "fileId": "profile3",
       "mimeType": "image/jpg"
     },
     {
-      "attachmentId": "room1",
+      "fileId": "room1",
       "mimeType": "image/jpg"
     },
     {
-      "attachmentId": "room2",
+      "fileId": "room2",
       "mimeType": "image/jpg"
     },
     {
-      "messageId": "9547464AD01B421E9A1F061985CB1B51",
-      "attachmentId": "sailing1",
+      "referenceId": "9547464AD01B421E9A1F061985CB1B51",
+      "fileId": "sailing1",
       "mimeType": "image/jpg"
     }
   ],

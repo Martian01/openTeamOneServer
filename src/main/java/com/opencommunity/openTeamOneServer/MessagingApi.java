@@ -36,7 +36,7 @@ public class MessagingApi {
 	@Autowired
 	private MessageRepository messageRepository;
 	@Autowired
-	private AttachmentRepository attachmentRepository;
+	private SymbolicFileRepository symbolicFileRepository;
 	@Autowired
 	private ViewedConfirmationRepository viewedConfirmationRepository;
 	@Autowired
@@ -266,30 +266,30 @@ public class MessagingApi {
 		if (protoMessage == null)
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
 		// add mime types and save attachments in file system
-		if (protoMessage.protoAttachments != null) {
-			for (ProtoAttachment protoAttachment : protoMessage.protoAttachments) {
-				MultipartFile multipartFile = multipartRequest.getFile(protoAttachment.clientId);
+		if (protoMessage.protoSymbolicFiles != null) {
+			for (ProtoSymbolicFile protoSymbolicFile : protoMessage.protoSymbolicFiles) {
+				MultipartFile multipartFile = multipartRequest.getFile(protoSymbolicFile.clientId);
 				if (multipartFile == null)
 					return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-				protoAttachment.mimeType = multipartFile.getContentType();
-				File file = new File(directory, protoAttachment.attachmentId);
+				protoSymbolicFile.mimeType = multipartFile.getContentType();
+				File file = new File(directory, protoSymbolicFile.fileId);
 				Util.writeFile(multipartFile.getInputStream(), file);
 			}
 		}
 		// create BOs
 		Message message = new Message(protoMessage.messageId, protoMessage.clientId, roomId, user.personId, now, protoMessage.text, false, now);
-		ArrayList<Attachment> attachments = null;
-		if (protoMessage.protoAttachments != null) {
-			attachments = new ArrayList<>();
-			for (ProtoAttachment protoAttachment : protoMessage.protoAttachments)
-				attachments.add(new Attachment(protoAttachment.attachmentId, protoAttachment.mimeType, protoAttachment.text, protoMessage.messageId));
+		ArrayList<SymbolicFile> symbolicFiles = null;
+		if (protoMessage.protoSymbolicFiles != null) {
+			symbolicFiles = new ArrayList<>();
+			for (ProtoSymbolicFile protoSymbolicFile : protoMessage.protoSymbolicFiles)
+				symbolicFiles.add(new SymbolicFile(protoSymbolicFile.fileId, protoSymbolicFile.mimeType, protoSymbolicFile.text, protoMessage.messageId));
 		}
 		// save without lock by saving the dependent items first
-		attachmentRepository.save(attachments);
+		symbolicFileRepository.save(symbolicFiles);
 		messageRepository.save(message);
 		// construct response
 		JSONObject body = new JSONObject();
-		JsonUtil.put(body, "message", messageToJson(message, user.personId, attachments));
+		JsonUtil.put(body, "message", messageToJson(message, user.personId, symbolicFiles));
 		//
 		return Util.httpStringResponse(body, HttpStatus.CREATED);
 	}
@@ -362,13 +362,13 @@ public class MessagingApi {
 		File directory = Util.getDataDirectory(tenantParameterRepository, "files");
 		if (directory == null)
 			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		Iterable<Attachment> attachments = attachmentRepository.findByMessageId(messageId);
-		for (Attachment attachment : attachments) {
-			File file = new File(directory, attachment.attachmentId);
+		Iterable<SymbolicFile> symbolicFiles = symbolicFileRepository.findByReferenceId(messageId);
+		for (SymbolicFile symbolicFile : symbolicFiles) {
+			File file = new File(directory, symbolicFile.fileId);
 			if (file.exists())
 				file.delete();
 		}
-		attachmentRepository.delete(attachments);
+		symbolicFileRepository.delete(symbolicFiles);
 		// delete text and mark message as deleted
 		message.text = null;
 		message.isDeleted = true;
@@ -494,32 +494,32 @@ public class MessagingApi {
 		return array;
 	}
 
-	private JSONObject attachmentToJson(Attachment attachment) throws JSONException {
-		if (attachment == null)
+	private JSONObject symbolicFileToJson(SymbolicFile symbolicFile) throws JSONException {
+		if (symbolicFile == null)
 			return null;
 		JSONObject sapSportsFile = new JSONObject();
-		sapSportsFile.put("fileId", attachment.attachmentId);
-		sapSportsFile.put("mimeType", attachment.mimeType);
+		sapSportsFile.put("fileId", symbolicFile.fileId);
+		sapSportsFile.put("mimeType", symbolicFile.mimeType);
 		JSONObject attachmentContent = new JSONObject();
-		JsonUtil.put(attachmentContent, "text", attachment.text);
+		JsonUtil.put(attachmentContent, "text", symbolicFile.text);
 		JsonUtil.put(attachmentContent, "mimeType", "application/vnd.sap.sports.file");
 		JsonUtil.put(attachmentContent, "sapSportsFile", sapSportsFile);
 		JSONObject item = new JSONObject();
-		item.put("assetId", attachment.attachmentId);
+		item.put("assetId", symbolicFile.fileId);
 		item.put("assetContent", attachmentContent);
 		return item;
 	}
 
-	private JSONArray attachmentsToJsonArray(Iterable<Attachment> attachments) throws JSONException {
+	private JSONArray symbolicFilesToJsonArray(Iterable<SymbolicFile> symbolicFiles) throws JSONException {
 		JSONArray array = new JSONArray();
-		for (Attachment attachment : attachments)
-			array.put(attachmentToJson(attachment));
+		for (SymbolicFile symbolicFile : symbolicFiles)
+			array.put(symbolicFileToJson(symbolicFile));
 		return array;
 	}
 
 	/* the following JSON formats are complex and include data from outside the actual entity parsed */
 
-	private JSONObject messageToJson(Message message, String personId, Iterable<Attachment> attachments) throws JSONException {
+	private JSONObject messageToJson(Message message, String personId, Iterable<SymbolicFile> symbolicFiles) throws JSONException {
 		if (message == null)
 			return null;
 		JSONObject messageContent = new JSONObject();
@@ -528,8 +528,8 @@ public class MessagingApi {
 		messageContent.put("postedAt", JsonUtil.toIsoDate(message.postedAt));
 		messageContent.put("text", message.text);
 		messageContent.put("isOwnMessage", personId.equals(message.senderPersonId));
-		if (attachments != null)
-			messageContent.put("assets", attachmentsToJsonArray(attachments));
+		if (symbolicFiles != null)
+			messageContent.put("assets", symbolicFilesToJsonArray(symbolicFiles));
 		JSONObject messageStatus = new JSONObject();
 		messageStatus.put("isDeleted", message.isDeleted);
 		messageStatus.put("updatedAt", JsonUtil.toIsoDate(message.updatedAt));
@@ -552,7 +552,7 @@ public class MessagingApi {
 	private JSONObject messageToJson(Message message, String personId) throws JSONException {
 		if (message == null)
 			return null;
-		return messageToJson(message, personId, attachmentRepository.findByMessageId(message.messageId));
+		return messageToJson(message, personId, symbolicFileRepository.findByReferenceId(message.messageId));
 	}
 
 	private JSONArray messagesToJsonArray(Iterable<Message> messages, String personId) throws JSONException {
@@ -634,33 +634,33 @@ public class MessagingApi {
 		return array;
 	}
 
-	private class ProtoAttachment {
-		String attachmentId;
+	private class ProtoSymbolicFile {
+		String fileId;
 		String clientId;
 		String text;
 		String mimeType;
 
-		public ProtoAttachment() {
-			attachmentId = Util.getUuid();
+		public ProtoSymbolicFile() {
+			fileId = Util.getUuid();
 		}
 	}
 
-	private ProtoAttachment getProtoAttachment(JSONObject item) throws JSONException {
+	private ProtoSymbolicFile getProtoSymbolicFile(JSONObject item) throws JSONException {
 		if (item == null)
 			return null;
-		ProtoAttachment protoAttachment = new ProtoAttachment();
-		protoAttachment.clientId = JsonUtil.getString(item, "payloadMultipartName");
-		if (protoAttachment.clientId == null)
+		ProtoSymbolicFile protoSymbolicFile = new ProtoSymbolicFile();
+		protoSymbolicFile.clientId = JsonUtil.getString(item, "payloadMultipartName");
+		if (protoSymbolicFile.clientId == null)
 			return null;
-		protoAttachment.text = JsonUtil.getString(item, "text");
-		return protoAttachment;
+		protoSymbolicFile.text = JsonUtil.getString(item, "text");
+		return protoSymbolicFile;
 	}
 
 	private class ProtoMessage {
 		String messageId;
 		String clientId;
 		String text;
-		List<ProtoAttachment> protoAttachments;
+		List<ProtoSymbolicFile> protoSymbolicFiles;
 
 		public ProtoMessage() {
 			messageId = Util.getUuid();
@@ -680,13 +680,13 @@ public class MessagingApi {
 		protoMessage.text = JsonUtil.getString(messageContent, "text");
 		JSONArray attachments = JsonUtil.getJSONArray(messageContent, "assets");
 		if (attachments != null) {
-			protoMessage.protoAttachments = new ArrayList<>();
+			protoMessage.protoSymbolicFiles = new ArrayList<>();
 			for (int i = 0; i < attachments.length(); i++) {
-				JSONObject attachment = JsonUtil.getJSONObject(attachments.getJSONObject(i), "assetContent");
-				ProtoAttachment protoAttachment = getProtoAttachment(attachment);
-				if (protoAttachment == null)
+				JSONObject attachmentContent = JsonUtil.getJSONObject(attachments.getJSONObject(i), "assetContent");
+				ProtoSymbolicFile protoSymbolicFile = getProtoSymbolicFile(attachmentContent);
+				if (protoSymbolicFile == null)
 					return null;
-				protoMessage.protoAttachments.add(protoAttachment);
+				protoMessage.protoSymbolicFiles.add(protoSymbolicFile);
 			}
 		}
 		return protoMessage;

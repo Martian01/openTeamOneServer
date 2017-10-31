@@ -29,48 +29,48 @@ public class MediaApi {
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
-	private AttachmentRepository attachmentRepository;
+	private SymbolicFileRepository symbolicFileRepository;
 
 	@Autowired
 	private ResourceLoader resourceLoader;
 
 	/* API implementation */
 
-	@RequestMapping(method = RequestMethod.GET, value = "/picture/v1/service/rest/picture/{itemId}")
-	public ResponseEntity<Resource> picture(HttpServletRequest request, @PathVariable String itemId) throws Exception {
-		return sendFileContent(request, itemId, "pictures");
+	@RequestMapping(method = RequestMethod.GET, value = "/picture/v1/service/rest/picture/{fileId}")
+	public ResponseEntity<Resource> picture(HttpServletRequest request, @PathVariable String fileId) throws Exception {
+		return sendFileContent(request, fileId, "pictures");
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{itemId}/content")
-	public ResponseEntity<Resource> mediaFileContent(HttpServletRequest request, @PathVariable String itemId) throws Exception {
-		return sendFileContent(request, itemId, "files");
+	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{fileId}/content")
+	public ResponseEntity<Resource> mediaFileContent(HttpServletRequest request, @PathVariable String fileId) throws Exception {
+		return sendFileContent(request, fileId, "files");
 	}
 
 	/* The following API calls are intentionally not implemented */
 
-	//@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{itemId}/preview")
-	//@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{itemId}/details")
-	//@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{itemId}/url")
+	//@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{fileId}/preview")
+	//@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{fileId}/details")
+	//@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{fileId}/url")
 
 	/* helper functions */
 
-	public ResponseEntity<Resource> sendFileContent(HttpServletRequest request, String itemId, String subDirectory) throws Exception {
+	public ResponseEntity<Resource> sendFileContent(HttpServletRequest request, String fileId, String subDirectory) throws Exception {
 		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpResourceResponse(HttpStatus.UNAUTHORIZED);
 		//
-		Attachment attachment = attachmentRepository.findOne(itemId);
-		if (attachment == null)
+		SymbolicFile symbolicFile = symbolicFileRepository.findOne(fileId);
+		if (symbolicFile == null)
 			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
 		File directory = Util.getDataDirectory(tenantParameterRepository, subDirectory);
 		if (directory == null)
 			return Util.httpResourceResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		File file = new File(directory, itemId);
+		File file = new File(directory, fileId);
 		if (!file.canRead()) {
 			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
 		}
 		Resource resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
-		return Util.httpResourceResponse(resource, MediaType.parseMediaType(attachment.mimeType));
+		return Util.httpResourceResponse(resource, MediaType.parseMediaType(symbolicFile.mimeType));
 	}
 
 }
