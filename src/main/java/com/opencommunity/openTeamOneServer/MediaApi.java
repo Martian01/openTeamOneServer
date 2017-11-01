@@ -62,10 +62,9 @@ public class MediaApi {
 		SymbolicFile symbolicFile = symbolicFileRepository.findOne(fileId);
 		if (symbolicFile == null)
 			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
-		File directory = Util.getDataDirectory(tenantParameterRepository, symbolicFile.directory);
-		if (directory == null)
+		File file = Util.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
+		if (file == null)
 			return Util.httpResourceResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		File file = new File(directory, fileId);
 		if (!file.canRead()) {
 			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
 		}

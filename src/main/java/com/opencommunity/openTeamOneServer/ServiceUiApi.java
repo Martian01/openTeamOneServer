@@ -73,10 +73,9 @@ public class ServiceUiApi {
 		String forward = formData.get("forward");
 		if (filename == null)
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		File directory = Util.getDataDirectory(tenantParameterRepository, "snapshots");
-		if (directory == null)
+		File file = Util.getFile(tenantParameterRepository, SymbolicFile.DIRECTORY_SNAPSHOTS, filename);
+		if (file == null)
 			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		File file = new File(directory, filename);
 		JSONObject jsonContent = ContentService.exportToJson();
 		String stringContent = jsonContent.toString();
 		Util.writeFile(stringContent.getBytes("UTF-8"), file);
@@ -96,10 +95,9 @@ public class ServiceUiApi {
 		String forward = formData.get("forward");
 		if (filename == null)
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		File directory = Util.getDataDirectory(tenantParameterRepository, SymbolicFile.DIRECTORY_SNAPSHOTS);
-		if (directory == null)
+		File file = Util.getFile(tenantParameterRepository, SymbolicFile.DIRECTORY_SNAPSHOTS, filename);
+		if (file == null)
 			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		File file = new File(directory, filename);
 		if (!file.canRead())
 			return Util.httpStringResponse(HttpStatus.NOT_FOUND);
 		String stringContent = new String(Util.readFile(file), "UTF-8");
