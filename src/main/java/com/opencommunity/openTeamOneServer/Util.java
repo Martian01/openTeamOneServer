@@ -150,6 +150,11 @@ public class Util {
 		return directory.isDirectory() ? directory : null;
 	}
 
+	public static File getFile(TenantParameterRepository tpr, String subdirectory, String fileId) {
+		File directory = getDataDirectory(tpr, subdirectory);
+		return directory == null ? null : new File(directory, fileId);
+	}
+
 	/* Files and Streams */
 
 	private static final int MAX_BUFFER_SIZE = 2 * 1024 * 1024;
