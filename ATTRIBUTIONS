@@ -1,6 +1,8 @@
-The software is based on other Open Source projects, like the SpringBoot framework found on https://spring.io/.
+The software is based on other Open Source projects, like the SpringBoot (https://spring.io/) and MariaDB (https://mariadb.com/).
 
 Those dependencies are included by maven at compile time and are referenced in the pom.xml file.
+
+The admin UI loads jQuery and the plugins jQuery UI and DataTables at runtime in the browser.
 
 The logo is a derivative work based on an icon made by Freepik from www.flaticon.com, available under the Creative Commons license of type "Attributions Share Alike" (BY-SA). Therefore the logo is shared under the same terms.
 
