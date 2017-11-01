@@ -64,7 +64,7 @@ Congratulations! The demo instance is now operational.
 
 The demo instance contains 3 users that you can log in as from your mobile devices. The user names are player01, player02 and player03. All 3 of them have the case-sensitive password "pass".
 
-![App Login](docu/screenshot5.png)
+![App Login](docu/screenshot0.png)
 
 Familiarize yourself with the system by creating transactional content through mobile devices, saving database snapshots to the server and studyding the JSON objects inside those snapshots. 
 
@@ -81,7 +81,7 @@ Here are a few screenshots of SAP Team One connected against Open Team One Serve
 
 ## Persistence via MariaDB
 
-MariaDB is a popular MySQL fork, so everything written in this section works for MySQL, too.
+MariaDB is a popular MySQL fork. In fact, MariaDB is the continuation of MySQL by the original author and a community. MariaDB is drop-in compatible with MySQL, so everything written in this section works for MySQL, too.
 
 For a first trial it is quite convenient to use the H2 in-memory database as it comes with Spring Boot and requires no configuration. It is also quite easy to switch to a disk based SQL database, like MariaDB. To do so, you first need to prepare an empty database for a standard user. Having started the database daemon, you simply enter the following three commands in any SQL console connected to the database, for instance the _mysql_ binary:
 

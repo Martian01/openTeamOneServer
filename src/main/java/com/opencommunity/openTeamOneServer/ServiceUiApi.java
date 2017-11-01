@@ -96,7 +96,7 @@ public class ServiceUiApi {
 		String forward = formData.get("forward");
 		if (filename == null)
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		File directory = Util.getDataDirectory(tenantParameterRepository, "snapshots");
+		File directory = Util.getDataDirectory(tenantParameterRepository, SymbolicFile.DIRECTORY_SNAPSHOTS);
 		if (directory == null)
 			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
 		File file = new File(directory, filename);

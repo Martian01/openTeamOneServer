@@ -45,7 +45,6 @@
       "roomType": "private"
     }
   ],
-  "subscriptionLogs": [],
   "files": [
     {
       "fileId": "tenant",
@@ -286,21 +285,21 @@
       "personId": "BF374732F28544F6849BA8A551ED8B47",
       "hasUserRole": true,
       "userId": "player01",
-      "passwordHash": "$2a$10$HGGCb.u/TOc5zWf5oPsC.e0U.t3n8JfaP05OJUKRC01xyxVPRTxry"
+      "password": "pass"
     },
     {
       "hasAdminRole": false,
       "personId": "94FB692997F241728389C83808F48F8F",
       "hasUserRole": true,
       "userId": "player02",
-      "passwordHash": "$2a$10$iVWFZLpH5mQRuutRXFRoA.3G/tHC30AUBwvR.MHXrvl1KzRlKj20a"
+      "password": "pass"
     },
     {
       "hasAdminRole": false,
       "personId": "D4CE6AE67DFA449DBC013E646639513A",
       "hasUserRole": true,
       "userId": "player03",
-      "passwordHash": "$2a$10$HYKGkCiqXi5.XE1fGOQ/7eIOn48.C/MPuf0mRdY1Xo2ZwR7VaPFou"
+      "password": "pass"
     }
   ]
 }

@@ -19,6 +19,7 @@ public class SymbolicFile {
 
 	public static final String DIRECTORY_ATTACHMENTS = "attachments";
 	public static final String DIRECTORY_PROFILES = "profiles";
+	public static final String DIRECTORY_SNAPSHOTS = "snapshots";
 
 	@Id
 	public String fileId;
