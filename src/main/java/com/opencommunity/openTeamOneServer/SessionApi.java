@@ -24,19 +24,12 @@ public class SessionApi {
 	@Autowired
 	private PersonRepository personRepository;
 
-	private static final String unsafeCsrfToken = "unsafe";
+	// Dummy service
+	// Note: CSRF protection is irrelevant for mobile clients, and taken care of for browsers by SameSite cookies
 
 	@RequestMapping(method = RequestMethod.GET, value = "/token.xsjs")
-	public ResponseEntity<String> token(HttpServletRequest request) {
-		String sessionId = Util.getSessionId(request);
-		Session session = sessionId == null ? null : Session.getSession(sessionId);
-		User user = session == null ? null : userRepository.findOne(session.userId);
-		//
-		HttpHeaders httpHeaders= new HttpHeaders();
-		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-		if ("Fetch".equals(request.getHeader("X-CSRF-Token")))
-			httpHeaders.set("X-CSRF-Token", user == null ? unsafeCsrfToken : session.getNewCsrfToken());
-		return new ResponseEntity<>("{}", httpHeaders, HttpStatus.OK);
+	public ResponseEntity<String> token() {
+		return Util.httpStringResponse(HttpStatus.OK);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/login.xscfunc")
@@ -58,8 +51,6 @@ public class SessionApi {
 		HttpHeaders httpHeaders= new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 		httpHeaders.set("Set-Cookie", Util.getSessionCookie(session == null ? null : session.sessionId));
-		if ("Fetch".equals(request.getHeader("X-CSRF-Token")))
-			httpHeaders.set("X-CSRF-Token", session == null ? unsafeCsrfToken : session.getNewCsrfToken());
 		return new ResponseEntity<>(body.toString(), httpHeaders, session == null ? HttpStatus.FORBIDDEN : HttpStatus.OK);
 	}
 
@@ -91,8 +82,6 @@ public class SessionApi {
 		HttpHeaders httpHeaders= new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 		httpHeaders.set("Set-Cookie", Util.getSessionCookie(session == null ? null : session.sessionId));
-		if ("Fetch".equals(request.getHeader("X-CSRF-Token")))
-			httpHeaders.set("X-CSRF-Token", session == null ? unsafeCsrfToken : session.getNewCsrfToken());
 		return new ResponseEntity<>(body.toString(), httpHeaders, session == null ? HttpStatus.FORBIDDEN : HttpStatus.OK);
 	}
 

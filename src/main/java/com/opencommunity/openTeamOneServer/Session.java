@@ -14,14 +14,11 @@ public class Session {
 	public long startTime;
 	public long lastAccessTime;
 
-	public String csrfToken;
-
 	public Session(String userId) {
 		sessionId = Util.getUuid();
 		this.userId = userId;
 		startTime = System.currentTimeMillis();
 		lastAccessTime = startTime;
-		csrfToken = Util.getUuid(); // TODO
 	}
 
 	public JSONObject toJson() throws JSONException {
@@ -40,10 +37,6 @@ public class Session {
 			output += toJson().toString();
 		} catch (JSONException e) { }
 		return output;
-	}
-
-	public String getNewCsrfToken() {
-		return csrfToken = Util.getUuid();
 	}
 
 	private static final long sessionMaximumAge = 1800000L;

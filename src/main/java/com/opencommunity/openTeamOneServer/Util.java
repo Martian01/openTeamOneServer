@@ -58,8 +58,8 @@ public class Util {
 
 	public static String getSessionCookie(String sessionId) {
 		return sessionId == null
-				? SESSION_COOKIE_NAME + "=_; HttpOnly; Path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
-				: SESSION_COOKIE_NAME + "=" + sessionId + "; HttpOnly; Path=/";
+				? SESSION_COOKIE_NAME + "=_; Path=/; HttpOnly; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+				: SESSION_COOKIE_NAME + "=" + sessionId + "; Path=/; HttpOnly; SameSite=Strict";
 	}
 
 	public static String getSessionId(HttpServletRequest request) {

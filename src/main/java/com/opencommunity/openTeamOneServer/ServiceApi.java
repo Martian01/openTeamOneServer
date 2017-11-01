@@ -3,15 +3,11 @@ package com.opencommunity.openTeamOneServer;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/svc")
@@ -32,16 +28,23 @@ public class ServiceApi {
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
 		//
 		JSONObject body = new JSONObject();
+		JSONObject item;
 		if (session != null) {
-			body.put("session", session.toJson());
+			item = new JSONObject();
+			item.put("startTime", JsonUtil.toIsoDate(session.startTime));
+			item.put("lastAccessTime", JsonUtil.toIsoDate(session.lastAccessTime));
+			body.put("session", item);
 			User user = session.userId == null ? null : userRepository.findOne(session.userId);
 			if (user != null) {
-				body.put("user", user.toJson());
+				item = new JSONObject();
+				item.put("userId", user.userId);
+				item.put("hasAdminRole", user.hasAdminRole);
+				item.put("hasUserRole", user.hasUserRole);
+				body.put("user", item);
 				Person person = user.personId == null ? null : personRepository.findOne(user.personId);
 				if (person != null)
 					body.put("person", person.toJson());
 				if (user.hasAdminRole) {
-					//body.put("tenantParameters", TenantParameter.toJsonArray(tenantParameterRepository.findAll()));
 					TenantParameter tp = tenantParameterRepository.findOne("dataDirectory");
 					if (tp != null && tp.value != null)
 						body.put("dataDirectory", tp.value);
