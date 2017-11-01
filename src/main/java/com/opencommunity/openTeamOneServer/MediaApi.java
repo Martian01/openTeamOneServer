@@ -38,12 +38,12 @@ public class MediaApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/picture/v1/service/rest/picture/{fileId}")
 	public ResponseEntity<Resource> picture(HttpServletRequest request, @PathVariable String fileId) throws Exception {
-		return sendFileContent(request, fileId, "pictures");
+		return sendFileContent(request, fileId);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{fileId}/content")
 	public ResponseEntity<Resource> mediaFileContent(HttpServletRequest request, @PathVariable String fileId) throws Exception {
-		return sendFileContent(request, fileId, "files");
+		return sendFileContent(request, fileId);
 	}
 
 	/* The following API calls are intentionally not implemented */
@@ -54,7 +54,7 @@ public class MediaApi {
 
 	/* helper functions */
 
-	public ResponseEntity<Resource> sendFileContent(HttpServletRequest request, String fileId, String subDirectory) throws Exception {
+	public ResponseEntity<Resource> sendFileContent(HttpServletRequest request, String fileId) throws Exception {
 		User user = Util.getSessionContact(request, userRepository);
 		if (user == null)
 			return Util.httpResourceResponse(HttpStatus.UNAUTHORIZED);
@@ -62,7 +62,7 @@ public class MediaApi {
 		SymbolicFile symbolicFile = symbolicFileRepository.findOne(fileId);
 		if (symbolicFile == null)
 			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
-		File directory = Util.getDataDirectory(tenantParameterRepository, subDirectory);
+		File directory = Util.getDataDirectory(tenantParameterRepository, symbolicFile.directory);
 		if (directory == null)
 			return Util.httpResourceResponse(HttpStatus.INTERNAL_SERVER_ERROR);
 		File file = new File(directory, fileId);

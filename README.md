@@ -30,7 +30,7 @@ Therefore, in order to bootstrap a demo server we need to provide a filesystem d
 
 In step 1 you need to designate a data directory for the server, or rather, for the tenant that this server instance represents. In this example the directory chosen is /var/cache/openTeamOne but you are free to choose any other directory.
 
-You copy the complete content of the project directory "demo" into the designated data directory. At the time of writing that would be the three subdirectories "files", "pictures" and "snapshots". The result should look like this:
+You copy the complete content of the project directory "demo" into the designated data directory. At the time of writing that would be the three subdirectories "attachments", "profiles" and "snapshots". The result should look like this:
 
 ![Preparation](docu/demo1.png)
 

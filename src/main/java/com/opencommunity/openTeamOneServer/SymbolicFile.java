@@ -17,6 +17,9 @@ interface SymbolicFileRepository extends CrudRepository<SymbolicFile, String> {
 @Entity
 public class SymbolicFile {
 
+	public static final String DIRECTORY_ATTACHMENTS = "attachments";
+	public static final String DIRECTORY_PROFILES = "profiles";
+
 	@Id
 	public String fileId;
 	@Column
@@ -27,16 +30,19 @@ public class SymbolicFile {
 	public String referenceId;
 	@Column
 	public int position;
+	@Column
+	public String directory;
 
 	public SymbolicFile() {
 	}
 
-	public SymbolicFile(String fileId, String mimeType, String text, String referenceId, int position) {
+	public SymbolicFile(String fileId, String mimeType, String text, String referenceId, int position, String directory) {
 		this.fileId = fileId == null ? Util.getUuid() : fileId;
 		this.mimeType = mimeType;
 		this.text = text;
 		this.referenceId = referenceId;
 		this.position = position;
+		this.directory = directory;
 	}
 
 	public SymbolicFile(JSONObject item) throws JSONException {
@@ -45,6 +51,7 @@ public class SymbolicFile {
 		text = JsonUtil.getString(item, "text");
 		referenceId = JsonUtil.getString(item, "referenceId");
 		position = JsonUtil.getInt(item, "position", 0);
+		directory = JsonUtil.getString(item, "directory");
 		//
 		if (fileId == null || fileId.length() == 0)
 			fileId = Util.getUuid();
@@ -57,6 +64,7 @@ public class SymbolicFile {
 		item.put("text", text);
 		item.put("referenceId", referenceId);
 		item.put("position", position);
+		item.put("directory", directory);
 		return item;
 	}
 
@@ -114,6 +122,14 @@ public class SymbolicFile {
 
 	public void setPosition(int position) {
 		this.position = position;
+	}
+
+	public String getDirectory() {
+		return directory;
+	}
+
+	public void setDirectory(String directory) {
+		this.directory = directory;
 	}
 
 	@Override

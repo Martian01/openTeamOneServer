@@ -255,7 +255,7 @@ public class MessagingApi {
 			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
 		long now = System.currentTimeMillis();
-		File directory = Util.getDataDirectory(tenantParameterRepository, "files");
+		File directory = Util.getDataDirectory(tenantParameterRepository, SymbolicFile.DIRECTORY_ATTACHMENTS);
 		if (directory == null)
 			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
 		// scan message part
@@ -284,8 +284,9 @@ public class MessagingApi {
 		ArrayList<SymbolicFile> symbolicFiles = null;
 		if (protoMessage.protoSymbolicFiles != null) {
 			symbolicFiles = new ArrayList<>();
+			int i = 0;
 			for (ProtoSymbolicFile protoSymbolicFile : protoMessage.protoSymbolicFiles)
-				symbolicFiles.add(new SymbolicFile(protoSymbolicFile.fileId, protoSymbolicFile.mimeType, protoSymbolicFile.text, protoMessage.messageId, protoSymbolicFile.position));
+				symbolicFiles.add(new SymbolicFile(protoSymbolicFile.fileId, protoSymbolicFile.mimeType, protoSymbolicFile.text, protoMessage.messageId, i++, SymbolicFile.DIRECTORY_ATTACHMENTS));
 		}
 		// save without lock by saving the dependent items first
 		symbolicFileRepository.save(symbolicFiles);
@@ -642,14 +643,13 @@ public class MessagingApi {
 		String clientId;
 		String text;
 		String mimeType;
-		public int position;
 
 		public ProtoSymbolicFile() {
 			fileId = Util.getUuid();
 		}
 	}
 
-	private ProtoSymbolicFile getProtoSymbolicFile(JSONObject item, int position) throws JSONException {
+	private ProtoSymbolicFile getProtoSymbolicFile(JSONObject item) throws JSONException {
 		if (item == null)
 			return null;
 		ProtoSymbolicFile protoSymbolicFile = new ProtoSymbolicFile();
@@ -657,7 +657,6 @@ public class MessagingApi {
 		if (protoSymbolicFile.clientId == null)
 			return null;
 		protoSymbolicFile.text = JsonUtil.getString(item, "text");
-		protoSymbolicFile.position = position;
 		return protoSymbolicFile;
 	}
 
@@ -688,7 +687,7 @@ public class MessagingApi {
 			protoMessage.protoSymbolicFiles = new ArrayList<>();
 			for (int i = 0; i < attachments.length(); i++) {
 				JSONObject attachmentContent = JsonUtil.getJSONObject(attachments.getJSONObject(i), "assetContent");
-				ProtoSymbolicFile protoSymbolicFile = getProtoSymbolicFile(attachmentContent, i);
+				ProtoSymbolicFile protoSymbolicFile = getProtoSymbolicFile(attachmentContent);
 				if (protoSymbolicFile == null)
 					return null;
 				protoMessage.protoSymbolicFiles.add(protoSymbolicFile);
