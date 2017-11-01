@@ -267,10 +267,13 @@ public class MessagingApi {
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
 		// add mime types and save attachments in file system
 		if (protoMessage.protoSymbolicFiles != null) {
+			// first pass for validation
+			for (ProtoSymbolicFile protoSymbolicFile : protoMessage.protoSymbolicFiles)
+				if (multipartRequest.getFile(protoSymbolicFile.clientId) == null)
+					return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+			// second pass for writing attachments
 			for (ProtoSymbolicFile protoSymbolicFile : protoMessage.protoSymbolicFiles) {
 				MultipartFile multipartFile = multipartRequest.getFile(protoSymbolicFile.clientId);
-				if (multipartFile == null)
-					return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
 				protoSymbolicFile.mimeType = multipartFile.getContentType();
 				File file = new File(directory, protoSymbolicFile.fileId);
 				Util.writeFile(multipartFile.getInputStream(), file);
@@ -282,7 +285,7 @@ public class MessagingApi {
 		if (protoMessage.protoSymbolicFiles != null) {
 			symbolicFiles = new ArrayList<>();
 			for (ProtoSymbolicFile protoSymbolicFile : protoMessage.protoSymbolicFiles)
-				symbolicFiles.add(new SymbolicFile(protoSymbolicFile.fileId, protoSymbolicFile.mimeType, protoSymbolicFile.text, protoMessage.messageId));
+				symbolicFiles.add(new SymbolicFile(protoSymbolicFile.fileId, protoSymbolicFile.mimeType, protoSymbolicFile.text, protoMessage.messageId, protoSymbolicFile.position));
 		}
 		// save without lock by saving the dependent items first
 		symbolicFileRepository.save(symbolicFiles);
@@ -362,7 +365,7 @@ public class MessagingApi {
 		File directory = Util.getDataDirectory(tenantParameterRepository, "files");
 		if (directory == null)
 			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		Iterable<SymbolicFile> symbolicFiles = symbolicFileRepository.findByReferenceId(messageId);
+		Iterable<SymbolicFile> symbolicFiles = symbolicFileRepository.findByReferenceIdOrderByPositionAsc(messageId);
 		for (SymbolicFile symbolicFile : symbolicFiles) {
 			File file = new File(directory, symbolicFile.fileId);
 			if (file.exists())
@@ -552,7 +555,7 @@ public class MessagingApi {
 	private JSONObject messageToJson(Message message, String personId) throws JSONException {
 		if (message == null)
 			return null;
-		return messageToJson(message, personId, symbolicFileRepository.findByReferenceId(message.messageId));
+		return messageToJson(message, personId, symbolicFileRepository.findByReferenceIdOrderByPositionAsc(message.messageId));
 	}
 
 	private JSONArray messagesToJsonArray(Iterable<Message> messages, String personId) throws JSONException {
@@ -639,13 +642,14 @@ public class MessagingApi {
 		String clientId;
 		String text;
 		String mimeType;
+		public int position;
 
 		public ProtoSymbolicFile() {
 			fileId = Util.getUuid();
 		}
 	}
 
-	private ProtoSymbolicFile getProtoSymbolicFile(JSONObject item) throws JSONException {
+	private ProtoSymbolicFile getProtoSymbolicFile(JSONObject item, int position) throws JSONException {
 		if (item == null)
 			return null;
 		ProtoSymbolicFile protoSymbolicFile = new ProtoSymbolicFile();
@@ -653,6 +657,7 @@ public class MessagingApi {
 		if (protoSymbolicFile.clientId == null)
 			return null;
 		protoSymbolicFile.text = JsonUtil.getString(item, "text");
+		protoSymbolicFile.position = position;
 		return protoSymbolicFile;
 	}
 
@@ -683,7 +688,7 @@ public class MessagingApi {
 			protoMessage.protoSymbolicFiles = new ArrayList<>();
 			for (int i = 0; i < attachments.length(); i++) {
 				JSONObject attachmentContent = JsonUtil.getJSONObject(attachments.getJSONObject(i), "assetContent");
-				ProtoSymbolicFile protoSymbolicFile = getProtoSymbolicFile(attachmentContent);
+				ProtoSymbolicFile protoSymbolicFile = getProtoSymbolicFile(attachmentContent, i);
 				if (protoSymbolicFile == null)
 					return null;
 				protoMessage.protoSymbolicFiles.add(protoSymbolicFile);

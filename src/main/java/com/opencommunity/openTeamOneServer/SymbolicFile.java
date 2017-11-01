@@ -11,7 +11,7 @@ import javax.persistence.Id;
 import java.util.ArrayList;
 
 interface SymbolicFileRepository extends CrudRepository<SymbolicFile, String> {
-	Iterable<SymbolicFile> findByReferenceId(String referenceId);
+	Iterable<SymbolicFile> findByReferenceIdOrderByPositionAsc(String referenceId);
 }
 
 @Entity
@@ -25,15 +25,18 @@ public class SymbolicFile {
 	public String text;
 	@Column
 	public String referenceId;
+	@Column
+	public int position;
 
 	public SymbolicFile() {
 	}
 
-	public SymbolicFile(String fileId, String mimeType, String text, String referenceId) {
+	public SymbolicFile(String fileId, String mimeType, String text, String referenceId, int position) {
 		this.fileId = fileId == null ? Util.getUuid() : fileId;
 		this.mimeType = mimeType;
 		this.text = text;
 		this.referenceId = referenceId;
+		this.position = position;
 	}
 
 	public SymbolicFile(JSONObject item) throws JSONException {
@@ -41,6 +44,7 @@ public class SymbolicFile {
 		mimeType = JsonUtil.getString(item, "mimeType");
 		text = JsonUtil.getString(item, "text");
 		referenceId = JsonUtil.getString(item, "referenceId");
+		position = JsonUtil.getInt(item, "position", 0);
 		//
 		if (fileId == null || fileId.length() == 0)
 			fileId = Util.getUuid();
@@ -52,6 +56,7 @@ public class SymbolicFile {
 		item.put("mimeType", mimeType);
 		item.put("text", text);
 		item.put("referenceId", referenceId);
+		item.put("position", position);
 		return item;
 	}
 
@@ -101,6 +106,14 @@ public class SymbolicFile {
 
 	public void setReferenceId(String referenceId) {
 		this.referenceId = referenceId;
+	}
+
+	public int getPosition() {
+		return position;
+	}
+
+	public void setPosition(int position) {
+		this.position = position;
 	}
 
 	@Override

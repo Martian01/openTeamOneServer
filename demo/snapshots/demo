@@ -49,32 +49,39 @@
   "files": [
     {
       "fileId": "tenant",
-      "mimeType": "image/jpg"
+      "mimeType": "image/jpg",
+      "position": 0
     },
     {
       "fileId": "profile1",
-      "mimeType": "image/jpg"
+      "mimeType": "image/jpg",
+      "position": 0
     },
     {
       "fileId": "profile2",
-      "mimeType": "image/jpg"
+      "mimeType": "image/jpg",
+      "position": 0
     },
     {
       "fileId": "profile3",
-      "mimeType": "image/jpg"
+      "mimeType": "image/jpg",
+      "position": 0
     },
     {
       "fileId": "room1",
-      "mimeType": "image/jpg"
+      "mimeType": "image/jpg",
+      "position": 0
     },
     {
       "fileId": "room2",
-      "mimeType": "image/jpg"
+      "mimeType": "image/jpg",
+      "position": 0
     },
     {
       "referenceId": "9547464AD01B421E9A1F061985CB1B51",
       "fileId": "sailing1",
-      "mimeType": "image/jpg"
+      "mimeType": "image/jpg",
+      "position": 0
     }
   ],
   "messages": [
