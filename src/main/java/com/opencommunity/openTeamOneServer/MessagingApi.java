@@ -362,8 +362,8 @@ public class MessagingApi {
 		if (!user.personId.equals(message.senderPersonId))
 			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
-		// delete attachments (DB objects and files)
-		File directory = Util.getDataDirectory(tenantParameterRepository, "files");
+		// delete attachments (DB objects and files in the file system)
+		File directory = Util.getDataDirectory(tenantParameterRepository, SymbolicFile.DIRECTORY_ATTACHMENTS);
 		if (directory == null)
 			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
 		Iterable<SymbolicFile> symbolicFiles = symbolicFileRepository.findByReferenceIdOrderByPositionAsc(messageId);
