@@ -48,22 +48,23 @@ public class User {
 	}
 
 	public User(JSONObject item) throws JSONException {
-		userId = JsonUtil.getString(item, "userId");
-		passwordHash = JsonUtil.getString(item, "passwordHash");
-		// temporary hack until user administration is available
+		userId = JsonUtil.getString(item, "userId").toLowerCase();
+		// accept unencrypted password or password hash
 		String password = JsonUtil.getString(item, "password");
 		if (password != null)
 			setPassword(password);
-		// eoh
+		else
+			passwordHash = JsonUtil.getString(item, "passwordHash");
 		personId = JsonUtil.getString(item, "personId");
 		hasUserRole = JsonUtil.getBoolean(item, "hasUserRole");
 		hasAdminRole = JsonUtil.getBoolean(item, "hasAdminRole");
 	}
 
-	public JSONObject toJson() throws JSONException {
+	public JSONObject toJson(boolean withPasswordHash) throws JSONException {
 		JSONObject item = new JSONObject();
 		item.put("userId", userId);
-		item.put("passwordHash", passwordHash);
+		if (withPasswordHash)
+			item.put("passwordHash", passwordHash);
 		item.put("personId", personId);
 		item.put("hasUserRole", hasUserRole);
 		item.put("hasAdminRole", hasAdminRole);
@@ -79,10 +80,10 @@ public class User {
 		return userList;
 	}
 
-	public static JSONArray toJsonArray(Iterable<User> users) throws JSONException {
+	public static JSONArray toJsonArray(Iterable<User> users, boolean withPasswordHash) throws JSONException {
 		JSONArray array = new JSONArray();
 		for (User user : users)
-			array.put(user.toJson());
+			array.put(user.toJson(withPasswordHash));
 		return array;
 	}
 
@@ -130,7 +131,7 @@ public class User {
 	public String toString() {
 		String output = getClass().getSimpleName();
 		try {
-			output += toJson().toString();
+			output += toJson(false).toString();
 		} catch (JSONException e) { }
 		return output;
 	}

@@ -1,6 +1,6 @@
-The software is based on other Open Source projects, like the SpringBoot (https://spring.io/) and MariaDB (https://mariadb.com/).
+The software is based on other Open Source projects, like SpringBoot (https://spring.io/) and MariaDB (https://mariadb.com/).
 
-Those dependencies are included by maven at compile time and are referenced in the pom.xml file.
+Those dependencies are included by maven at compile time and referenced in the pom.xml file.
 
 The admin UI loads jQuery and the plugins jQuery UI and DataTables at runtime in the browser.
 

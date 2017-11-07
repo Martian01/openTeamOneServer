@@ -79,7 +79,7 @@ public class ContentService {
 	private JSONObject _exportToJson() throws JSONException {
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("tenantParameters", TenantParameter.toJsonArray(tpr.findAll()));
-		jsonObject.put("users", User.toJsonArray(ur.findAll()));
+		jsonObject.put("users", User.toJsonArray(ur.findAll(), true));
 		jsonObject.put("persons", Person.toJsonArray(pr.findAll()));
 		jsonObject.put("rooms", Room.toJsonArray(rr.findAll()));
 		jsonObject.put("roomMembers", RoomMember.toJsonArray(rmr.findAll()));

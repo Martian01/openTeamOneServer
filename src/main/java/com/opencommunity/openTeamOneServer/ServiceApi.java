@@ -55,6 +55,60 @@ public class ServiceApi {
 		return Util.httpStringResponse(body);
 	}
 
+	/* CRUD Services for User */
+
+	@RequestMapping(method = RequestMethod.GET, value = "/users")
+	public ResponseEntity<String> usersGet(HttpServletRequest request) throws Exception {
+		User user = Util.getSessionAdmin(request, userRepository);
+		if (user == null)
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		return Util.httpStringResponse(User.toJsonArray(userRepository.findAll(), false));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/user/{userId}")
+	public ResponseEntity<String> userGet(HttpServletRequest request, @PathVariable String userId) throws Exception {
+		User user = Util.getSessionAdmin(request, userRepository);
+		if (user == null)
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		User targetUser = userId == null ? null : userRepository.findOne(userId);
+		if (targetUser == null)
+			return Util.httpStringResponse(HttpStatus.NOT_FOUND);
+		//
+		return Util.httpStringResponse(targetUser.toJson(false));
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, value = "/user/{userId}")
+	public ResponseEntity<String> userDelete(HttpServletRequest request, @PathVariable String userId) throws Exception {
+		User user = Util.getSessionAdmin(request, userRepository);
+		if (user == null)
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		User targetUser = userId == null ? null : userRepository.findOne(userId);
+		if (targetUser == null)
+			return Util.httpStringResponse(HttpStatus.GONE);
+		if (user.userId.equals(userId))
+			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
+		userRepository.delete(targetUser);
+		//
+		return Util.httpStringResponse(HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/user")
+	public ResponseEntity<String> userPost(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
+		User user = Util.getSessionAdmin(request, userRepository);
+		if (user == null)
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		if (requestBody == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		User targetUser = new User(new JSONObject(requestBody));
+		userRepository.save(targetUser);
+		//
+		return Util.httpStringResponse(targetUser.toJson(false), HttpStatus.CREATED);
+	}
+
 	/* CRUD Services for Person */
 
 	@RequestMapping(method = RequestMethod.GET, value = "/persons")
@@ -79,6 +133,7 @@ public class ServiceApi {
 		return Util.httpStringResponse(person.toJson());
 	}
 
+	/*
 	@RequestMapping(method = RequestMethod.PUT, value = "/person/{personId}")
 	public ResponseEntity<String> personPut(HttpServletRequest request, @PathVariable String personId, @RequestBody String requestBody) throws Exception {
 		User user = Util.getSessionAdmin(request, userRepository);
@@ -95,6 +150,7 @@ public class ServiceApi {
 		//
 		return Util.httpStringResponse(HttpStatus.CREATED);
 	}
+	*/
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/person/{personId}")
 	public ResponseEntity<String> personDelete(HttpServletRequest request, @PathVariable String personId) throws Exception {

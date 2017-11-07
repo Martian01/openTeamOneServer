@@ -118,8 +118,6 @@
 				  buttons: {
 					Delete: deletePerson,
 					Save: postPerson
-				  },
-				  close: function() {
 				  }
 			});
 			var table = $("#personTable").DataTable({
@@ -133,7 +131,7 @@
 					{ data: "firstName", defaultContent: "" },
 					{ data: "lastName", defaultContent: "" },
 					{ data: "nickName", defaultContent: "" },
-					{ data: "pictureId", defaultContent: "" },
+					{ data: "pictureId", defaultContent: "" }
 				]
 			});
 			$("#personTable tbody").on("click", "tr", function () {
