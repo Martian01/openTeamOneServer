@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<title>Open Team One Administration</title>
+	<link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
+	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.css"/>
+	<link rel="stylesheet" type="text/css" href="css/default.css"/>
+	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+</head>
+<body>
+	<div style="display: none;">
+		<div id="dialog" title="Room Member Dialog">
+			<form id="form">
+				<label for="roomId">Room Id:</label><br/>
+				<input id="roomId" type="text" size="32" name="roomId" value="roomId"/><br/><br/>
+				<label for="personId">Person Id:</label><br/>
+				<input id="personId" type="text" size="32" name="personId" value="personId"/><br/><br/>
+			</form>
+		</div>
+	</div>
+	<h1>Room Members</h1>
+	<table id="memberTable" class="display" width="100%" cellspacing="0">
+		<thead>
+		<tr>
+			<th>Room Id</th>
+			<th>Person Id</th>
+		</tr>
+		</thead>
+	</table>
+	<br/>
+	<input id="createMember" type="button" value="Create New Room Member"/>
+	<br/><br/>
+	<div>
+		<h2>Menu</h2>
+		<a href="index.html">Admin Home</a><br/>
+		<a href="parameters.html">Tenant Parameters</a><br/>
+		<a href="users.html">Users</a><br/>
+		<a href="persons.html">Persons</a><br/>
+		<a href="rooms.html">Rooms</a><br/>
+		<a href="members.html">Room Members</a><br/>
+		<a href="messages.html">Messages</a><br/>
+		<a href="files.html">Files</a><br/>
+		<a href="confirmations.html">Viewed Confirmations</a><br/>
+		<a href="subscriptions.html">Subscriptions</a><br/>
+	</div>
+	<br/>
+	<script>
+		$(document).ready( function () {
+			var dialog = $("#dialog");
+			function setMember(member) {
+				$("#roomId").val((member && member.roomId) || null);
+				$("#personId").val((member && member.personId) || null);
+			}
+			function getMember() {
+				function set(object, property, personId) {
+					if (personId)
+						object[property] = personId;
+				}
+				var member = {};
+				set(member, "roomId", $("#roomId").val());
+				set(member, "personId", $("#personId").val());
+				return member;
+			}
+			function deleteMember() {
+				dialog.dialog("close");
+				var member = getMember();
+				if (member.roomId && member.personId) {
+					//alert("delete member " + JSON.stringify(member));
+					$.ajax({
+						url: "/svc/member/" + member.roomId + "/" + member.personId,
+						method: "DELETE",
+						success: table.ajax.reload.bind(null, null, false),
+						error: alert.bind(null, "Deletion failure")
+					});
+				}
+			}
+			function postMember() {
+				if (!$("#roomId").val() || !$("#personId").val()) {
+					alert("Error: Room Id or Person Id is empty");
+					return;
+				}
+				dialog.dialog("close");
+				var member = getMember();
+				var body = JSON.stringify(member);
+				//alert("post member " + body);
+				$.ajax({
+					url: "/svc/member",
+					method: "POST",
+					contentType: "application/json; charset=UTF-8'",
+					data: body,
+					processData: false,
+					success: table.ajax.reload.bind(null, null, false),
+					error: alert.bind(null, "Posting failure")
+				});
+			}
+			dialog.dialog({
+				autoOpen: false,
+				  height: 300,
+				  width: 360,
+				  modal: true,
+				  buttons: {
+					Delete: deleteMember,
+					Save: postMember
+				  }
+			});
+			var table = $("#memberTable").DataTable({
+				pageLength: 25,
+				ajax: {
+					url: "/svc/members",
+					dataSrc: ""
+				},
+				columns: [
+					{ data: "roomId", defaultContent: "" },
+					{ data: "personId", defaultContent: "" }
+				]
+			});
+			$("#memberTable tbody").on("click", "tr", function () {
+				setMember(table.row(this).data());
+				dialog.dialog("open");
+			});
+			$("#createMember").on("click", function() {
+				setMember(null);
+				dialog.dialog("open");
+			});
+    	});
+	</script>
+	<noscript>Info: JavaScript must be enabled.</noscript>
+</body>
+</html>

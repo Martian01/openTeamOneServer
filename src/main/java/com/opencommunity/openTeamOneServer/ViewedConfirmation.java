@@ -17,8 +17,8 @@ interface ViewedConfirmationRepository extends CrudRepository<ViewedConfirmation
 	// for viewedCount (simple version)
 	long countByMessageIdAndPersonIdNot(String messageId, String personId);
 	// for badgeCount etc.
-	ViewedConfirmation findTopByPersonIdAndRoomIdOrderByMessagePostedAtDesc(String personId, String messageRoomId);
-	// for viewedAt
+	ViewedConfirmation findTopByPersonIdAndRoomIdOrderByMessagePostedAtDesc(String personId, String roomId);
+	// for viewedAt etc.
 	ViewedConfirmation findTopByMessageIdAndPersonId(String messageId, String personId);
 	// for debugging
 	Iterable<ViewedConfirmation> findByPersonId(String personId);

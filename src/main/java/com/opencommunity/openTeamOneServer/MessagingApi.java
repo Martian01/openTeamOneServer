@@ -40,7 +40,7 @@ public class MessagingApi {
 	@Autowired
 	private ViewedConfirmationRepository viewedConfirmationRepository;
 	@Autowired
-	private SubscriptionRepository sr;
+	private SubscriptionRepository subscriptionRepository;
 
 	/* API implementation */
 
@@ -55,7 +55,7 @@ public class MessagingApi {
 		Subscription subscription = getSubscription(new JSONObject(input), user.userId);
 		if (subscription == null)
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		sr.save(subscription);
+		subscriptionRepository.save(subscription);
 		return Util.httpStringResponse(HttpStatus.OK);
 	}
 
@@ -70,11 +70,11 @@ public class MessagingApi {
 		SubscriptionKey key = getSubscriptionKey(new JSONObject(input), user.userId);
 		if (key == null)
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		Subscription subscription = sr.findTop1ByTargetTypeAndAppIdAndDeviceTokenAndUserId(key.targetType, key.appId, key.deviceToken, key.userId);
+		Subscription subscription = subscriptionRepository.findTopByTargetTypeAndAppIdAndDeviceTokenAndUserId(key.targetType, key.appId, key.deviceToken, key.userId);
 		if (subscription != null) {
 			subscription.isActive = false;
 			subscription.changedAt = System.currentTimeMillis();
-			sr.save(subscription);
+			subscriptionRepository.save(subscription);
 		}
 		return Util.httpStringResponse(HttpStatus.OK);
 	}
@@ -254,10 +254,9 @@ public class MessagingApi {
 		if (!isRoomMember(roomId, user.personId))
 			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		//
+		if (multipartRequest == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
 		long now = System.currentTimeMillis();
-		File directory = Util.getDataDirectory(tenantParameterRepository, SymbolicFile.DIRECTORY_ATTACHMENTS);
-		if (directory == null)
-			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
 		// scan message part
 		String parameter = multipartRequest.getParameter("message");
 		if (parameter == null)
@@ -267,11 +266,14 @@ public class MessagingApi {
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
 		// add mime types and save attachments in file system
 		if (protoMessage.protoSymbolicFiles != null) {
-			// first pass for validation
+			// first pass for validation of all attachments
 			for (ProtoSymbolicFile protoSymbolicFile : protoMessage.protoSymbolicFiles)
 				if (multipartRequest.getFile(protoSymbolicFile.clientId) == null)
 					return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
 			// second pass for writing attachments
+			File directory = Util.getDataDirectory(tenantParameterRepository, SymbolicFile.DIRECTORY_ATTACHMENTS);
+			if (directory == null)
+				return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
 			for (ProtoSymbolicFile protoSymbolicFile : protoMessage.protoSymbolicFiles) {
 				MultipartFile multipartFile = multipartRequest.getFile(protoSymbolicFile.clientId);
 				protoSymbolicFile.mimeType = multipartFile.getContentType();

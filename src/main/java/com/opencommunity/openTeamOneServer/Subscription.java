@@ -12,7 +12,7 @@ import javax.persistence.IdClass;
 import java.util.ArrayList;
 
 interface SubscriptionRepository extends CrudRepository<Subscription, SubscriptionKey> {
-	Subscription findTop1ByTargetTypeAndAppIdAndDeviceTokenAndUserId(String targetType, String appId, String deviceToken, String userId);
+	Subscription findTopByTargetTypeAndAppIdAndDeviceTokenAndUserId(String targetType, String appId, String deviceToken, String userId);
 }
 
 @Entity

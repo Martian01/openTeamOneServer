@@ -15,6 +15,8 @@ interface RoomMemberRepository extends CrudRepository<RoomMember, RoomMemberKey>
 	Iterable<RoomMember> findByRoomId(String roomId);
 	// for rooms
 	Iterable<RoomMember> findByPersonId(String personId);
+	// full key
+	RoomMember findTopByRoomIdAndPersonId(String roomId, String personId);
 	// for private rooms
 	RoomMember findTopByRoomIdAndPersonIdNot(String roomId, String personId);
 	// for specific membership (validation)

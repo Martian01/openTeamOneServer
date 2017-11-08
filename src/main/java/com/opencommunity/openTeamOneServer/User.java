@@ -40,7 +40,7 @@ public class User {
 	}
 
 	public User(String userId, String password, String personId, boolean hasUserRole, boolean hasAdminRole) {
-		this.userId = userId.toLowerCase();
+		this.userId = userId == null || userId.length() == 0 ? Util.getRandomString(8) : userId.toLowerCase();
 		setPassword(password);
 		this.personId = personId;
 		this.hasUserRole = hasUserRole;
@@ -48,7 +48,8 @@ public class User {
 	}
 
 	public User(JSONObject item) throws JSONException {
-		userId = JsonUtil.getString(item, "userId").toLowerCase();
+		userId = JsonUtil.getString(item, "userId");
+		userId = userId == null || userId.length() == 0 ? Util.getRandomString(8) : userId.toLowerCase();
 		// accept unencrypted password or password hash
 		String password = JsonUtil.getString(item, "password");
 		if (password != null)

@@ -23,6 +23,10 @@ public class Util {
 		return UUID.randomUUID().toString().replace("-", "").toUpperCase();
 	}
 
+	public static String getRandomString(int length) {
+		return UUID.randomUUID().toString().replace("-", "").substring(0, length).toLowerCase();
+	}
+
 	public static Map<String, String> splitQueryString(String queryString) {
 		Map<String, String> map = new HashMap<>();
 		if (queryString != null) {

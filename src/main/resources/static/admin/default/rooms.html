@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<title>Open Team One Administration</title>
+	<link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
+	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.css"/>
+	<link rel="stylesheet" type="text/css" href="css/default.css"/>
+	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+</head>
+<body>
+	<div style="display: none;">
+		<div id="dialog" title="Room Dialog">
+			<form id="form">
+				<label for="roomId">Room Id:</label><br/>
+				<input id="roomId" type="text" size="32" readonly disabled name="roomId" value="roomId"/><br/><br/>
+				<label for="name">Name:</label><br/>
+				<input id="name" type="text" name="name"/><br/><br/>
+				<label for="shortName">Short Name:</label><br/>
+				<input id="shortName" type="text" name="shortName"/><br/><br/>
+				<label for="roomType">Room Type:</label><br/>
+				<input id="roomType" type="text" name="roomType"/><br/><br/>
+				<label for="pictureId">Picture Id:</label><br/>
+				<input id="pictureId" type="text" size="32" name="pictureId"/><br/><br/>
+				<label for="changedAt">Changed At:</label><br/>
+				<input id="changedAt" type="text" size="32" name="changedAt"/>&nbsp;<input id="_changedAt" type="button" value="Now"/><br/><br/>
+			</form>
+		</div>
+	</div>
+	<h1>Rooms</h1>
+	<table id="roomTable" class="display" width="100%" cellspacing="0">
+		<thead>
+		<tr>
+			<th>Room Id</th>
+			<th>Name</th>
+			<th>Short Name</th>
+			<th>Room Type</th>
+			<th>Picture Id</th>
+			<th>Changed At</th>
+		</tr>
+		</thead>
+	</table>
+	<br/>
+	<input id="createRoom" type="button" value="Create New Room"/>
+	<br/><br/>
+	<div>
+		<h2>Menu</h2>
+		<a href="index.html">Admin Home</a><br/>
+		<a href="parameters.html">Tenant Parameters</a><br/>
+		<a href="users.html">Users</a><br/>
+		<a href="persons.html">Persons</a><br/>
+		<a href="rooms.html">Rooms</a><br/>
+		<a href="members.html">Room Members</a><br/>
+		<a href="messages.html">Messages</a><br/>
+		<a href="files.html">Files</a><br/>
+		<a href="confirmations.html">Viewed Confirmations</a><br/>
+		<a href="subscriptions.html">Subscriptions</a><br/>
+	</div>
+	<br/>
+	<script>
+		$(document).ready( function () {
+			var dialog = $("#dialog");
+			function setRoom(room) {
+				$("#roomId").val((room && room.roomId) || null);
+				$("#name").val((room && room.name) || null);
+				$("#shortName").val((room && room.firstName) || null);
+				$("#roomType").val((room && room.roomType) || null);
+				$("#pictureId").val((room && room.pictureId) || null);
+				$("#changedAt").val((room && room.changedAt) || null);
+			}
+			function getRoom() {
+				function set(object, property, value) {
+					if (value)
+						object[property] = value;
+				}
+				var room = {};
+				set(room, "roomId", $("#roomId").val());
+				set(room, "name", $("#name").val());
+				set(room, "shortName", $("#shortName").val());
+				set(room, "roomType", $("#roomType").val());
+				set(room, "pictureId", $("#pictureId").val());
+				set(room, "changedAt", $("#changedAt").val());
+				return room;
+			}
+			function deleteRoom() {
+				dialog.dialog("close");
+				var room = getRoom();
+				if (room.roomId) {
+					//alert("delete room " + JSON.stringify(room));
+					$.ajax({
+						url: "/svc/room/" + room.roomId,
+						method: "DELETE",
+						success: table.ajax.reload.bind(null, null, false),
+						error: alert.bind(null, "Deletion failure")
+					});
+				}
+			}
+			function postRoom() {
+				dialog.dialog("close");
+				var room = getRoom();
+				var body = JSON.stringify(room);
+				//alert("post room " + body);
+				$.ajax({
+					url: "/svc/room",
+					method: "POST",
+					contentType: "application/json; charset=UTF-8'",
+					data: body,
+					processData: false,
+					success: table.ajax.reload.bind(null, null, false),
+					error: alert.bind(null, "Posting failure")
+				});
+			}
+			dialog.dialog({
+				autoOpen: false,
+				  height: 580,
+				  width: 500,
+				  modal: true,
+				  buttons: {
+					Delete: deleteRoom,
+					Save: postRoom
+				  }
+			});
+			var table = $("#roomTable").DataTable({
+				pageLength: 25,
+				ajax: {
+					url: "/svc/rooms",
+					dataSrc: ""
+				},
+				columns: [
+					{ data: "roomId", defaultContent: "" },
+					{ data: "name", defaultContent: "" },
+					{ data: "shortName", defaultContent: "" },
+					{ data: "roomType", defaultContent: "" },
+					{ data: "pictureId", defaultContent: "" },
+					{ data: "changedAt", defaultContent: "" }
+				]
+			});
+			$("#roomTable tbody").on("click", "tr", function () {
+				setRoom(table.row(this).data());
+				dialog.dialog("open");
+			});
+			$("#createRoom").on("click", function() {
+				setRoom(null);
+				dialog.dialog("open");
+			});
+			$("#_changedAt").on("click", function() {
+				$("#changedAt").val(new Date().toISOString());
+			});
+    	});
+	</script>
+	<noscript>Info: JavaScript must be enabled.</noscript>
+</body>
+</html>

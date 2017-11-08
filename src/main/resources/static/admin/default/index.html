@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<title>Open Team One Administration</title>
-	<link rel="stylesheet" type="text/css" href="css/default.css" />
+	<link rel="stylesheet" type="text/css" href="css/default.css"/>
 	<script>
 		function setVisibility(id, isVisible) {
 			var element = document.getElementById(id)
@@ -52,15 +52,15 @@
 			<fieldset>
 				<legend>Login Credentials</legend>
 				<label for="username">Username:</label><br/>
-				<input id="username" type="text" name="username"><br/>
+				<input id="username" type="text" name="username"/><br/>
 				<label for="password">Password:</label><br/>
-				<input id="password" type="password" name="password"><br/><br/>
-				<input type="submit" value="Log In">
+				<input id="password" type="password" name="password"/><br/><br/>
+				<input type="submit" value="Log In"/>
 			</fieldset>
 		</form>
 		<form id="logoutForm" action="/ui/logout" method="post" style="display: none;">
-			<input type="hidden" name="dummy" value="">
-			<input type="submit" value="Log Out">
+			<input type="hidden" name="dummy" value=""/>
+			<input type="submit" value="Log Out"/>
 		</form>
 	</div>
 	<div id="adminFunctions" style="display: none;">
@@ -68,10 +68,10 @@
 		<form action="/ui/tenant/parameter" method="post">
 			<fieldset>
 				<legend>Set server-side data directory</legend>
-				<input type="hidden" name="name" value="dataDirectory">
+				<input type="hidden" name="name" value="dataDirectory"/>
 				<label for="dataDirectory">Data Directory:</label><br/>
-				<input id="dataDirectory" type="text" name="value"><br/><br/>
-				<input type="submit" value="Set">
+				<input id="dataDirectory" type="text" name="value"/><br/><br/>
+				<input type="submit" value="Set"/>
 			</fieldset>
 		</form>
 		<h2>Server-side Snapshots</h2>
@@ -79,17 +79,17 @@
 			<fieldset>
 				<legend>Load a snapshot from the server</legend>
 				<label for="filename">File name:</label><br/>
-				<input id="filename" type="text" name="filename"><br/><br/>
-				<input type="checkbox" name="config">&nbsp;Include tenant parameters and admin users<br/><br/>
-				<input type="submit" value="Load">
+				<input id="filename" type="text" name="filename"/><br/><br/>
+				<input type="checkbox" name="config"/>&nbsp;Include tenant parameters and admin users<br/><br/>
+				<input type="submit" value="Load"/>
 			</fieldset>
 		</form>
 		<form action="/ui/snapshot/save" method="post">
 			<fieldset>
 				<legend>Save a snapshot on the server</legend>
 				File name:<br/>
-				<input type="text" name="filename"><br/><br/>
-				<input type="submit" value="Save">
+				<input type="text" name="filename"/><br/><br/>
+				<input type="submit" value="Save"/>
 			</fieldset>
 		</form>
 		<br/><br/>
