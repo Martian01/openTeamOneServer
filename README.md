@@ -12,13 +12,11 @@ The SAP Team One apps are normally operated against a SAP Sports One backend tha
 
 One function that cannot be provided for legal reasons are push notifications. The delivery of push notifications would require to reverse-engineer a secret API key.
 
-## Current Limitations
+## Limitations
 
-At the time of writing there are limitations in two areas. One is the type of database provided which is an in-memory H2 database. Due to the JPA software interface, it should not be difficult to connect a disk-based SQL database like MySQL or similar. In the meantime there is an export/import function that can be used to persist snapshots.
+Whilst the server is functionally complete within the scope described above, the user experience of the web apps for server administration and user self-service is still limited. Those web apps need a better user interaction & web design and a modern implementation resulting in a pleasant best-of-breed user experience.
 
-The other limited area is the web application used by the administrator. Functionally the web app needs to offer maintenance modules for configuration data and master data. At the moment those can only be maintained through the export/import interface. In addition to functional enhancements, the web app needs a good web design and a modern implementation resulting in a pleasant best-of-breed user experience.
-
-In fact, Open Team One has a configuration switch allowing the admin to switch between separate web applications, should there ever be more than one.
+Open Team One offers a configuration switch allowing the admin to switch between different web applications, should there ever be more than one.
 
 ## Quick Guide (How to run the server with demo content)
 
@@ -34,9 +32,13 @@ You copy the complete content of the project directory "demo" into the designate
 
 ![Preparation](docu/demo1.png)
 
-### Step 2: Login
+### Step 2: Starting the Server
 
 Next step is to start the server and log in to the admin section. Since this project is distributed as source code, you would import it as Java project into a suitable IDE like IntelliJ IDEA or Eclipse. When asked for project types you would probably choose "Maven" since all dependencies are declared in a pom.xml file.
+
+You would start the server by hitting the "execute" button of your IDE. Alternatively you can build and execute a JAR file on the command line, as layed out in a section below.
+
+### Step 3: Login
 
 When the server is running you call up the admin page in a web browser. Assuming your server listens on TCP port 8080 (depends on your run configuration), you would enter the URL http://localhost:8080 in your browser.
 
@@ -44,7 +46,7 @@ The default login is user "admin" with password "admin".
 
 ![Admin Login](docu/demo2.png)
 
-### Step 3: Configuration
+### Step 4: Configuration
 
 The server is smart enough to configure missing information when it starts up. There are not many configuration settings to begin with, and every setting can be changed by the administrator. However, there is one setting the server cannot guess: the data directory you have chosen in step 1.
 
@@ -52,23 +54,25 @@ So before you continue with anything, you need to make this directory known to t
 
 ![Configuration](docu/demo3.png)
 
-### Step 4: Import
+### Step 5: Import
 
-In the last step you import the database content of the demo instance from the JSON file "demo". If you followed the previous steps, the server will find it when you hit the "Load" button as in the following picture:
+In this step you import the database content of the demo instance from the JSON file "demo". If you followed the previous steps, the server will find it when you hit the "Load" button as in the following picture:
 
 ![Import](docu/demo4.png)
 
 Congratulations! The demo instance is now operational.
 
-### Step 5: Profit
+### Step 6: Profit
 
 The demo instance contains 3 users that you can log in as from your mobile devices. The user names are player01, player02 and player03. All 3 of them have the case-sensitive password "pass".
 
 ![App Login](docu/screenshot0.png)
 
-Familiarize yourself with the system by creating transactional content through mobile devices, saving database snapshots to the server and studyding the JSON objects inside those snapshots. 
+You can now familiarize yourself with the system by creating transactional content through mobile devices, and studying the database content using the admin functionality of the server. 
 
-At this point in time the admin functionality is limited to the bare minimum, which means that master data creation and maintenance (users, persons, rooms, room memberships) can only be done through JSON snapshots that are uploaded. Note that a JSON file can be partial. For instance, if a JSON file contains only users and persons, it will not affect other object types in the database.
+At this point in time the admin functionality is limited to the bare essentials. There are maintenance modules for the database tables available, allowing you to create, read, update & delete table entries (the so-called CRUD operations). There are database tables for tenant parameters, users, persons, rooms, room memberships, messages, files, viewed confirmations and subscriptions.
+
+You can also export and import JSON snapshots of the database content. Note that a JSON file can be partial. For instance, if a JSON import contains only users and persons, it will not affect other object types in the database.
 
 ## Screenshots of Demo Content
 
@@ -114,3 +118,17 @@ Restart Open Team One Server and you're done. If you want to migrate the content
 
 Note: we ran into one issue when running the server against MariaDB, caused by a Java property that coincided with a protected SQL identifier. We solved the issue by re-naming the property.
 
+## Building a JAR file
+
+One of the most simple deployment options is to build a JAR file that can be executed anywhere. You simply call the Maven wrapper in the project root directory like this:
+
+	$ ./mvnw package
+
+This will build the project in the "target" directory and create two JAR files: One relatively small, containing only the project artefacts, the other one quite large, containing everything including the dependencies.
+
+	-rw-r--r--  1 xxx users 30102998 Nov  9 00:53 openTeamOneServer-0.0.1-SNAPSHOT.jar
+	-rw-r--r--  1 xxx users   114474 Nov  9 00:53 openTeamOneServer-0.0.1-SNAPSHOT.jar.original
+
+The large JAR file can be copied to another machine and executed by a JRE (Java Runtime Environment) like this:
+
+	java -jar openTeamOneServer-0.0.1-SNAPSHOT.jar
