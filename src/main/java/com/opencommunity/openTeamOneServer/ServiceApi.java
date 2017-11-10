@@ -481,7 +481,7 @@ public class ServiceApi {
 
 	/* CRUD Services for ViewedConfirmation */
 
-	@RequestMapping(method = RequestMethod.GET, value = "/viewedConfirmations")
+	@RequestMapping(method = RequestMethod.GET, value = "/confirmations")
 	public ResponseEntity<String> viewedConfirmationsGet(HttpServletRequest request) throws Exception {
 		User user = Util.getSessionAdmin(request, userRepository);
 		if (user == null)
@@ -490,7 +490,7 @@ public class ServiceApi {
 		return Util.httpStringResponse(ViewedConfirmation.toJsonArray(viewedConfirmationRepository.findAll()));
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/viewedConfirmation/{messageId}/{personId}")
+	@RequestMapping(method = RequestMethod.GET, value = "/confirmation/{messageId}/{personId}")
 	public ResponseEntity<String> viewedConfirmationGet(HttpServletRequest request, @PathVariable String messageId, @PathVariable String personId) throws Exception {
 		User user = Util.getSessionAdmin(request, userRepository);
 		if (user == null)
@@ -503,7 +503,7 @@ public class ServiceApi {
 		return Util.httpStringResponse(viewedConfirmation.toJson());
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, value = "/viewedConfirmation/{messageId}/{personId}")
+	@RequestMapping(method = RequestMethod.DELETE, value = "/confirmation/{messageId}/{personId}")
 	public ResponseEntity<String> viewedConfirmationDelete(HttpServletRequest request, @PathVariable String messageId, @PathVariable String personId) throws Exception {
 		User user = Util.getSessionAdmin(request, userRepository);
 		if (user == null)
@@ -517,7 +517,7 @@ public class ServiceApi {
 		return Util.httpStringResponse(HttpStatus.OK);
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/viewedConfirmation")
+	@RequestMapping(method = RequestMethod.POST, value = "/confirmation")
 	public ResponseEntity<String> viewedConfirmationPost(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
 		User user = Util.getSessionAdmin(request, userRepository);
 		if (user == null)

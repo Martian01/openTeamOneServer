@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<title>Open Team One Administration</title>
+	<link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
+	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.css"/>
+	<link rel="stylesheet" type="text/css" href="css/default.css"/>
+	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+</head>
+<body>
+	<div style="display: none;">
+		<div id="dialog" title="Message Dialog">
+			<form id="form">
+				<label for="messageId">Message Id:</label><br/>
+				<input id="messageId" type="text" size="32" readonly disabled name="messageId"/><br/><br/>
+				<label for="clientMessageId">Client Message Id:</label><br/>
+				<input id="clientMessageId" type="text" size="32" name="clientMessageId"/><br/><br/>
+				<label for="roomId">Room Id:</label><br/>
+				<input id="roomId" type="text" size="32" name="roomId"/><br/><br/>
+				<label for="senderPersonId">Sender Id:</label><br/>
+				<input id="senderPersonId" type="text" size="32" name="senderPersonId"/><br/><br/>
+				<label for="postedAt">Posted at:</label><br/>
+				<input id="postedAt" type="text" size="32" name="changedAt"/>&nbsp;<input id="_postedAt" type="button" value="Now"/><br/><br/>
+				<label for="text">Text:</label><br/>
+				<textarea id="text" name="text" cols="40" rows="5" wrap="soft"></textarea><br/><br/>
+				<input id="isDeleted" type="checkbox" name="isDeleted"/>&nbsp;is deleted<br/><br/>
+				<label for="updatedAt">Updated at:</label><br/>
+				<input id="updatedAt" type="text" size="32" name="updatedAt"/>&nbsp;<input id="_updatedAt" type="button" value="Now"/><br/><br/>
+			</form>
+		</div>
+	</div>
+	<h1>Messages</h1>
+	<table id="messageTable" class="display" width="100%" cellspacing="0">
+		<thead>
+		<tr>
+			<th>Message Id</th>
+			<th>Client Message Id</th>
+			<th>Room Id</th>
+			<th>Sender Id</th>
+			<th>Posted at</th>
+			<th>Text</th>
+			<th>Is Deleted</th>
+			<th>Updated at</th>
+		</tr>
+		</thead>
+	</table>
+	<br/>
+	<input id="createMessage" type="button" value="Create New Message"/>
+	<br/><br/>
+	<div>
+		<h2>Menu</h2>
+		<a href="index.html">Admin Home</a><br/>
+		<a href="parameters.html">Tenant Parameters</a><br/>
+		<a href="users.html">Users</a><br/>
+		<a href="persons.html">Persons</a><br/>
+		<a href="rooms.html">Rooms</a><br/>
+		<a href="members.html">Room Members</a><br/>
+		<a href="messages.html">Messages</a><br/>
+		<a href="files.html">Files</a><br/>
+		<a href="confirmations.html">Viewed Confirmations</a><br/>
+		<a href="subscriptions.html">Subscriptions</a><br/>
+	</div>
+	<br/>
+	<script>
+		$(document).ready( function () {
+			var dialog = $("#dialog");
+			function setMessage(message) {
+				$("#messageId").val((message && message.messageId) || null);
+				$("#clientMessageId").val((message && message.clientMessageId) || null);
+				$("#roomId").val((message && message.roomId) || null);
+				$("#senderPersonId").val((message && message.senderPersonId) || null);
+				$("#postedAt").val((message && message.postedAt) || null);
+				$("#text").val((message && message.text) || null);
+				$("#isDeleted").prop('checked', message && message.isDeleted);
+				$("#updatedAt").val((message && message.updatedAt) || null);
+			}
+			function getMessage() {
+				function set(object, property, value) {
+					if (value)
+						object[property] = value;
+				}
+				var message = {};
+				set(message, "messageId", $("#messageId").val());
+				set(message, "clientMessageId", $("#clientMessageId").val());
+				set(message, "roomId", $("#roomId").val());
+				set(message, "senderPersonId", $("#senderPersonId").val());
+				set(message, "postedAt", $("#postedAt").val());
+				set(message, "text", $("#text").val());
+				set(message, "isDeleted", $("#isDeleted").prop("checked"));
+				set(message, "updatedAt", $("#updatedAt").val());
+				return message;
+			}
+			function deleteMessage() {
+				dialog.dialog("close");
+				var message = getMessage();
+				if (message.messageId) {
+					//alert("delete message " + JSON.stringify(message));
+					$.ajax({
+						url: "/svc/message/" + message.messageId,
+						method: "DELETE",
+						success: table.ajax.reload.bind(null, null, false),
+						error: alert.bind(null, "Deletion failure")
+					});
+				}
+			}
+			function postMessage() {
+				dialog.dialog("close");
+				var message = getMessage();
+				var body = JSON.stringify(message);
+				//alert("post message " + body);
+				$.ajax({
+					url: "/svc/message",
+					method: "POST",
+					contentType: "application/json; charset=UTF-8'",
+					data: body,
+					processData: false,
+					success: table.ajax.reload.bind(null, null, false),
+					error: alert.bind(null, "Posting failure")
+				});
+			}
+			dialog.dialog({
+				autoOpen: false,
+				  height: 750,
+				  width: 500,
+				  modal: true,
+				  buttons: {
+					Delete: deleteMessage,
+					Save: postMessage
+				  }
+			});
+			var table = $("#messageTable").DataTable({
+				pageLength: 25,
+				ajax: {
+					url: "/svc/messages",
+					dataSrc: ""
+				},
+				columns: [
+					{ data: "messageId", defaultContent: "" },
+					{ data: "clientMessageId", defaultContent: "" },
+					{ data: "roomId", defaultContent: "" },
+					{ data: "senderPersonId", defaultContent: "" },
+					{ data: "postedAt", defaultContent: "" },
+					{ data: "text", defaultContent: "" },
+					{ data: "isDeleted", defaultContent: false },
+					{ data: "updatedAt", defaultContent: "" }
+				]
+			});
+			$("#messageTable tbody").on("click", "tr", function () {
+				setMessage(table.row(this).data());
+				dialog.dialog("open");
+			});
+			$("#createMessage").on("click", function() {
+				setMessage(null);
+				dialog.dialog("open");
+			});
+			$("#_postedAt").on("click", function() {
+				$("#postedAt").val(new Date().toISOString());
+			});
+			$("#_updatedAt").on("click", function() {
+				$("#updatedAt").val(new Date().toISOString());
+			});
+    	});
+	</script>
+	<noscript>Info: JavaScript must be enabled.</noscript>
+</body>
+</html>

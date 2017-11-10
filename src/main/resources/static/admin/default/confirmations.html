@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<title>Open Team One Administration</title>
+	<link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
+	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.css"/>
+	<link rel="stylesheet" type="text/css" href="css/default.css"/>
+	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+</head>
+<body>
+	<div style="display: none;">
+		<div id="dialog" title="Viewed Confirmation Dialog">
+			<form id="form">
+				<label for="messageId">Room Id:</label><br/>
+				<input id="messageId" type="text" size="32" name="messageId"/><br/><br/>
+				<label for="personId">Person Id:</label><br/>
+				<input id="personId" type="text" size="32" name="personId"/><br/><br/>
+				<label for="roomId">Room Id:</label><br/>
+				<input id="roomId" type="text" size="32" name="roomId"/><br/><br/>
+				<label for="messagePostedAt">Room Id:</label><br/>
+				<input id="messagePostedAt" type="text" size="32" name="messagePostedAt"/>&nbsp;<input id="_messagePostedAt" type="button" value="Now"/><br/><br/>
+				<label for="confirmedAt">Room Id:</label><br/>
+				<input id="confirmedAt" type="text" size="32" name="confirmedAt"/>&nbsp;<input id="_confirmedAt" type="button" value="Now"/><br/><br/>
+			</form>
+		</div>
+	</div>
+	<h1>Viewed Confirmations</h1>
+	<table id="confirmationTable" class="display" width="100%" cellspacing="0">
+		<thead>
+		<tr>
+			<th>Message Id</th>
+			<th>Person Id</th>
+			<th>Room Id</th>
+			<th>Posted at</th>
+			<th>Confirmed at</th>
+		</tr>
+		</thead>
+	</table>
+	<br/>
+	<input id="createConfirmation" type="button" value="Create New Viewed Confirmation"/>
+	<br/><br/>
+	<div>
+		<h2>Menu</h2>
+		<a href="index.html">Admin Home</a><br/>
+		<a href="parameters.html">Tenant Parameters</a><br/>
+		<a href="users.html">Users</a><br/>
+		<a href="persons.html">Persons</a><br/>
+		<a href="rooms.html">Rooms</a><br/>
+		<a href="members.html">Room Members</a><br/>
+		<a href="messages.html">Messages</a><br/>
+		<a href="files.html">Files</a><br/>
+		<a href="confirmations.html">Viewed Confirmations</a><br/>
+		<a href="subscriptions.html">Subscriptions</a><br/>
+	</div>
+	<br/>
+	<script>
+		$(document).ready( function () {
+			var dialog = $("#dialog");
+			function setConfirmation(confirmation) {
+				$("#messageId").val((confirmation && confirmation.messageId) || null);
+				$("#personId").val((confirmation && confirmation.personId) || null);
+				$("#roomId").val((confirmation && confirmation.roomId) || null);
+				$("#messagePostedAt").val((confirmation && confirmation.messagePostedAt) || null);
+				$("#confirmedAt").val((confirmation && confirmation.confirmedAt) || null);
+			}
+			function getConfirmation() {
+				function set(object, property, personId) {
+					if (personId)
+						object[property] = personId;
+				}
+				var confirmation = {};
+				set(confirmation, "messageId", $("#messageId").val());
+				set(confirmation, "personId", $("#personId").val());
+				set(confirmation, "roomId", $("#roomId").val());
+				set(confirmation, "messagePostedAt", $("#messagePostedAt").val());
+				set(confirmation, "confirmedAt", $("#confirmedAt").val());
+				return confirmation;
+			}
+			function deleteConfirmation() {
+				dialog.dialog("close");
+				var confirmation = getConfirmation();
+				if (confirmation.roomId && confirmation.personId) {
+					//alert("delete confirmation " + JSON.stringify(confirmation));
+					$.ajax({
+						url: "/svc/confirmation/" + confirmation.roomId + "/" + confirmation.personId,
+						method: "DELETE",
+						success: table.ajax.reload.bind(null, null, false),
+						error: alert.bind(null, "Deletion failure")
+					});
+				}
+			}
+			function postConfirmation() {
+				if (!$("#messageId").val() || !$("#personId").val()) {
+					alert("Error: Message Id or Person Id is empty");
+					return;
+				}
+				dialog.dialog("close");
+				var confirmation = getConfirmation();
+				var body = JSON.stringify(confirmation);
+				//alert("post confirmation " + body);
+				$.ajax({
+					url: "/svc/confirmation",
+					method: "POST",
+					contentType: "application/json; charset=UTF-8'",
+					data: body,
+					processData: false,
+					success: table.ajax.reload.bind(null, null, false),
+					error: alert.bind(null, "Posting failure")
+				});
+			}
+			dialog.dialog({
+				autoOpen: false,
+				  height: 500,
+				  width: 500,
+				  modal: true,
+				  buttons: {
+					Delete: deleteConfirmation,
+					Save: postConfirmation
+				  }
+			});
+			var table = $("#confirmationTable").DataTable({
+				pageLength: 25,
+				ajax: {
+					url: "/svc/confirmations",
+					dataSrc: ""
+				},
+				columns: [
+					{ data: "messageId", defaultContent: "" },
+					{ data: "personId", defaultContent: "" },
+					{ data: "roomId", defaultContent: "" },
+					{ data: "messagePostedAt", defaultContent: "" },
+					{ data: "confirmedAt", defaultContent: "" }
+				]
+			});
+			$("#confirmationTable tbody").on("click", "tr", function () {
+				setConfirmation(table.row(this).data());
+				dialog.dialog("open");
+			});
+			$("#createConfirmation").on("click", function() {
+				setConfirmation(null);
+				dialog.dialog("open");
+			});
+			$("#_messagePostedAt").on("click", function() {
+				$("#messagePostedAt").val(new Date().toISOString());
+			});
+			$("#_confirmedAt").on("click", function() {
+				$("#confirmedAt").val(new Date().toISOString());
+			});
+    	});
+	</script>
+	<noscript>Info: JavaScript must be enabled.</noscript>
+</body>
+</html>
