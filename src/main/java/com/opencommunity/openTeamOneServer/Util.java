@@ -156,7 +156,7 @@ public class Util {
 
 	public static File getFile(TenantParameterRepository tpr, String subdirectory, String fileId) {
 		File directory = getDataDirectory(tpr, subdirectory);
-		return directory == null ? null : new File(directory, fileId);
+		return directory == null || fileId == null ? null : new File(directory, fileId);
 	}
 
 	/* Files and Streams */

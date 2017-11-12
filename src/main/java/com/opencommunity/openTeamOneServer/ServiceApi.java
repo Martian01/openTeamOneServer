@@ -3,14 +3,20 @@ package com.opencommunity.openTeamOneServer;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotNull;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/svc")
@@ -204,25 +210,6 @@ public class ServiceApi {
 		return Util.httpStringResponse(person.toJson());
 	}
 
-	/*
-	@RequestMapping(method = RequestMethod.PUT, value = "/person/{personId}")
-	public ResponseEntity<String> personPut(HttpServletRequest request, @PathVariable String personId, @RequestBody String requestBody) throws Exception {
-		User user = Util.getSessionAdmin(request, userRepository);
-		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
-		//
-		if (personId == null || requestBody == null)
-			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		JSONObject item = new JSONObject(requestBody);
-		if (!personId.equals(item.get("personId")))
-			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		Person person = new Person(item);
-		personRepository.save(person);
-		//
-		return Util.httpStringResponse(HttpStatus.CREATED);
-	}
-	*/
-
 	@RequestMapping(method = RequestMethod.DELETE, value = "/person/{personId}")
 	public ResponseEntity<String> personDelete(HttpServletRequest request, @PathVariable String personId) throws Exception {
 		User user = Util.getSessionAdmin(request, userRepository);
@@ -409,76 +396,6 @@ public class ServiceApi {
 		return Util.httpStringResponse(message.toJson(), HttpStatus.CREATED);
 	}
 
-	/* CRUD Services for SymbolicFile */
-
-	@RequestMapping(method = RequestMethod.GET, value = "/symbolicFiles")
-	public ResponseEntity<String> symbolicFilesGet(HttpServletRequest request) throws Exception {
-		User user = Util.getSessionAdmin(request, userRepository);
-		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
-		//
-		return Util.httpStringResponse(SymbolicFile.toJsonArray(symbolicFileRepository.findAll()));
-	}
-
-	@RequestMapping(method = RequestMethod.GET, value = "/symbolicFile/{fileId}")
-	public ResponseEntity<String> symbolicFileGet(HttpServletRequest request, @PathVariable String fileId) throws Exception {
-		User user = Util.getSessionAdmin(request, userRepository);
-		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
-		//
-		SymbolicFile symbolicFile = fileId == null ? null : symbolicFileRepository.findOne(fileId);
-		if (symbolicFile == null)
-			return Util.httpStringResponse(HttpStatus.NOT_FOUND);
-		//
-		return Util.httpStringResponse(symbolicFile.toJson());
-	}
-
-	@RequestMapping(method = RequestMethod.DELETE, value = "/symbolicFile/{fileId}")
-	public ResponseEntity<String> symbolicFileDelete(HttpServletRequest request, @PathVariable String fileId) throws Exception {
-		User user = Util.getSessionAdmin(request, userRepository);
-		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
-		//
-		SymbolicFile symbolicFile = fileId == null ? null : symbolicFileRepository.findOne(fileId);
-		if (symbolicFile == null)
-			return Util.httpStringResponse(HttpStatus.GONE);
-		File file = Util.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
-		if (file == null)
-			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		if (file.exists())
-			file.delete();
-		symbolicFileRepository.delete(symbolicFile);
-		//
-		return Util.httpStringResponse(HttpStatus.OK);
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/symbolicFile")
-	public ResponseEntity<String> symbolicFilePost(MultipartHttpServletRequest multipartRequest) throws Exception {
-		User user = Util.getSessionAdmin(multipartRequest, userRepository);
-		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
-		//
-		if (multipartRequest == null)
-			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		String parameter = multipartRequest.getParameter("symbolicFile");
-		if (parameter == null)
-			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		SymbolicFile symbolicFile = new SymbolicFile(new JSONObject(parameter));
-		// save byte stream
-		MultipartFile multipartFile = multipartRequest.getFile("fileContent");
-		if (multipartFile == null)
-			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		File directory = Util.getDataDirectory(tenantParameterRepository, SymbolicFile.DIRECTORY_ATTACHMENTS);
-		if (directory == null)
-			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		File file = new File(directory, symbolicFile.fileId);
-		Util.writeFile(multipartFile.getInputStream(), file);
-		// save descriptor
-		symbolicFileRepository.save(symbolicFile);
-		//
-		return Util.httpStringResponse(symbolicFile.toJson(), HttpStatus.CREATED);
-	}
-
 	/* CRUD Services for ViewedConfirmation */
 
 	@RequestMapping(method = RequestMethod.GET, value = "/confirmations")
@@ -585,6 +502,125 @@ public class ServiceApi {
 		subscriptionRepository.save(subscription);
 		//
 		return Util.httpStringResponse(subscription.toJson(), HttpStatus.CREATED);
+	}
+
+	/* CRUD Services for SymbolicFile */
+
+	@RequestMapping(method = RequestMethod.GET, value = "/files")
+	public ResponseEntity<String> symbolicFilesGet(HttpServletRequest request) throws Exception {
+		User user = Util.getSessionAdmin(request, userRepository);
+		if (user == null)
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		return Util.httpStringResponse(SymbolicFile.toJsonArray(symbolicFileRepository.findAll()));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/file/{fileId}")
+	public ResponseEntity<String> symbolicFileGet(HttpServletRequest request, @PathVariable String fileId) throws Exception {
+		User user = Util.getSessionAdmin(request, userRepository);
+		if (user == null)
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		SymbolicFile symbolicFile = fileId == null ? null : symbolicFileRepository.findOne(fileId);
+		if (symbolicFile == null)
+			return Util.httpStringResponse(HttpStatus.NOT_FOUND);
+		//
+		return Util.httpStringResponse(symbolicFile.toJson());
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/file/{fileId}/content")
+	public ResponseEntity<Resource> symbolicFileContentGet(HttpServletRequest request, @PathVariable String fileId) throws Exception {
+		User user = Util.getSessionAdmin(request, userRepository);
+		if (user == null)
+			return Util.httpResourceResponse(HttpStatus.UNAUTHORIZED);
+		//
+		return sendFileContent(fileId);
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, value = "/file/{fileId}")
+	public ResponseEntity<String> symbolicFileDelete(HttpServletRequest request, @PathVariable String fileId) throws Exception {
+		User user = Util.getSessionAdmin(request, userRepository);
+		if (user == null)
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		SymbolicFile symbolicFile = fileId == null ? null : symbolicFileRepository.findOne(fileId);
+		if (symbolicFile == null)
+			return Util.httpStringResponse(HttpStatus.GONE);
+		if (!deleteFileContent(symbolicFile))
+			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+		symbolicFileRepository.delete(symbolicFile);
+		//
+		return Util.httpStringResponse(HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/file")
+	public ResponseEntity<String> personPut(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
+		User user = Util.getSessionAdmin(request, userRepository);
+		if (user == null)
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		if (requestBody == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		JSONObject item = new JSONObject(requestBody);
+		SymbolicFile symbolicFile = new SymbolicFile(item);
+		symbolicFileRepository.save(symbolicFile);
+		//
+		return Util.httpStringResponse(HttpStatus.CREATED);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/file")
+	public ResponseEntity<String> symbolicFilePost(MultipartHttpServletRequest multipartRequest) throws Exception {
+		User user = Util.getSessionAdmin(multipartRequest, userRepository);
+		if (user == null)
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		if (multipartRequest == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		String parameter = multipartRequest.getParameter("file");
+		if (parameter == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		SymbolicFile symbolicFile = new SymbolicFile(new JSONObject(parameter));
+		// save byte stream
+		MultipartFile multipartFile = multipartRequest.getFile("fileContent");
+		if (multipartFile == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		File directory = Util.getDataDirectory(tenantParameterRepository, symbolicFile.directory);
+		if (directory == null)
+			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+		File file = new File(directory, symbolicFile.fileId);
+		Util.writeFile(multipartFile.getInputStream(), file);
+		// save descriptor
+		deleteFileContent(symbolicFileRepository.findOne(symbolicFile.fileId));
+		symbolicFileRepository.save(symbolicFile);
+		//
+		return Util.httpStringResponse(symbolicFile.toJson(), HttpStatus.CREATED);
+	}
+
+	/* helper functions */
+
+	private boolean deleteFileContent(SymbolicFile symbolicFile) {
+		if (symbolicFile == null)
+			return false;
+		File file = Util.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
+		if (file == null)
+			return false;
+		if (file.exists())
+			file.delete();
+		return true;
+	}
+
+	private ResponseEntity<Resource> sendFileContent(String fileId) throws Exception {
+		SymbolicFile symbolicFile = symbolicFileRepository.findOne(fileId);
+		if (symbolicFile == null)
+			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
+		File file = Util.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
+		if (file == null)
+			return Util.httpResourceResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+		if (!file.canRead()) {
+			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
+		}
+		Resource resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+		return Util.httpResourceResponse(resource, MediaType.parseMediaType(symbolicFile.mimeType));
 	}
 
 }

@@ -38,12 +38,20 @@ public class MediaApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/picture/v1/service/rest/picture/{fileId}")
 	public ResponseEntity<Resource> picture(HttpServletRequest request, @PathVariable String fileId) throws Exception {
-		return sendFileContent(request, fileId);
+		User user = Util.getSessionContact(request, userRepository);
+		if (user == null)
+			return Util.httpResourceResponse(HttpStatus.UNAUTHORIZED);
+		//
+		return sendFileContent(fileId);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{fileId}/content")
 	public ResponseEntity<Resource> mediaFileContent(HttpServletRequest request, @PathVariable String fileId) throws Exception {
-		return sendFileContent(request, fileId);
+		User user = Util.getSessionContact(request, userRepository);
+		if (user == null)
+			return Util.httpResourceResponse(HttpStatus.UNAUTHORIZED);
+		//
+		return sendFileContent(fileId);
 	}
 
 	/* The following API calls are intentionally not implemented */
@@ -54,11 +62,7 @@ public class MediaApi {
 
 	/* helper functions */
 
-	public ResponseEntity<Resource> sendFileContent(HttpServletRequest request, String fileId) throws Exception {
-		User user = Util.getSessionContact(request, userRepository);
-		if (user == null)
-			return Util.httpResourceResponse(HttpStatus.UNAUTHORIZED);
-		//
+	private ResponseEntity<Resource> sendFileContent(String fileId) throws Exception {
 		SymbolicFile symbolicFile = symbolicFileRepository.findOne(fileId);
 		if (symbolicFile == null)
 			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
