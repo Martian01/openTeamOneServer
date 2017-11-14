@@ -1,6 +1,6 @@
 # Open Team One Server
 
-![Logo](src/main/resources/static/admin/logo128.png)
+![Logo](src/main/resources/static/default/logo128.png)
 
 Open Team One Server is a backend component to support the communication function of SAP Team One mobile apps. At this point in time the software is ready to be used productively, although some areas are still work in progress.
 
@@ -15,8 +15,6 @@ One function that cannot be provided for legal reasons are push notifications. T
 ## Limitations
 
 Whilst the server is functionally complete within the scope described above, the user experience of the web apps for server administration and user self-service is still limited. Those web apps need a better user interaction & web design and a modern implementation resulting in a pleasant best-of-breed user experience.
-
-Open Team One offers a configuration switch allowing the admin to switch between different web applications, should there ever be more than one.
 
 ## Quick Guide (How to run the server with demo content)
 
@@ -40,9 +38,9 @@ You would start the server by hitting the "execute" button of your IDE. Alternat
 
 ### Step 3: Login
 
-When the server is running you call up the admin page in a web browser. Assuming your server listens on TCP port 8080 (depends on your run configuration), you would enter the URL http://localhost:8080 in your browser.
+When the server is running you call up the start page in a web browser. Assuming your server listens on TCP port 8080 (depends on your run configuration), you would enter the URL http://localhost:8080 in your browser.
 
-The default login is user "admin" with password "admin".
+The default administration login is user "admin" with password "admin".
 
 ![Admin Login](docu/demo2.png)
 
@@ -132,3 +130,22 @@ This will build the project in the "target" directory and create two JAR files: 
 The large JAR file can be copied to another machine and executed by a JRE (Java Runtime Environment) like this:
 
 	java -jar openTeamOneServer-0.0.1-SNAPSHOT.jar
+
+## Web Application
+
+Open Team One offers a web application for the two user groups: administrators and users. There is a unified logon that is accessed by calling up server root, for instance http://localhost:8080 for a local installation.
+
+Users will be taken to a self-service, where they can change their display name and their profile picture.
+
+Administrators will be taken to a set of pages where they can browse and modify all tables and file attachments in the database. You have caught a glimpse of it in the quick guide section above.
+
+Open Team One is designed to support different web applications, should there ever be more than one. The default web applikation is meant to be a fully functional proof-of-concept. It resides in the project directory src/main/resources/static/default/ and is served via the URL http://localhost:8080/default/ . Additional web applications can be placed into subdirectories that are sibling to src/main/resources/static/default/. The server offers the following tenant parameters that control the navigation. The /ui/* services will automatically redirect to the targets specified by the tenant parameters. By overwriting them in the database you can set another web application as default.
+
+| Parameter        | Default value             | Selected                                   |
+|------------------|---------------------------|--------------------------------------------|
+| startPageNoLogon | /default/index.html       | when called without valid session context  |
+| startPageLogon   | /default/index.html       | for logins that are neither admin nor user |
+| startPageAdmin   | /default/admin/index.html | for logged-in administrators               |
+| startPageUser    | /default/user/index.html  | for logged-in users                        |
+
+

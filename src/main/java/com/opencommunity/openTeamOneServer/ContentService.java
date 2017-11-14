@@ -64,11 +64,13 @@ public class ContentService {
 		if (tpr.findOne("pictureId") == null)
 			tpr.save(new TenantParameter("pictureId", "tenant"));
 		if (tpr.findOne("startPageNoLogon") == null)
-			tpr.save(new TenantParameter("startPageNoLogon", "/admin/default/index.html"));
-		if (tpr.findOne("startPageNoAdmin") == null)
-			tpr.save(new TenantParameter("startPageNoAdmin", "/admin/default/index.html"));
+			tpr.save(new TenantParameter("startPageNoLogon", "/default/index.html"));
+		if (tpr.findOne("startPageLogon") == null)
+			tpr.save(new TenantParameter("startPageLogon", "/default/index.html"));
 		if (tpr.findOne("startPageAdmin") == null)
-			tpr.save(new TenantParameter("startPageAdmin", "/admin/default/index.html"));
+			tpr.save(new TenantParameter("startPageAdmin", "/default/admin/index.html"));
+		if (tpr.findOne("startPageUser") == null)
+			tpr.save(new TenantParameter("startPageUser", "/default/user/index.html"));
 		if (tpr.findOne("dataDirectory") == null)
 			tpr.save(new TenantParameter("dataDirectory", "/tmp"));
 		//

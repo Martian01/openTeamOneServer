@@ -129,9 +129,9 @@ public class Util {
 	}
 
 	public static String getDefaultTarget(TenantParameterRepository tpr, User user) {
-		String parameter = user == null ? "startPageNoLogon" : (user.hasAdminRole ? "startPageAdmin" : "startPageNoAdmin");
+		String parameter = user == null ? "startPageNoLogon" : (user.hasAdminRole ? "startPageAdmin" : (user.hasUserRole ? "startPageUser" : "startPageLogon"));
 		TenantParameter tp = tpr.findOne(parameter);
-		return tp == null ? "/admin/default/index.html" : tp.value; // in theory a forwarding URI should be absolute...
+		return tp == null ? "/default/index.html" : tp.value; // in theory a forwarding URI should be absolute...
 	}
 
 	public static ResponseEntity<String> httpForwardResponse(TenantParameterRepository tpr, User user, String targetUri) {

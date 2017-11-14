@@ -6,7 +6,7 @@
 	<title>Open Team One Administration</title>
 	<link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
 	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.css"/>
-	<link rel="stylesheet" type="text/css" href="css/default.css"/>
+	<link rel="stylesheet" type="text/css" href="../css/default.css"/>
 	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
@@ -50,7 +50,7 @@
 	<input id="createFile" type="button" value="Create New File"/>
 	<br/><br/>
 	<div>
-		<h2>Menu</h2>
+		<h2>Admin Menu</h2>
 		<a href="index.html">Admin Home</a><br/>
 		<a href="parameters.html">Tenant Parameters</a><br/>
 		<a href="users.html">Users</a><br/>
@@ -117,7 +117,7 @@
 					data: body,
 					processData: false,
 					success: table.ajax.reload.bind(null, null, false),
-					error: alert.bind(null, "Posting failure")
+					error: alert.bind(null, "Update failure")
 				});
 			}
 			function postFile() {

@@ -6,36 +6,36 @@
 	<title>Open Team One Administration</title>
 	<link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
 	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.css"/>
-	<link rel="stylesheet" type="text/css" href="css/default.css"/>
+	<link rel="stylesheet" type="text/css" href="../css/default.css"/>
 	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
 </head>
 <body>
 	<div style="display: none;">
-		<div id="dialog" title="Tenant Parameter Dialog">
+		<div id="dialog" title="Room Member Dialog">
 			<form id="form">
-				<label for="name">Key:</label><br/>
-				<input id="name" type="text" size="32" name="name"/><br/><br/>
-				<label for="value">Value:</label><br/>
-				<input id="value" type="text" size="32" name="value"/><br/><br/>
+				<label for="roomId">Room Id:</label><br/>
+				<input id="roomId" type="text" size="32" name="roomId"/><br/><br/>
+				<label for="personId">Person Id:</label><br/>
+				<input id="personId" type="text" size="32" name="personId"/><br/><br/>
 			</form>
 		</div>
 	</div>
-	<h1>Tenant Parameters</h1>
-	<table id="parameterTable" class="display" width="100%" cellspacing="0">
+	<h1>Room Members</h1>
+	<table id="memberTable" class="display" width="100%" cellspacing="0">
 		<thead>
 		<tr>
-			<th>Key</th>
-			<th>Value</th>
+			<th>Room Id</th>
+			<th>Person Id</th>
 		</tr>
 		</thead>
 	</table>
 	<br/>
-	<input id="createParameter" type="button" value="Create New Tenant Parameter"/>
+	<input id="createMember" type="button" value="Create New Room Member"/>
 	<br/><br/>
 	<div>
-		<h2>Menu</h2>
+		<h2>Admin Menu</h2>
 		<a href="index.html">Admin Home</a><br/>
 		<a href="parameters.html">Tenant Parameters</a><br/>
 		<a href="users.html">Users</a><br/>
@@ -51,44 +51,44 @@
 	<script>
 		$(document).ready( function () {
 			var dialog = $("#dialog");
-			function setParameter(parameter) {
-				$("#name").val((parameter && parameter.name) || null);
-				$("#value").val((parameter && parameter.value) || null);
+			function setMember(member) {
+				$("#roomId").val((member && member.roomId) || null);
+				$("#personId").val((member && member.personId) || null);
 			}
-			function getParameter() {
-				function set(object, property, value) {
-					if (value)
-						object[property] = value;
+			function getMember() {
+				function set(object, property, personId) {
+					if (personId)
+						object[property] = personId;
 				}
-				var parameter = {};
-				set(parameter, "name", $("#name").val());
-				set(parameter, "value", $("#value").val());
-				return parameter;
+				var member = {};
+				set(member, "roomId", $("#roomId").val());
+				set(member, "personId", $("#personId").val());
+				return member;
 			}
-			function deleteParameter() {
+			function deleteMember() {
 				dialog.dialog("close");
-				var parameter = getParameter();
-				if (parameter.name) {
-					//alert("delete parameter " + JSON.stringify(parameter));
+				var member = getMember();
+				if (member.roomId && member.personId) {
+					//alert("delete member " + JSON.stringify(member));
 					$.ajax({
-						url: "/svc/parameter/" + parameter.name,
+						url: "/svc/member/" + member.roomId + "/" + member.personId,
 						method: "DELETE",
 						success: table.ajax.reload.bind(null, null, false),
 						error: alert.bind(null, "Deletion failure")
 					});
 				}
 			}
-			function postParameter() {
-				if (!$("#name").val()) {
-					alert("Error: Tenant parameter key is empty");
+			function postMember() {
+				if (!$("#roomId").val() || !$("#personId").val()) {
+					alert("Error: Room Id or Person Id is empty");
 					return;
 				}
 				dialog.dialog("close");
-				var parameter = getParameter();
-				var body = JSON.stringify(parameter);
-				//alert("post parameter " + body);
+				var member = getMember();
+				var body = JSON.stringify(member);
+				//alert("post member " + body);
 				$.ajax({
-					url: "/svc/parameter",
+					url: "/svc/member",
 					method: "POST",
 					contentType: "application/json; charset=UTF-8'",
 					data: body,
@@ -103,27 +103,27 @@
 				  width: 360,
 				  modal: true,
 				  buttons: {
-					Delete: deleteParameter,
-					Save: postParameter
+					Delete: deleteMember,
+					Save: postMember
 				  }
 			});
-			var table = $("#parameterTable").DataTable({
+			var table = $("#memberTable").DataTable({
 				pageLength: 25,
 				ajax: {
-					url: "/svc/parameters",
+					url: "/svc/members",
 					dataSrc: ""
 				},
 				columns: [
-					{ data: "name", defaultContent: "" },
-					{ data: "value", defaultContent: "" }
+					{ data: "roomId", defaultContent: "" },
+					{ data: "personId", defaultContent: "" }
 				]
 			});
-			$("#parameterTable tbody").on("click", "tr", function () {
-				setParameter(table.row(this).data());
+			$("#memberTable tbody").on("click", "tr", function () {
+				setMember(table.row(this).data());
 				dialog.dialog("open");
 			});
-			$("#createParameter").on("click", function() {
-				setParameter(null);
+			$("#createMember").on("click", function() {
+				setMember(null);
 				dialog.dialog("open");
 			});
     	});

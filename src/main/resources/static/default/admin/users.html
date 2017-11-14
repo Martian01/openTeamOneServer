@@ -6,7 +6,7 @@
 	<title>Open Team One Administration</title>
 	<link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
 	<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.css"/>
-	<link rel="stylesheet" type="text/css" href="css/default.css"/>
+	<link rel="stylesheet" type="text/css" href="../css/default.css"/>
 	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
@@ -25,6 +25,7 @@
 				<input id="password" type="password" name="password"/><br/><br/>
 				<label for="password2">Repeat password</label><br/>
 				<input id="password2" type="password" name="password2"/><br/><br/>
+				<input id="withPwd" type="checkbox" name="withPwd"/>&nbsp;save with password<br/><br/>
 			</form>
 		</div>
 	</div>
@@ -43,7 +44,7 @@
 	<input id="createUser" type="button" value="Create New User"/>
 	<br/><br/>
 	<div>
-		<h2>Menu</h2>
+		<h2>Admin Menu</h2>
 		<a href="index.html">Admin Home</a><br/>
 		<a href="parameters.html">Tenant Parameters</a><br/>
 		<a href="users.html">Users</a><br/>
@@ -66,8 +67,9 @@
 				$("#hasAdminRole").prop('checked', user && user.hasAdminRole);
 				$("#password").val(null);
 				$("#password2").val(null);
+				$("#withPwd").prop('checked', false);
 			}
-			function getUser() {
+			function getUser(withPwd) {
 				function set(object, property, value) {
 					if (value)
 						object[property] = value;
@@ -77,7 +79,8 @@
 				set(user, "personId", $("#personId").val());
 				set(user, "hasUserRole", $("#hasUserRole").prop("checked"));
 				set(user, "hasAdminRole", $("#hasAdminRole").prop("checked"));
-				set(user, "password", $("#password").val());
+				if (withPwd)
+					set(user, "password", $("#password").val());
 				return user;
 			}
 			function deleteUser() {
@@ -98,12 +101,13 @@
 					alert("Error: User Id is empty");
 					return;
 				}
-				if (!$("#password").val() || $("#password").val() != $("#password2").val()) {
+				var withPwd = $("#withPwd").prop("checked");
+				if (withPwd && (!$("#password").val() || $("#password").val() != $("#password2").val())) {
 					alert("Error: Passwords are empty or different");
 					return;
 				}
 				dialog.dialog("close");
-				var user = getUser();
+				var user = getUser(withPwd);
 				var body = JSON.stringify(user);
 				//alert("post user " + body);
 				$.ajax({
@@ -118,7 +122,7 @@
 			}
 			dialog.dialog({
 				autoOpen: false,
-				  height: 500,
+				  height: 540,
 				  width: 360,
 				  modal: true,
 				  buttons: {

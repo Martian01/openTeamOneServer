@@ -181,6 +181,12 @@ public class ServiceApi {
 		// it is not allowed to remove the admin role from the logon user
 		if (user.userId.equals(targetUser.userId) && !targetUser.hasAdminRole)
 			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
+		// if password was not provided, try and re-use existing password
+		if (targetUser.passwordHash == null) {
+			User oldUser = userRepository.findOne(targetUser.userId);
+			if (oldUser != null)
+				targetUser.passwordHash = oldUser.passwordHash;
+		}
 		userRepository.save(targetUser);
 		//
 		return Util.httpStringResponse(targetUser.toJson(false), HttpStatus.CREATED);
