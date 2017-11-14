@@ -133,15 +133,17 @@ The large JAR file can be copied to another machine and executed by a JRE (Java 
 
 ## Web Application
 
-Open Team One offers a web application for the two user groups: administrators and users. There is a unified logon that is accessed by calling up server root, for instance http://localhost:8080 for a local installation.
+Open Team One offers a web application for two user groups: administrators and users. There is a unified logon that is accessed by calling up server root, for instance http://localhost:8080 for a local installation.
 
-Users will be taken to a self-service, where they can change their display name and their profile picture.
+Users will be taken to a self-service, where they can change their display names and their profile picture.
 
 Administrators will be taken to a set of pages where they can browse and modify all tables and file attachments in the database. You have caught a glimpse of it in the quick guide section above.
 
-Open Team One is designed to support different web applications, should there ever be more than one. The default web applikation is meant to be a fully functional proof-of-concept. It resides in the project directory src/main/resources/static/default/ and is served via the URL http://localhost:8080/default/ . Additional web applications can be placed into subdirectories that are sibling to src/main/resources/static/default/. The server offers the following tenant parameters that control the navigation. The /ui/* services will automatically redirect to the targets specified by the tenant parameters. By overwriting them in the database you can set another web application as default.
+Open Team One is designed to support different web applications, should there ever be more than one. The default web applikation is meant to be a fully functional proof-of-concept. It resides in the project directory src/main/resources/static/default/ and is served via the URL http://localhost:8080/default/ . Additional web applications can be placed into subdirectories that are sibling to src/main/resources/static/default/.
 
-| Parameter        | Default value             | Selected                                   |
+The server offers the following tenant parameters to control the navigation. The /ui/* services will automatically redirect to the targets specified by the tenant parameters. By overwriting them in the database you can set another web application as default.
+
+| Tenant Parameter | Default value             | Usage                                      |
 |------------------|---------------------------|--------------------------------------------|
 | startPageNoLogon | /default/index.html       | when called without valid session context  |
 | startPageLogon   | /default/index.html       | for logins that are neither admin nor user |
