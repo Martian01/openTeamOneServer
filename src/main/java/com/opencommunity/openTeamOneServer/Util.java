@@ -19,6 +19,10 @@ public class Util {
 
 	/* Misc */
 
+	public static boolean equal(Object x, Object y) {
+		return (x == null && y == null) || (x != null && y != null && x.equals(y));
+	}
+
 	public static String getUuid() {
 		return UUID.randomUUID().toString().replace("-", "").toUpperCase();
 	}

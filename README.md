@@ -141,7 +141,7 @@ Administrators will be taken to a set of pages where they can browse and modify 
 
 Open Team One is designed to support different web applications, should there ever be more than one. The default web applikation is meant to be a fully functional proof-of-concept. It resides in the project directory src/main/resources/static/default/ and is served via the URL http://localhost:8080/default/ . Additional web applications can be placed into subdirectories that are sibling to src/main/resources/static/default/.
 
-The server offers the following tenant parameters to control the navigation. The /ui/* services will automatically redirect to the targets specified by the tenant parameters. By overwriting them in the database you can set another web application as default.
+The server offers the following tenant parameters to control the navigation. The /ui/* services will automatically redirect to the targets specified by those tenant parameters. By overwriting them in the database you can set another web application as default.
 
 | Tenant Parameter | Default value             | Usage                                      |
 |------------------|---------------------------|--------------------------------------------|

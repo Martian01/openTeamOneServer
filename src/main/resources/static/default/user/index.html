@@ -5,49 +5,110 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<title>Open Team One Self-Service</title>
 	<link rel="stylesheet" type="text/css" href="../css/default.css"/>
+	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script>
 		function setVisibility(id, isVisible) {
-			var element = document.getElementById(id)
+			var element = document.getElementById(id);
 			if (element)
 				element.style.display = isVisible ? "block" : "none";
 		}
-		function checkSessionState() {
-			var xmlhttp = new XMLHttpRequest();
-			xmlhttp.onreadystatechange = function() {
-				if (this.readyState === 4 && this.status === 200) {
-					var response = JSON.parse(this.responseText);
-					var isLoggedIn = response && response.user;
-					var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
-					var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
-					//
-					var infoLine;
-					if (isLoggedIn) {
-						infoLine = 'You are logged in as "' + response.user.userId + '". Your roles are:';
-						if (isLoggedInAsAdmin) {
-							infoLine += ' Administrator';
-						}
-						if (isLoggedInAsUser) {
-							infoLine += ' User';
-						}
-					} else {
-						infoLine = 'You are not logged in.';
-					}
-					document.getElementById("infoLine").innerText = infoLine;
-					setVisibility("loginForm", !isLoggedIn);
-					setVisibility("logoutForm", isLoggedIn);
-					setVisibility("adminFunctions", isLoggedInAsAdmin);
-					setVisibility("userFunctions", isLoggedInAsUser);
-					if (!isLoggedInAsUser) {
-						if (isLoggedInAsAdmin) {
-							window.location.href = "../admin/index.html";
-						} else {
-							window.location.href = "../index.html";
-						}
-					}
+		function onLoadSession(response) {
+			var isLoggedIn = response && response.user;
+			var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
+			var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
+			//
+			var infoLine;
+			if (isLoggedIn) {
+				infoLine = 'You are logged in as "' + response.user.userId + '". Your roles are:';
+				if (isLoggedInAsAdmin) {
+					infoLine += ' Administrator';
 				}
-			};
-			xmlhttp.open("GET", "/svc/session", true);
-			xmlhttp.send();
+				if (isLoggedInAsUser) {
+					infoLine += ' User';
+				}
+			} else {
+				infoLine = 'You are not logged in.';
+			}
+			document.getElementById("infoLine").innerText = infoLine;
+			setVisibility("loginForm", !isLoggedIn);
+			setVisibility("logoutForm", isLoggedIn);
+			setVisibility("adminFunctions", isLoggedInAsAdmin);
+			setVisibility("userFunctions", isLoggedInAsUser);
+			if (!isLoggedInAsUser) {
+				if (isLoggedInAsAdmin) {
+					window.location.href = "../admin/index.html";
+				} else {
+					window.location.href = "../index.html";
+				}
+			} else {
+				setPerson(response.person);
+			}
+		}
+		function checkSessionState() {
+			$.ajax({
+				url: "/svc/session",
+				method: "GET",
+				dataType: "json",
+				success: onLoadSession,
+				error: alert.bind(null, "Session failure")
+			});
+		}
+		function setPerson(person) {
+			$("#personId").val((person && person.personId) || null);
+			$("#lastName").val((person && person.lastName) || null);
+			$("#firstName").val((person && person.firstName) || null);
+			$("#nickName").val((person && person.nickName) || null);
+			$("#pictureId").val((person && person.pictureId) || null);
+			if (person && person.pictureId)
+				$("#userPicture").attr("src", "/sap/sports/fnd/api/picture/v1/service/rest/picture/" + person.pictureId);
+		}
+		function getPerson() {
+			function set(object, property, value) {
+				if (value)
+					object[property] = value;
+			}
+			var person = {};
+			set(person, "personId", $("#personId").val());
+			set(person, "lastName", $("#lastName").val());
+			set(person, "firstName", $("#firstName").val());
+			set(person, "nickName", $("#nickName").val());
+			set(person, "pictureId", $("#pictureId").val());
+			return person;
+		}
+		function postProfilePic() {
+			if (!($("#fileContent")[0].files && $("#fileContent")[0].files[0])) {
+				//alert("Error: No file selected");
+				return;
+			}
+			var fileContent = $("#fileContent")[0].files[0];
+			var formData = new FormData();
+			formData.append("mimeType", fileContent.type);
+			formData.append("fileContent", fileContent);
+			$.ajax({
+				url: "/svc/self/picture",
+				dataType: 'json',
+				cache: false,
+				contentType: false,
+				processData: false,
+				data: formData,
+				type: 'post',
+				success: setPerson,
+				error: alert.bind(null, "Posting failure")
+			 });
+		}
+		function updatePerson() {
+			var person = getPerson();
+			var body = JSON.stringify(person);
+			//alert("post person " + body);
+			$.ajax({
+				url: "/svc/self/person",
+				method: "POST",
+				contentType: "application/json; charset=UTF-8'",
+				data: body,
+				processData: false,
+				success: setPerson,
+				error: alert.bind(null, "Posting failure")
+			});
 		}
 	</script>
 </head>
@@ -71,16 +132,55 @@
 			<input type="submit" value="Log Out"/>
 		</form>
 	</div>
+	<div id="userFunctions">
+		<br/>
+		<br/>
+		<div class="polaroid">
+			<img id="userPicture" class="polaroid" src="../empty_profile.png" alt="Profile Picture"/>
+			<div class="container">
+				<p>Profile Picture</p>
+			</div>
+		</div>
+		<form>
+			<label for="fileContent">Upload new profile picture:</label><br/>
+			<input id="fileContent" type="file" name="fileContent"/><br/><br/>
+		</form>
+		<br/>
+		<br/>
+		<form>
+			<fieldset>
+				<legend>Person Data</legend>
+				<label for="firstName">First Name:</label><br/>
+				<input id="firstName" type="text" name="firstName"/><br/><br/>
+				<label for="lastName">Last Name:</label><br/>
+				<input id="lastName" type="text" name="lastName"/><br/><br/>
+				<label for="nickName">Nickname:</label><br/>
+				<input id="nickName" type="text" name="nickName"/><br/><br/>
+				<input id="personId" type="hidden" size="32" readonly disabled name="personId"/>
+				<input id="pictureId" type="hidden" size="32" readonly disabled name="pictureId"/>
+				<input id="updatePerson" type="button" value="Update Person Data"/>
+			</fieldset>
+		</form>
+	</div>
 	<div id="adminFunctions">
+		<br/>
+		<br/>
 		<h2>Admin Menu</h2>
 		<a href="../admin/index.html">Admin Home</a><br/>
-	</div>
-	<div id="userFunctions">
-		<h2>User Menu</h2>
-		<a href="index.html">User Home</a><br/>
+		<a href="../admin/parameters.html">Tenant Parameters</a><br/>
+		<a href="../admin/users.html">Users</a><br/>
+		<a href="../admin/persons.html">Persons</a><br/>
+		<a href="../admin/rooms.html">Rooms</a><br/>
+		<a href="../admin/members.html">Room Members</a><br/>
+		<a href="../admin/messages.html">Messages</a><br/>
+		<a href="../admin/confirmations.html">Viewed Confirmations</a><br/>
+		<a href="../admin/subscriptions.html">Subscriptions</a><br/>
+		<a href="../admin/files.html">Files</a><br/>
 	</div>
 	<br/>
 	<script>
+		$("#fileContent").on("change", postProfilePic);
+		$("#updatePerson").on("click", updatePerson);
 		checkSessionState();
 	</script>
 	<noscript>Info: JavaScript must be enabled.</noscript>

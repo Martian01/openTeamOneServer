@@ -552,7 +552,7 @@ public class ServiceApi {
 		SymbolicFile symbolicFile = fileId == null ? null : symbolicFileRepository.findOne(fileId);
 		if (symbolicFile == null)
 			return Util.httpStringResponse(HttpStatus.GONE);
-		if (!deleteFileContent(symbolicFile))
+		if (deleteFileContent(symbolicFile) == null)
 			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
 		symbolicFileRepository.delete(symbolicFile);
 		//
@@ -586,33 +586,95 @@ public class ServiceApi {
 		if (parameter == null)
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
 		SymbolicFile symbolicFile = new SymbolicFile(new JSONObject(parameter));
-		// save byte stream
+		//
 		MultipartFile multipartFile = multipartRequest.getFile("fileContent");
 		if (multipartFile == null)
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		File directory = Util.getDataDirectory(tenantParameterRepository, symbolicFile.directory);
-		if (directory == null)
+		// delete old content
+		File file = deleteFileContent(symbolicFile);
+		if (file == null)
 			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		File file = new File(directory, symbolicFile.fileId);
+		// save byte stream under same fileId
 		Util.writeFile(multipartFile.getInputStream(), file);
 		// save descriptor
-		deleteFileContent(symbolicFileRepository.findOne(symbolicFile.fileId));
 		symbolicFileRepository.save(symbolicFile);
 		//
 		return Util.httpStringResponse(symbolicFile.toJson(), HttpStatus.CREATED);
 	}
 
+	/* User Self Service */
+
+	@RequestMapping(method = RequestMethod.POST, value = "/self/picture")
+	public ResponseEntity<String> selfPicturePost(MultipartHttpServletRequest multipartRequest) throws Exception {
+		User user = Util.getSessionContact(multipartRequest, userRepository);
+		if (user == null)
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		Person person = personRepository.findOne(user.personId);
+		if (person == null)
+			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
+		//
+		if (multipartRequest == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		String mimeType = multipartRequest.getParameter("mimeType");
+		if (mimeType == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		//
+		MultipartFile multipartFile = multipartRequest.getFile("fileContent");
+		if (multipartFile == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		// delete old content and old symbolic file
+		SymbolicFile oldSymbolicFile = symbolicFileRepository.findOne(person.pictureId);
+		File file = deleteFileContent(oldSymbolicFile);
+		if (file == null)
+			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+		symbolicFileRepository.delete(oldSymbolicFile.fileId);
+		// save byte stream under new fileId
+		SymbolicFile symbolicFile = new SymbolicFile(null, mimeType, null, null, 0, SymbolicFile.DIRECTORY_PROFILES);
+		file = Util.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
+		if (file == null) { // unlikely
+			person.pictureId = null;
+			personRepository.save(person);
+			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		Util.writeFile(multipartFile.getInputStream(), file);
+		// save descriptor
+		symbolicFileRepository.save(symbolicFile);
+		// save person
+		person.pictureId = symbolicFile.fileId;
+		personRepository.save(person);
+		//
+		return Util.httpStringResponse(person.toJson(), HttpStatus.CREATED);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/self/person")
+	public ResponseEntity<String> selfDataPost(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
+		User user = Util.getSessionContact(request, userRepository);
+		if (user == null)
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		if (requestBody == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		Person person = new Person(new JSONObject(requestBody));
+		if (!user.personId.equals(person.personId))
+			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
+		Person oldPerson = personRepository.findOne(user.personId);
+		if (!Util.equal(oldPerson.pictureId, person.pictureId))
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		personRepository.save(person);
+		//
+		return Util.httpStringResponse(person.toJson(), HttpStatus.CREATED);
+	}
+
 	/* helper functions */
 
-	private boolean deleteFileContent(SymbolicFile symbolicFile) {
+	private File deleteFileContent(SymbolicFile symbolicFile) {
 		if (symbolicFile == null)
-			return false;
+			return null;
 		File file = Util.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
-		if (file == null)
-			return false;
-		if (file.exists())
+		if (file != null && file.exists())
 			file.delete();
-		return true;
+		return file;
 	}
 
 	private ResponseEntity<Resource> sendFileContent(String fileId) throws Exception {
@@ -627,6 +689,23 @@ public class ServiceApi {
 		}
 		Resource resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
 		return Util.httpResourceResponse(resource, MediaType.parseMediaType(symbolicFile.mimeType));
+	}
+
+	private ResponseEntity<String> saveFileContent(MultipartHttpServletRequest multipartRequest, SymbolicFile symbolicFile) throws Exception {
+		// save byte stream
+		MultipartFile multipartFile = multipartRequest.getFile("fileContent");
+		if (multipartFile == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		File directory = Util.getDataDirectory(tenantParameterRepository, symbolicFile.directory);
+		if (directory == null)
+			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+		File file = new File(directory, symbolicFile.fileId);
+		Util.writeFile(multipartFile.getInputStream(), file);
+		// save descriptor
+		deleteFileContent(symbolicFileRepository.findOne(symbolicFile.fileId));
+		symbolicFileRepository.save(symbolicFile);
+		//
+		return Util.httpStringResponse(symbolicFile.toJson(), HttpStatus.CREATED);
 	}
 
 }
