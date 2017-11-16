@@ -473,6 +473,8 @@ public class ServiceApi {
 		if (user == null)
 			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
 		//
+		if (!user.userId.equals(userId))
+			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
 		Subscription subscription = targetType == null || appId == null || deviceToken == null || userId == null ? null : subscriptionRepository.findTopByTargetTypeAndAppIdAndDeviceTokenAndUserId(targetType, appId, deviceToken, userId);
 		if (subscription == null)
 			return Util.httpStringResponse(HttpStatus.NOT_FOUND);

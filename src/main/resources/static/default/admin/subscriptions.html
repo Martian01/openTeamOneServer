@@ -128,7 +128,7 @@
 				var subscription = getSubscription();
 				if (subscription.targetType && subscription.appId && subscription.deviceToken && subscription.userId) {
 					$.ajax({
-						url: "/svc/subscription/" + subscription.targetType + "/" + subscription.appId,
+						url: "/svc/subscription/" + subscription.targetType + "/" + subscription.appId + "/" + subscription.deviceToken + "/" + subscription.userId,
 						method: "DELETE",
 						success: table.ajax.reload.bind(null, null, false),
 						error: alert.bind(null, "Deletion failure")

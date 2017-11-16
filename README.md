@@ -88,12 +88,12 @@ MariaDB is a popular MySQL fork. In fact, MariaDB is the continuation of MySQL b
 For a first trial it is quite convenient to use the H2 in-memory database as it comes with Spring Boot and requires no configuration. It is also quite easy to switch to a disk based SQL database, like MariaDB. To do so, you first need to prepare an empty database for a standard user. Having started the database daemon, you simply enter the following three commands in any SQL console connected to the database, for instance the _mysql_ binary:
 
 	mysql --password
-	> create database teamone;
+	> create database teamone character set = 'utf8mb4' collate = 'utf8mb4_unicode_ci';
 	> create user 'springuser'@'localhost' identified by 'dbPassword';
 	> grant all on teamone.* to 'springuser'@'localhost';
 	> quit
 
-In this example the database is called _teamone_ and contains a user _springuser_ with password _dbPassword_. The database name, the user name and the password can be freely chosen. In a productive environment, once the database schema has been created, you are advised to reduce the granted authorizations to select, insert, update and delete.
+In this example the database is called _teamone_ and contains a user _springuser_ with password _dbPassword_. The database name, the user name and the password can be freely chosen. In a productive environment, once the database schema has been created, you are advised to reduce the granted authorizations to select, insert, update and delete. NB: I'm still working on character encoding issues at the time of writing.
 
 Next you need to add the JDBC database driver to the project. We have already added the following dependency to our Maven file pom.xml:
 
@@ -111,6 +111,7 @@ Finally we add the following properties to the application.properties file. In f
 	spring.datasource.url=jdbc:mysql://localhost:3306/teamone
 	spring.datasource.username=springuser
 	spring.datasource.password=dbPassword
+	spring.datasource.connectionProperties=useUnicode=true;characterEncoding=utf-8;
 
 Restart Open Team One Server and you're done. If you want to migrate the content over to the new DB, save and import a snapshot via the admin tools. 
 
