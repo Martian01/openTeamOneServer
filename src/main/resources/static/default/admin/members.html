@@ -69,7 +69,6 @@
 				dialog.dialog("close");
 				var member = getMember();
 				if (member.roomId && member.personId) {
-					//alert("delete member " + JSON.stringify(member));
 					$.ajax({
 						url: "/svc/member/" + member.roomId + "/" + member.personId,
 						method: "DELETE",
@@ -86,7 +85,6 @@
 				dialog.dialog("close");
 				var member = getMember();
 				var body = JSON.stringify(member);
-				//alert("post member " + body);
 				$.ajax({
 					url: "/svc/member",
 					method: "POST",

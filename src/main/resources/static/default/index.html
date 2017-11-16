@@ -5,47 +5,49 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<title>Open Team One</title>
 	<link rel="stylesheet" type="text/css" href="css/default.css"/>
+	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script>
 		function setVisibility(id, isVisible) {
 			var element = document.getElementById(id);
 			if (element)
 				element.style.display = isVisible ? "block" : "none";
 		}
-		function checkSessionState() {
-			var xmlhttp = new XMLHttpRequest();
-			xmlhttp.onreadystatechange = function() {
-				if (this.readyState === 4 && this.status === 200) {
-					var response = JSON.parse(this.responseText);
-					var isLoggedIn = response && response.user;
-					var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
-					var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
-					//
-					var infoLine;
-					if (isLoggedIn) {
-						infoLine = 'You are logged in as "' + response.user.userId + '". Your roles are:';
-						if (isLoggedInAsAdmin) {
-							infoLine += ' Administrator';
-						}
-						if (isLoggedInAsUser) {
-							infoLine += ' User';
-						}
-					} else {
-						infoLine = 'Please log in';
-					}
-					document.getElementById("infoLine").innerText = infoLine;
-					setVisibility("loginForm", !isLoggedIn);
-					setVisibility("logoutForm", isLoggedIn);
-					setVisibility("adminFunctions", isLoggedInAsAdmin);
-					setVisibility("userFunctions", isLoggedInAsUser);
-					if (isLoggedInAsAdmin) {
-						window.location.href = "admin/index.html";
-					} else if (isLoggedInAsUser) {
-						window.location.href = "user/index.html";
-					}
+		function onLoadSession(response) {
+			var isLoggedIn = response && response.user;
+			var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
+			var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
+			//
+			var infoLine;
+			if (isLoggedIn) {
+				infoLine = 'You are logged in as "' + response.user.userId + '". Your roles are:';
+				if (isLoggedInAsAdmin) {
+					infoLine += ' Administrator';
 				}
-			};
-			xmlhttp.open("GET", "/svc/session", true);
-			xmlhttp.send();
+				if (isLoggedInAsUser) {
+					infoLine += ' User';
+				}
+			} else {
+				infoLine = 'Please log in';
+			}
+			document.getElementById("infoLine").innerText = infoLine;
+			setVisibility("loginForm", !isLoggedIn);
+			setVisibility("logoutForm", isLoggedIn);
+			setVisibility("adminFunctions", isLoggedInAsAdmin);
+			setVisibility("userFunctions", isLoggedInAsUser);
+			if (isLoggedInAsAdmin) {
+				window.location.href = "admin/index.html";
+			} else if (isLoggedInAsUser) {
+				window.location.href = "user/index.html";
+			}
+		}
+		function loadSession() {
+			$.ajax({
+				url: "/svc/session",
+				method: "GET",
+				dataType: "json",
+				success: onLoadSession,
+				error: alert.bind(null, "Session failure")
+			});
 		}
 	</script>
 </head>
@@ -83,7 +85,7 @@
 	</div>
 	<br/>
 	<script>
-		checkSessionState();
+		loadSession();
 	</script>
 	<noscript>Info: JavaScript must be enabled.</noscript>
 </body>

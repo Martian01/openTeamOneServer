@@ -127,7 +127,6 @@
 				dialog.dialog("close");
 				var subscription = getSubscription();
 				if (subscription.targetType && subscription.appId && subscription.deviceToken && subscription.userId) {
-					//alert("delete subscription " + JSON.stringify(subscription));
 					$.ajax({
 						url: "/svc/subscription/" + subscription.targetType + "/" + subscription.appId,
 						method: "DELETE",
@@ -144,7 +143,6 @@
 				dialog.dialog("close");
 				var subscription = getSubscription();
 				var body = JSON.stringify(subscription);
-				//alert("post subscription " + body);
 				$.ajax({
 					url: "/svc/subscription",
 					method: "POST",

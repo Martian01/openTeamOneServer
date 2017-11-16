@@ -84,7 +84,6 @@
 				dialog.dialog("close");
 				var confirmation = getConfirmation();
 				if (confirmation.roomId && confirmation.personId) {
-					//alert("delete confirmation " + JSON.stringify(confirmation));
 					$.ajax({
 						url: "/svc/confirmation/" + confirmation.roomId + "/" + confirmation.personId,
 						method: "DELETE",
@@ -101,7 +100,6 @@
 				dialog.dialog("close");
 				var confirmation = getConfirmation();
 				var body = JSON.stringify(confirmation);
-				//alert("post confirmation " + body);
 				$.ajax({
 					url: "/svc/confirmation",
 					method: "POST",

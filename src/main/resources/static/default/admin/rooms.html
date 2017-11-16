@@ -89,7 +89,6 @@
 				dialog.dialog("close");
 				var room = getRoom();
 				if (room.roomId) {
-					//alert("delete room " + JSON.stringify(room));
 					$.ajax({
 						url: "/svc/room/" + room.roomId,
 						method: "DELETE",
@@ -102,7 +101,6 @@
 				dialog.dialog("close");
 				var room = getRoom();
 				var body = JSON.stringify(room);
-				//alert("post room " + body);
 				$.ajax({
 					url: "/svc/room",
 					method: "POST",

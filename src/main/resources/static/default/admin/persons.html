@@ -84,7 +84,6 @@
 				dialog.dialog("close");
 				var person = getPerson();
 				if (person.personId) {
-					//alert("delete person " + JSON.stringify(person));
 					$.ajax({
 						url: "/svc/person/" + person.personId,
 						method: "DELETE",
@@ -97,7 +96,6 @@
 				dialog.dialog("close");
 				var person = getPerson();
 				var body = JSON.stringify(person);
-				//alert("post person " + body);
 				$.ajax({
 					url: "/svc/person",
 					method: "POST",

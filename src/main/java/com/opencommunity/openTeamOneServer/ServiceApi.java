@@ -663,7 +663,7 @@ public class ServiceApi {
 			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
 		personRepository.save(person);
 		//
-		return Util.httpStringResponse(person.toJson(), HttpStatus.CREATED);
+		return Util.httpStringResponse(person.toJson(), HttpStatus.OK);
 	}
 
 	/* helper functions */
@@ -689,23 +689,6 @@ public class ServiceApi {
 		}
 		Resource resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
 		return Util.httpResourceResponse(resource, MediaType.parseMediaType(symbolicFile.mimeType));
-	}
-
-	private ResponseEntity<String> saveFileContent(MultipartHttpServletRequest multipartRequest, SymbolicFile symbolicFile) throws Exception {
-		// save byte stream
-		MultipartFile multipartFile = multipartRequest.getFile("fileContent");
-		if (multipartFile == null)
-			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
-		File directory = Util.getDataDirectory(tenantParameterRepository, symbolicFile.directory);
-		if (directory == null)
-			return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-		File file = new File(directory, symbolicFile.fileId);
-		Util.writeFile(multipartFile.getInputStream(), file);
-		// save descriptor
-		deleteFileContent(symbolicFileRepository.findOne(symbolicFile.fileId));
-		symbolicFileRepository.save(symbolicFile);
-		//
-		return Util.httpStringResponse(symbolicFile.toJson(), HttpStatus.CREATED);
 	}
 
 }

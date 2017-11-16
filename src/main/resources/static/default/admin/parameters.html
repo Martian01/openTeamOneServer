@@ -69,7 +69,6 @@
 				dialog.dialog("close");
 				var parameter = getParameter();
 				if (parameter.name) {
-					//alert("delete parameter " + JSON.stringify(parameter));
 					$.ajax({
 						url: "/svc/parameter/" + parameter.name,
 						method: "DELETE",
@@ -86,7 +85,6 @@
 				dialog.dialog("close");
 				var parameter = getParameter();
 				var body = JSON.stringify(parameter);
-				//alert("post parameter " + body);
 				$.ajax({
 					url: "/svc/parameter",
 					method: "POST",

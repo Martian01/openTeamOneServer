@@ -98,7 +98,6 @@
 				dialog.dialog("close");
 				var message = getMessage();
 				if (message.messageId) {
-					//alert("delete message " + JSON.stringify(message));
 					$.ajax({
 						url: "/svc/message/" + message.messageId,
 						method: "DELETE",
@@ -111,7 +110,6 @@
 				dialog.dialog("close");
 				var message = getMessage();
 				var body = JSON.stringify(message);
-				//alert("post message " + body);
 				$.ajax({
 					url: "/svc/message",
 					method: "POST",

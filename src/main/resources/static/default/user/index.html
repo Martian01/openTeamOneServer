@@ -34,17 +34,17 @@
 			setVisibility("logoutForm", isLoggedIn);
 			setVisibility("adminFunctions", isLoggedInAsAdmin);
 			setVisibility("userFunctions", isLoggedInAsUser);
-			if (!isLoggedInAsUser) {
+			if (isLoggedInAsUser) {
+				setPerson(response.person);
+			} else {
 				if (isLoggedInAsAdmin) {
 					window.location.href = "../admin/index.html";
 				} else {
 					window.location.href = "../index.html";
 				}
-			} else {
-				setPerson(response.person);
 			}
 		}
-		function checkSessionState() {
+		function loadSession() {
 			$.ajax({
 				url: "/svc/session",
 				method: "GET",
@@ -77,7 +77,6 @@
 		}
 		function postProfilePic() {
 			if (!($("#fileContent")[0].files && $("#fileContent")[0].files[0])) {
-				//alert("Error: No file selected");
 				return;
 			}
 			var fileContent = $("#fileContent")[0].files[0];
@@ -99,7 +98,6 @@
 		function updatePerson() {
 			var person = getPerson();
 			var body = JSON.stringify(person);
-			//alert("post person " + body);
 			$.ajax({
 				url: "/svc/self/person",
 				method: "POST",
@@ -181,7 +179,7 @@
 	<script>
 		$("#fileContent").on("change", postProfilePic);
 		$("#updatePerson").on("click", updatePerson);
-		checkSessionState();
+		loadSession();
 	</script>
 	<noscript>Info: JavaScript must be enabled.</noscript>
 </body>
