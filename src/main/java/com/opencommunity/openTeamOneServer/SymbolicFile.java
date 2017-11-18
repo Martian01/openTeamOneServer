@@ -22,16 +22,17 @@ public class SymbolicFile {
 	public static final String DIRECTORY_SNAPSHOTS = "snapshots";
 
 	@Id
+	@Column(length = 32)
 	public String fileId;
-	@Column
+	@Column(length = 100)
 	public String mimeType;
-	@Column
+	@Column(length = 200)
 	public String text;
-	@Column
+	@Column(length = 32)
 	public String referenceId;
 	@Column
 	public int position;
-	@Column
+	@Column(length = 20)
 	public String directory;
 
 	public SymbolicFile() {

@@ -26,10 +26,11 @@ interface UserRepository extends CrudRepository<User, String> {
 @Entity
 public class User {
 	@Id
+	@Column(length = 32)
 	public String userId;
-	@Column
+	@Column(length = 200)
 	public String passwordHash;
-	@Column
+	@Column(length = 32)
 	public String personId;
 	@Column
 	public boolean hasUserRole;

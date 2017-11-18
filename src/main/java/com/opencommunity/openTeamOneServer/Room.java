@@ -18,14 +18,15 @@ interface RoomRepository extends CrudRepository<Room, String> {
 public class Room {
 
 	@Id
+	@Column(length = 32)
 	public String roomId;
-	@Column
+	@Column(length = 50)
 	public String name;
-	@Column
+	@Column(length = 4)
 	public String shortName;
-	@Column
+	@Column(length = 10)
 	public String roomType;
-	@Column
+	@Column(length = 32)
 	public String pictureId;
 	@Column
 	public long changedAt;

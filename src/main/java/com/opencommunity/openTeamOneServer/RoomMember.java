@@ -5,6 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.repository.CrudRepository;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
@@ -28,8 +29,10 @@ interface RoomMemberRepository extends CrudRepository<RoomMember, RoomMemberKey>
 public class RoomMember {
 
 	@Id
+	@Column(length = 32)
 	public String roomId;
 	@Id
+	@Column(length = 32)
 	public String personId;
 
 	public RoomMember() {

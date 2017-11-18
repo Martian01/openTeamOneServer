@@ -85,7 +85,13 @@ Here are a few screenshots of SAP Team One connected against Open Team One Serve
 
 MariaDB is a popular MySQL fork. In fact, MariaDB is the continuation of MySQL by the original author and a community. MariaDB is drop-in compatible with MySQL, so everything written in this section works for MySQL, too.
 
-For a first trial it is quite convenient to use the H2 in-memory database as it comes with Spring Boot and requires no configuration. It is also quite easy to switch to a disk based SQL database, like MariaDB. To do so, you first need to prepare an empty database for a standard user. Having started the database daemon, you simply enter the following three commands in any SQL console connected to the database, for instance the _mysql_ binary:
+For a first trial it is quite convenient to use the H2 in-memory database as it comes with Spring Boot and requires no configuration. It is also quite easy to switch to a disk based SQL database, like MariaDB. This can be done in the following way. First, make sure you have enabled UTF-8 with support for 4-byte characters. To that end I have added the following configuration to the MariaDB configuration file. In my installation the file is called _/etc/my.cnf.d/server.cnf_.
+
+	[mysqld]
+	character_set_server = utf8mb4
+	collation_server = utf8mb4_unicode_ci
+
+Next you need to prepare an empty database for a standard user. Having started the database daemon, you simply enter the following three commands in any SQL console connected to the database, for instance the _mysql_ binary:
 
 	mysql --password
 	> create database teamone character set = 'utf8mb4' collate = 'utf8mb4_unicode_ci';
@@ -93,7 +99,7 @@ For a first trial it is quite convenient to use the H2 in-memory database as it 
 	> grant all on teamone.* to 'springuser'@'localhost';
 	> quit
 
-In this example the database is called _teamone_ and contains a user _springuser_ with password _dbPassword_. The database name, the user name and the password can be freely chosen. In a productive environment, once the database schema has been created, you are advised to reduce the granted authorizations to select, insert, update and delete. NB: I'm still working on character encoding issues at the time of writing.
+In this example the database is called _teamone_ and contains a user _springuser_ with password _dbPassword_. The database name, the user name and the password can be freely chosen. In a productive environment, once the database schema has been created, you are advised to reduce the granted authorizations to select, insert, update and delete.
 
 Next you need to add the JDBC database driver to the project. We have already added the following dependency to our Maven file pom.xml:
 

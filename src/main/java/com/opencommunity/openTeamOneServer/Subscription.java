@@ -20,16 +20,20 @@ interface SubscriptionRepository extends CrudRepository<Subscription, Subscripti
 public class Subscription {
 
 	@Id
+	@Column(length = 32)
 	public String targetType;
 	@Id
+	@Column(length = 128)
 	public String appId;
 	@Id
+	@Column(length = 200)
 	public String deviceToken;
 	@Id
+	@Column(length = 32)
 	public String userId;
-	@Column
+	@Column(length = 5)
 	public String language;
-	@Column
+	@Column(length = 100)
 	public String clientAccountId;
 	@Column
 	public boolean userConsent;
@@ -38,15 +42,15 @@ public class Subscription {
 	@Column
 	public long changedAt;
 
-	@Column
+	@Column(length = 32)
 	public String deviceId;
-	@Column
+	@Column(length = 32)
 	public String deviceType;
-	@Column
+	@Column(length = 32)
 	public String osVersion;
-	@Column
+	@Column(length = 32)
 	public String encryption;
-	@Column
+	@Column(length = 32)
 	public String appVersion;
 
 	public Subscription() {

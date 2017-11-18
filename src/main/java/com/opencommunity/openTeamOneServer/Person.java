@@ -17,14 +17,15 @@ interface PersonRepository extends CrudRepository<Person, String> {
 @Entity
 public class Person {
 	@Id
+	@Column(length = 32)
 	public String personId;
-	@Column
+	@Column(length = 50)
 	public String lastName;
-	@Column
+	@Column(length = 50)
 	public String firstName;
-	@Column
+	@Column(length = 50)
 	public String nickName;
-	@Column
+	@Column(length = 32)
 	public String pictureId;
 
 	public Person() {

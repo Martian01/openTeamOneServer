@@ -40,16 +40,17 @@ interface MessageRepository extends CrudRepository<Message, String> {
 public class Message {
 
 	@Id
+	@Column(length = 32)
 	public String messageId;
-	@Column
+	@Column(length = 32)
 	public String clientMessageId;
-	@Column
+	@Column(length = 32)
 	public String roomId;
-	@Column
+	@Column(length = 32)
 	public String senderPersonId;
 	@Column
 	public long postedAt;
-	@Column
+	@Column(length = 5000)
 	public String text;
 	@Column
 	public boolean isDeleted;

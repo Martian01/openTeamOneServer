@@ -29,10 +29,12 @@ interface ViewedConfirmationRepository extends CrudRepository<ViewedConfirmation
 public class ViewedConfirmation {
 
 	@Id
+	@Column(length = 32)
 	public String messageId;
 	@Id
+	@Column(length = 32)
 	public String personId;
-	@Column
+	@Column(length = 32)
 	public String roomId;
 	@Column
 	public long messagePostedAt;
