@@ -10,6 +10,147 @@
 	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+	<script>
+		function setSubscription(subscription) {
+			$("#targetType").val((subscription && subscription.targetType) || null);
+			$("#appId").val((subscription && subscription.appId) || null);
+			$("#deviceToken").val((subscription && subscription.deviceToken) || null);
+			$("#userId").val((subscription && subscription.userId) || null);
+			$("#language").val((subscription && subscription.language) || null);
+			$("#clientAccountId").val((subscription && subscription.clientAccountId) || null);
+			$("#userConsent").prop('checked', subscription && subscription.userConsent);
+			$("#isActive").prop('checked', subscription && subscription.isActive);
+			$("#changedAt").val((subscription && subscription.changedAt) || null);
+			$("#deviceId").val((subscription && subscription.deviceId) || null);
+			$("#deviceType").val((subscription && subscription.deviceType) || null);
+			$("#osVersion").val((subscription && subscription.osVersion) || null);
+			$("#encryption").val((subscription && subscription.encryption) || null);
+			$("#appVersion").val((subscription && subscription.appVersion) || null);
+		}
+		function getSubscription() {
+			function set(object, property, appId) {
+				if (appId)
+					object[property] = appId;
+			}
+			var subscription = {};
+			set(subscription, "targetType", $("#targetType").val());
+			set(subscription, "appId", $("#appId").val());
+			set(subscription, "deviceToken", $("#deviceToken").val());
+			set(subscription, "userId", $("#userId").val());
+			set(subscription, "language", $("#language").val());
+			set(subscription, "clientAccountId", $("#clientAccountId").val());
+			set(subscription, "userConsent", $("#userConsent").prop("checked"));
+			set(subscription, "isActive", $("#isActive").prop("checked"));
+			set(subscription, "changedAt", $("#changedAt").val());
+			set(subscription, "deviceId", $("#deviceId").val());
+			set(subscription, "deviceType", $("#deviceType").val());
+			set(subscription, "osVersion", $("#osVersion").val());
+			set(subscription, "encryption", $("#encryption").val());
+			set(subscription, "appVersion", $("#appVersion").val());
+			return subscription;
+		}
+		function deleteSubscription(table, dialog) {
+			dialog.dialog("close");
+			var subscription = getSubscription();
+			if (subscription.targetType && subscription.appId && subscription.deviceToken && subscription.userId) {
+				$.ajax({
+					url: "/svc/subscription/" + subscription.targetType + "/" + subscription.appId + "/" + subscription.deviceToken + "/" + subscription.userId,
+					method: "DELETE",
+					success: table.ajax.reload.bind(null, null, false),
+					error: alert.bind(null, "Deletion failure")
+				});
+			}
+		}
+		function postSubscription(table, dialog) {
+			if (!$("#targetType").val() || !$("#appId").val() || !$("#deviceToken").val() || !$("#userId").val()) {
+				alert("Error: Target Type, App Id, Device Token or User Id is empty");
+				return;
+			}
+			dialog.dialog("close");
+			var subscription = getSubscription();
+			var body = JSON.stringify(subscription);
+			$.ajax({
+				url: "/svc/subscription",
+				method: "POST",
+				contentType: "application/json; charset=UTF-8'",
+				data: body,
+				processData: false,
+				success: table.ajax.reload.bind(null, null, false),
+				error: alert.bind(null, "Posting failure")
+			});
+		}
+		function onStart() {
+			var table = $("#subscriptionTable").DataTable({
+				pageLength: 25,
+				ajax: {
+					url: "/svc/subscriptions",
+					dataSrc: ""
+				},
+				columns: [
+					{ data: "targetType", defaultContent: "" },
+					{ data: "appId", defaultContent: "" },
+					{ data: "deviceToken", defaultContent: "" },
+					{ data: "userId", defaultContent: "" },
+					{ data: "language", defaultContent: "" },
+					{ data: "clientAccountId", defaultContent: "" },
+					{ data: "userConsent", defaultContent: false },
+					{ data: "isActive", defaultContent: false },
+					{ data: "changedAt", defaultContent: "" },
+					{ data: "deviceId", defaultContent: "" },
+					{ data: "deviceType", defaultContent: "" },
+					{ data: "osVersion", defaultContent: "" },
+					{ data: "encryption", defaultContent: "" },
+					{ data: "appVersion", defaultContent: "" }
+				]
+			});
+			var dialog = $("#dialog");
+			dialog.dialog({
+				autoOpen: false,
+				  height: 800,
+				  width: 500,
+				  modal: true,
+				  buttons: {
+					Delete: deleteSubscription.bind(null, table, dialog),
+					Save: postSubscription.bind(null, table, dialog)
+				  }
+			});
+			$("#subscriptionTable tbody").on("click", "tr", function () {
+				setSubscription(table.row(this).data());
+				dialog.dialog("open");
+			});
+			$("#createSubscription").on("click", function() {
+				setSubscription(null);
+				dialog.dialog("open");
+			});
+			$("#_changedAt").on("click", function() {
+				$("#changedAt").val(new Date().toISOString());
+			});
+    	};
+		function onLoadSession(response) {
+			var isLoggedIn = response && response.user;
+			var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
+			var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
+			//
+			if (isLoggedInAsAdmin) {
+				onStart();
+			} else {
+				if (isLoggedInAsUser) {
+					window.location.href = "../user/index.html";
+				} else {
+					window.location.href = "../index.html";
+				}
+			}
+		}
+		function loadSession() {
+			$.ajax({
+				url: "/svc/session",
+				method: "GET",
+				dataType: "json",
+				success: onLoadSession,
+				error: alert.bind(null, "Session failure")
+			});
+		}
+	</script>
 </head>
 <body>
 	<div style="display: none;">
@@ -83,121 +224,7 @@
 	</div>
 	<br/>
 	<script>
-		$(document).ready( function () {
-			var dialog = $("#dialog");
-			function setSubscription(subscription) {
-				$("#targetType").val((subscription && subscription.targetType) || null);
-				$("#appId").val((subscription && subscription.appId) || null);
-				$("#deviceToken").val((subscription && subscription.deviceToken) || null);
-				$("#userId").val((subscription && subscription.userId) || null);
-				$("#language").val((subscription && subscription.language) || null);
-				$("#clientAccountId").val((subscription && subscription.clientAccountId) || null);
-				$("#userConsent").prop('checked', subscription && subscription.userConsent);
-				$("#isActive").prop('checked', subscription && subscription.isActive);
-				$("#changedAt").val((subscription && subscription.changedAt) || null);
-				$("#deviceId").val((subscription && subscription.deviceId) || null);
-				$("#deviceType").val((subscription && subscription.deviceType) || null);
-				$("#osVersion").val((subscription && subscription.osVersion) || null);
-				$("#encryption").val((subscription && subscription.encryption) || null);
-				$("#appVersion").val((subscription && subscription.appVersion) || null);
-			}
-			function getSubscription() {
-				function set(object, property, appId) {
-					if (appId)
-						object[property] = appId;
-				}
-				var subscription = {};
-				set(subscription, "targetType", $("#targetType").val());
-				set(subscription, "appId", $("#appId").val());
-				set(subscription, "deviceToken", $("#deviceToken").val());
-				set(subscription, "userId", $("#userId").val());
-				set(subscription, "language", $("#language").val());
-				set(subscription, "clientAccountId", $("#clientAccountId").val());
-				set(subscription, "userConsent", $("#userConsent").prop("checked"));
-				set(subscription, "isActive", $("#isActive").prop("checked"));
-				set(subscription, "changedAt", $("#changedAt").val());
-				set(subscription, "deviceId", $("#deviceId").val());
-				set(subscription, "deviceType", $("#deviceType").val());
-				set(subscription, "osVersion", $("#osVersion").val());
-				set(subscription, "encryption", $("#encryption").val());
-				set(subscription, "appVersion", $("#appVersion").val());
-				return subscription;
-			}
-			function deleteSubscription() {
-				dialog.dialog("close");
-				var subscription = getSubscription();
-				if (subscription.targetType && subscription.appId && subscription.deviceToken && subscription.userId) {
-					$.ajax({
-						url: "/svc/subscription/" + subscription.targetType + "/" + subscription.appId + "/" + subscription.deviceToken + "/" + subscription.userId,
-						method: "DELETE",
-						success: table.ajax.reload.bind(null, null, false),
-						error: alert.bind(null, "Deletion failure")
-					});
-				}
-			}
-			function postSubscription() {
-				if (!$("#targetType").val() || !$("#appId").val() || !$("#deviceToken").val() || !$("#userId").val()) {
-					alert("Error: Target Type, App Id, Device Token or User Id is empty");
-					return;
-				}
-				dialog.dialog("close");
-				var subscription = getSubscription();
-				var body = JSON.stringify(subscription);
-				$.ajax({
-					url: "/svc/subscription",
-					method: "POST",
-					contentType: "application/json; charset=UTF-8'",
-					data: body,
-					processData: false,
-					success: table.ajax.reload.bind(null, null, false),
-					error: alert.bind(null, "Posting failure")
-				});
-			}
-			dialog.dialog({
-				autoOpen: false,
-				  height: 800,
-				  width: 500,
-				  modal: true,
-				  buttons: {
-					Delete: deleteSubscription,
-					Save: postSubscription
-				  }
-			});
-			var table = $("#subscriptionTable").DataTable({
-				pageLength: 25,
-				ajax: {
-					url: "/svc/subscriptions",
-					dataSrc: ""
-				},
-				columns: [
-					{ data: "targetType", defaultContent: "" },
-					{ data: "appId", defaultContent: "" },
-					{ data: "deviceToken", defaultContent: "" },
-					{ data: "userId", defaultContent: "" },
-					{ data: "language", defaultContent: "" },
-					{ data: "clientAccountId", defaultContent: "" },
-					{ data: "userConsent", defaultContent: false },
-					{ data: "isActive", defaultContent: false },
-					{ data: "changedAt", defaultContent: "" },
-					{ data: "deviceId", defaultContent: "" },
-					{ data: "deviceType", defaultContent: "" },
-					{ data: "osVersion", defaultContent: "" },
-					{ data: "encryption", defaultContent: "" },
-					{ data: "appVersion", defaultContent: "" }
-				]
-			});
-			$("#subscriptionTable tbody").on("click", "tr", function () {
-				setSubscription(table.row(this).data());
-				dialog.dialog("open");
-			});
-			$("#createSubscription").on("click", function() {
-				setSubscription(null);
-				dialog.dialog("open");
-			});
-			$("#_changedAt").on("click", function() {
-				$("#changedAt").val(new Date().toISOString());
-			});
-    	});
+		$(document).ready(loadSession);
 	</script>
 	<noscript>Info: JavaScript must be enabled.</noscript>
 </body>

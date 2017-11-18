@@ -10,6 +10,123 @@
 	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+	<script>
+		function setConfirmation(confirmation) {
+			$("#messageId").val((confirmation && confirmation.messageId) || null);
+			$("#personId").val((confirmation && confirmation.personId) || null);
+			$("#roomId").val((confirmation && confirmation.roomId) || null);
+			$("#messagePostedAt").val((confirmation && confirmation.messagePostedAt) || null);
+			$("#confirmedAt").val((confirmation && confirmation.confirmedAt) || null);
+		}
+		function getConfirmation() {
+			function set(object, property, personId) {
+				if (personId)
+					object[property] = personId;
+			}
+			var confirmation = {};
+			set(confirmation, "messageId", $("#messageId").val());
+			set(confirmation, "personId", $("#personId").val());
+			set(confirmation, "roomId", $("#roomId").val());
+			set(confirmation, "messagePostedAt", $("#messagePostedAt").val());
+			set(confirmation, "confirmedAt", $("#confirmedAt").val());
+			return confirmation;
+		}
+		function deleteConfirmation(table, dialog) {
+			dialog.dialog("close");
+			var confirmation = getConfirmation();
+			if (confirmation.roomId && confirmation.personId) {
+				$.ajax({
+					url: "/svc/confirmation/" + confirmation.messageId + "/" + confirmation.personId,
+					method: "DELETE",
+					success: table.ajax.reload.bind(null, null, false),
+					error: alert.bind(null, "Deletion failure")
+				});
+			}
+		}
+		function postConfirmation(table, dialog) {
+			if (!$("#messageId").val() || !$("#personId").val()) {
+				alert("Error: Message Id or Person Id is empty");
+				return;
+			}
+			dialog.dialog("close");
+			var confirmation = getConfirmation();
+			var body = JSON.stringify(confirmation);
+			$.ajax({
+				url: "/svc/confirmation",
+				method: "POST",
+				contentType: "application/json; charset=UTF-8'",
+				data: body,
+				processData: false,
+				success: table.ajax.reload.bind(null, null, false),
+				error: alert.bind(null, "Posting failure")
+			});
+		}
+		function onStart() {
+			var table = $("#confirmationTable").DataTable({
+				pageLength: 25,
+				ajax: {
+					url: "/svc/confirmations",
+					dataSrc: ""
+				},
+				columns: [
+					{ data: "messageId", defaultContent: "" },
+					{ data: "personId", defaultContent: "" },
+					{ data: "roomId", defaultContent: "" },
+					{ data: "messagePostedAt", defaultContent: "" },
+					{ data: "confirmedAt", defaultContent: "" }
+				]
+			});
+			var dialog = $("#dialog");
+			dialog.dialog({
+				autoOpen: false,
+				  height: 500,
+				  width: 500,
+				  modal: true,
+				  buttons: {
+					Delete: deleteConfirmation.bind(null, table, dialog),
+					Save: postConfirmation.bind(null, table, dialog)
+				  }
+			});
+			$("#confirmationTable tbody").on("click", "tr", function () {
+				setConfirmation(table.row(this).data());
+				dialog.dialog("open");
+			});
+			$("#createConfirmation").on("click", function() {
+				setConfirmation(null);
+				dialog.dialog("open");
+			});
+			$("#_messagePostedAt").on("click", function() {
+				$("#messagePostedAt").val(new Date().toISOString());
+			});
+			$("#_confirmedAt").on("click", function() {
+				$("#confirmedAt").val(new Date().toISOString());
+			});
+    	};
+		function onLoadSession(response) {
+			var isLoggedIn = response && response.user;
+			var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
+			var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
+			//
+			if (isLoggedInAsAdmin) {
+				onStart();
+			} else {
+				if (isLoggedInAsUser) {
+					window.location.href = "../user/index.html";
+				} else {
+					window.location.href = "../index.html";
+				}
+			}
+		}
+		function loadSession() {
+			$.ajax({
+				url: "/svc/session",
+				method: "GET",
+				dataType: "json",
+				success: onLoadSession,
+				error: alert.bind(null, "Session failure")
+			});
+		}
+	</script>
 </head>
 <body>
 	<div style="display: none;">
@@ -58,97 +175,7 @@
 	</div>
 	<br/>
 	<script>
-		$(document).ready( function () {
-			var dialog = $("#dialog");
-			function setConfirmation(confirmation) {
-				$("#messageId").val((confirmation && confirmation.messageId) || null);
-				$("#personId").val((confirmation && confirmation.personId) || null);
-				$("#roomId").val((confirmation && confirmation.roomId) || null);
-				$("#messagePostedAt").val((confirmation && confirmation.messagePostedAt) || null);
-				$("#confirmedAt").val((confirmation && confirmation.confirmedAt) || null);
-			}
-			function getConfirmation() {
-				function set(object, property, personId) {
-					if (personId)
-						object[property] = personId;
-				}
-				var confirmation = {};
-				set(confirmation, "messageId", $("#messageId").val());
-				set(confirmation, "personId", $("#personId").val());
-				set(confirmation, "roomId", $("#roomId").val());
-				set(confirmation, "messagePostedAt", $("#messagePostedAt").val());
-				set(confirmation, "confirmedAt", $("#confirmedAt").val());
-				return confirmation;
-			}
-			function deleteConfirmation() {
-				dialog.dialog("close");
-				var confirmation = getConfirmation();
-				if (confirmation.roomId && confirmation.personId) {
-					$.ajax({
-						url: "/svc/confirmation/" + confirmation.roomId + "/" + confirmation.personId,
-						method: "DELETE",
-						success: table.ajax.reload.bind(null, null, false),
-						error: alert.bind(null, "Deletion failure")
-					});
-				}
-			}
-			function postConfirmation() {
-				if (!$("#messageId").val() || !$("#personId").val()) {
-					alert("Error: Message Id or Person Id is empty");
-					return;
-				}
-				dialog.dialog("close");
-				var confirmation = getConfirmation();
-				var body = JSON.stringify(confirmation);
-				$.ajax({
-					url: "/svc/confirmation",
-					method: "POST",
-					contentType: "application/json; charset=UTF-8'",
-					data: body,
-					processData: false,
-					success: table.ajax.reload.bind(null, null, false),
-					error: alert.bind(null, "Posting failure")
-				});
-			}
-			dialog.dialog({
-				autoOpen: false,
-				  height: 500,
-				  width: 500,
-				  modal: true,
-				  buttons: {
-					Delete: deleteConfirmation,
-					Save: postConfirmation
-				  }
-			});
-			var table = $("#confirmationTable").DataTable({
-				pageLength: 25,
-				ajax: {
-					url: "/svc/confirmations",
-					dataSrc: ""
-				},
-				columns: [
-					{ data: "messageId", defaultContent: "" },
-					{ data: "personId", defaultContent: "" },
-					{ data: "roomId", defaultContent: "" },
-					{ data: "messagePostedAt", defaultContent: "" },
-					{ data: "confirmedAt", defaultContent: "" }
-				]
-			});
-			$("#confirmationTable tbody").on("click", "tr", function () {
-				setConfirmation(table.row(this).data());
-				dialog.dialog("open");
-			});
-			$("#createConfirmation").on("click", function() {
-				setConfirmation(null);
-				dialog.dialog("open");
-			});
-			$("#_messagePostedAt").on("click", function() {
-				$("#messagePostedAt").val(new Date().toISOString());
-			});
-			$("#_confirmedAt").on("click", function() {
-				$("#confirmedAt").val(new Date().toISOString());
-			});
-    	});
+		$(document).ready(loadSession);
 	</script>
 	<noscript>Info: JavaScript must be enabled.</noscript>
 </body>

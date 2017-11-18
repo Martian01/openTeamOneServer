@@ -10,6 +10,119 @@
 	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+	<script>
+		function setRoom(room) {
+			$("#roomId").val((room && room.roomId) || null);
+			$("#name").val((room && room.name) || null);
+			$("#shortName").val((room && room.firstName) || null);
+			$("#roomType").val((room && room.roomType) || null);
+			$("#pictureId").val((room && room.pictureId) || null);
+			$("#changedAt").val((room && room.changedAt) || null);
+		}
+		function getRoom() {
+			function set(object, property, value) {
+				if (value)
+					object[property] = value;
+			}
+			var room = {};
+			set(room, "roomId", $("#roomId").val());
+			set(room, "name", $("#name").val());
+			set(room, "shortName", $("#shortName").val());
+			set(room, "roomType", $("#roomType").val());
+			set(room, "pictureId", $("#pictureId").val());
+			set(room, "changedAt", $("#changedAt").val());
+			return room;
+		}
+		function deleteRoom(table, dialog) {
+			dialog.dialog("close");
+			var room = getRoom();
+			if (room.roomId) {
+				$.ajax({
+					url: "/svc/room/" + room.roomId,
+					method: "DELETE",
+					success: table.ajax.reload.bind(null, null, false),
+					error: alert.bind(null, "Deletion failure")
+				});
+			}
+		}
+		function postRoom(table, dialog) {
+			dialog.dialog("close");
+			var room = getRoom();
+			var body = JSON.stringify(room);
+			$.ajax({
+				url: "/svc/room",
+				method: "POST",
+				contentType: "application/json; charset=UTF-8'",
+				data: body,
+				processData: false,
+				success: table.ajax.reload.bind(null, null, false),
+				error: alert.bind(null, "Posting failure")
+			});
+		}
+		function onStart() {
+			var table = $("#roomTable").DataTable({
+				pageLength: 25,
+				ajax: {
+					url: "/svc/rooms",
+					dataSrc: ""
+				},
+				columns: [
+					{ data: "roomId", defaultContent: "" },
+					{ data: "name", defaultContent: "" },
+					{ data: "shortName", defaultContent: "" },
+					{ data: "roomType", defaultContent: "" },
+					{ data: "pictureId", defaultContent: "" },
+					{ data: "changedAt", defaultContent: "" }
+				]
+			});
+			var dialog = $("#dialog");
+			dialog.dialog({
+				autoOpen: false,
+				  height: 580,
+				  width: 500,
+				  modal: true,
+				  buttons: {
+					Delete: deleteRoom.bind(null, table, dialog),
+					Save: postRoom.bind(null, table, dialog)
+				  }
+			});
+			$("#roomTable tbody").on("click", "tr", function () {
+				setRoom(table.row(this).data());
+				dialog.dialog("open");
+			});
+			$("#createRoom").on("click", function() {
+				setRoom(null);
+				dialog.dialog("open");
+			});
+			$("#_changedAt").on("click", function() {
+				$("#changedAt").val(new Date().toISOString());
+			});
+    	};
+		function onLoadSession(response) {
+			var isLoggedIn = response && response.user;
+			var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
+			var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
+			//
+			if (isLoggedInAsAdmin) {
+				onStart();
+			} else {
+				if (isLoggedInAsUser) {
+					window.location.href = "../user/index.html";
+				} else {
+					window.location.href = "../index.html";
+				}
+			}
+		}
+		function loadSession() {
+			$.ajax({
+				url: "/svc/session",
+				method: "GET",
+				dataType: "json",
+				success: onLoadSession,
+				error: alert.bind(null, "Session failure")
+			});
+		}
+	</script>
 </head>
 <body>
 	<div style="display: none;">
@@ -61,93 +174,7 @@
 	</div>
 	<br/>
 	<script>
-		$(document).ready( function () {
-			var dialog = $("#dialog");
-			function setRoom(room) {
-				$("#roomId").val((room && room.roomId) || null);
-				$("#name").val((room && room.name) || null);
-				$("#shortName").val((room && room.firstName) || null);
-				$("#roomType").val((room && room.roomType) || null);
-				$("#pictureId").val((room && room.pictureId) || null);
-				$("#changedAt").val((room && room.changedAt) || null);
-			}
-			function getRoom() {
-				function set(object, property, value) {
-					if (value)
-						object[property] = value;
-				}
-				var room = {};
-				set(room, "roomId", $("#roomId").val());
-				set(room, "name", $("#name").val());
-				set(room, "shortName", $("#shortName").val());
-				set(room, "roomType", $("#roomType").val());
-				set(room, "pictureId", $("#pictureId").val());
-				set(room, "changedAt", $("#changedAt").val());
-				return room;
-			}
-			function deleteRoom() {
-				dialog.dialog("close");
-				var room = getRoom();
-				if (room.roomId) {
-					$.ajax({
-						url: "/svc/room/" + room.roomId,
-						method: "DELETE",
-						success: table.ajax.reload.bind(null, null, false),
-						error: alert.bind(null, "Deletion failure")
-					});
-				}
-			}
-			function postRoom() {
-				dialog.dialog("close");
-				var room = getRoom();
-				var body = JSON.stringify(room);
-				$.ajax({
-					url: "/svc/room",
-					method: "POST",
-					contentType: "application/json; charset=UTF-8'",
-					data: body,
-					processData: false,
-					success: table.ajax.reload.bind(null, null, false),
-					error: alert.bind(null, "Posting failure")
-				});
-			}
-			dialog.dialog({
-				autoOpen: false,
-				  height: 580,
-				  width: 500,
-				  modal: true,
-				  buttons: {
-					Delete: deleteRoom,
-					Save: postRoom
-				  }
-			});
-			var table = $("#roomTable").DataTable({
-				pageLength: 25,
-				ajax: {
-					url: "/svc/rooms",
-					dataSrc: ""
-				},
-				columns: [
-					{ data: "roomId", defaultContent: "" },
-					{ data: "name", defaultContent: "" },
-					{ data: "shortName", defaultContent: "" },
-					{ data: "roomType", defaultContent: "" },
-					{ data: "pictureId", defaultContent: "" },
-					{ data: "changedAt", defaultContent: "" }
-				]
-			});
-			$("#roomTable tbody").on("click", "tr", function () {
-				setRoom(table.row(this).data());
-				dialog.dialog("open");
-			});
-			$("#createRoom").on("click", function() {
-				setRoom(null);
-				dialog.dialog("open");
-			});
-			$("#_changedAt").on("click", function() {
-				$("#changedAt").val(new Date().toISOString());
-			});
-    	});
+		$(document).ready(loadSession);
 	</script>
 	<noscript>Info: JavaScript must be enabled.</noscript>
 </body>

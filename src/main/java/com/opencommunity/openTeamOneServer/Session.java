@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Session {
 
@@ -44,35 +45,41 @@ public class Session {
 	private static Map<String, Session> currentSessions = new HashMap<>();
 
 	public static Session getSession(@NotNull String sessionId) {
-		Session session = currentSessions.get(sessionId);
-		if (session != null)
-			session.lastAccessTime = System.currentTimeMillis();
-		return session;
+		synchronized (currentSessions) {
+			long now = System.currentTimeMillis();
+			Session session = currentSessions.get(sessionId);
+			if (session != null) {
+				if (now - session.lastAccessTime > sessionMaximumAge) {
+					currentSessions.remove(sessionId);
+					return null;
+				}
+				session.lastAccessTime = now;
+			}
+			return session;
+		}
 	}
 
 	public static Session newSession(@NotNull String userId) {
-		Session session = new Session(userId);
-		currentSessions.put(session.sessionId, session);
-		return session;
-	}
-
-	public static String newSessionId(@NotNull String userId) {
-		return newSession(userId).sessionId;
+		synchronized (currentSessions) {
+			Session session = new Session(userId);
+			currentSessions.put(session.sessionId, session);
+			return session;
+		}
 	}
 
 	public static void invalidateSession(@NotNull String sessionId) {
-		currentSessions.remove(sessionId);
-	}
-
-	public static void invalidateOldSessions(long maximumAge) {
-		long now = System.currentTimeMillis();
-		for (Session session : currentSessions.values())
-			if (now - session.lastAccessTime > maximumAge)
-				invalidateSession(session.sessionId);
+		synchronized (currentSessions) {
+			currentSessions.remove(sessionId);
+		}
 	}
 
 	public static void invalidateOldSessions() {
-		invalidateOldSessions(sessionMaximumAge);
+		synchronized (currentSessions) {
+			long now = System.currentTimeMillis();
+			for (Session session : currentSessions.values())
+				if (now - session.lastAccessTime > sessionMaximumAge)
+					currentSessions.remove(session.sessionId);
+		}
 	}
 
 }

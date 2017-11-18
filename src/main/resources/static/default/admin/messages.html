@@ -10,6 +10,128 @@
 	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+	<script>
+		function setMessage(message) {
+			$("#messageId").val((message && message.messageId) || null);
+			$("#clientMessageId").val((message && message.clientMessageId) || null);
+			$("#roomId").val((message && message.roomId) || null);
+			$("#senderPersonId").val((message && message.senderPersonId) || null);
+			$("#postedAt").val((message && message.postedAt) || null);
+			$("#text").val((message && message.text) || null);
+			$("#isDeleted").prop('checked', message && message.isDeleted);
+			$("#updatedAt").val((message && message.updatedAt) || null);
+		}
+		function getMessage() {
+			function set(object, property, value) {
+				if (value)
+					object[property] = value;
+			}
+			var message = {};
+			set(message, "messageId", $("#messageId").val());
+			set(message, "clientMessageId", $("#clientMessageId").val());
+			set(message, "roomId", $("#roomId").val());
+			set(message, "senderPersonId", $("#senderPersonId").val());
+			set(message, "postedAt", $("#postedAt").val());
+			set(message, "text", $("#text").val());
+			set(message, "isDeleted", $("#isDeleted").prop("checked"));
+			set(message, "updatedAt", $("#updatedAt").val());
+			return message;
+		}
+		function deleteMessage(table, dialog) {
+			dialog.dialog("close");
+			var message = getMessage();
+			if (message.messageId) {
+				$.ajax({
+					url: "/svc/message/" + message.messageId,
+					method: "DELETE",
+					success: table.ajax.reload.bind(null, null, false),
+					error: alert.bind(null, "Deletion failure")
+				});
+			}
+		}
+		function postMessage(table, dialog) {
+			dialog.dialog("close");
+			var message = getMessage();
+			var body = JSON.stringify(message);
+			$.ajax({
+				url: "/svc/message",
+				method: "POST",
+				contentType: "application/json; charset=UTF-8'",
+				data: body,
+				processData: false,
+				success: table.ajax.reload.bind(null, null, false),
+				error: alert.bind(null, "Posting failure")
+			});
+		}
+		function onStart() {
+			var table = $("#messageTable").DataTable({
+				pageLength: 25,
+				ajax: {
+					url: "/svc/messages",
+					dataSrc: ""
+				},
+				columns: [
+					{ data: "messageId", defaultContent: "" },
+					{ data: "clientMessageId", defaultContent: "" },
+					{ data: "roomId", defaultContent: "" },
+					{ data: "senderPersonId", defaultContent: "" },
+					{ data: "postedAt", defaultContent: "" },
+					{ data: "text", defaultContent: "" },
+					{ data: "isDeleted", defaultContent: false },
+					{ data: "updatedAt", defaultContent: "" }
+				]
+			});
+			var dialog = $("#dialog");
+			dialog.dialog({
+				autoOpen: false,
+				  height: 750,
+				  width: 500,
+				  modal: true,
+				  buttons: {
+					Delete: deleteMessage.bind(null, table, dialog),
+					Save: postMessage.bind(null, table, dialog)
+				  }
+			});
+			$("#messageTable tbody").on("click", "tr", function () {
+				setMessage(table.row(this).data());
+				dialog.dialog("open");
+			});
+			$("#createMessage").on("click", function() {
+				setMessage(null);
+				dialog.dialog("open");
+			});
+			$("#_postedAt").on("click", function() {
+				$("#postedAt").val(new Date().toISOString());
+			});
+			$("#_updatedAt").on("click", function() {
+				$("#updatedAt").val(new Date().toISOString());
+			});
+    	};
+		function onLoadSession(response) {
+			var isLoggedIn = response && response.user;
+			var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
+			var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
+			//
+			if (isLoggedInAsAdmin) {
+				onStart();
+			} else {
+				if (isLoggedInAsUser) {
+					window.location.href = "../user/index.html";
+				} else {
+					window.location.href = "../index.html";
+				}
+			}
+		}
+		function loadSession() {
+			$.ajax({
+				url: "/svc/session",
+				method: "GET",
+				dataType: "json",
+				success: onLoadSession,
+				error: alert.bind(null, "Session failure")
+			});
+		}
+	</script>
 </head>
 <body>
 	<div style="display: none;">
@@ -66,102 +188,7 @@
 	</div>
 	<br/>
 	<script>
-		$(document).ready( function () {
-			var dialog = $("#dialog");
-			function setMessage(message) {
-				$("#messageId").val((message && message.messageId) || null);
-				$("#clientMessageId").val((message && message.clientMessageId) || null);
-				$("#roomId").val((message && message.roomId) || null);
-				$("#senderPersonId").val((message && message.senderPersonId) || null);
-				$("#postedAt").val((message && message.postedAt) || null);
-				$("#text").val((message && message.text) || null);
-				$("#isDeleted").prop('checked', message && message.isDeleted);
-				$("#updatedAt").val((message && message.updatedAt) || null);
-			}
-			function getMessage() {
-				function set(object, property, value) {
-					if (value)
-						object[property] = value;
-				}
-				var message = {};
-				set(message, "messageId", $("#messageId").val());
-				set(message, "clientMessageId", $("#clientMessageId").val());
-				set(message, "roomId", $("#roomId").val());
-				set(message, "senderPersonId", $("#senderPersonId").val());
-				set(message, "postedAt", $("#postedAt").val());
-				set(message, "text", $("#text").val());
-				set(message, "isDeleted", $("#isDeleted").prop("checked"));
-				set(message, "updatedAt", $("#updatedAt").val());
-				return message;
-			}
-			function deleteMessage() {
-				dialog.dialog("close");
-				var message = getMessage();
-				if (message.messageId) {
-					$.ajax({
-						url: "/svc/message/" + message.messageId,
-						method: "DELETE",
-						success: table.ajax.reload.bind(null, null, false),
-						error: alert.bind(null, "Deletion failure")
-					});
-				}
-			}
-			function postMessage() {
-				dialog.dialog("close");
-				var message = getMessage();
-				var body = JSON.stringify(message);
-				$.ajax({
-					url: "/svc/message",
-					method: "POST",
-					contentType: "application/json; charset=UTF-8'",
-					data: body,
-					processData: false,
-					success: table.ajax.reload.bind(null, null, false),
-					error: alert.bind(null, "Posting failure")
-				});
-			}
-			dialog.dialog({
-				autoOpen: false,
-				  height: 750,
-				  width: 500,
-				  modal: true,
-				  buttons: {
-					Delete: deleteMessage,
-					Save: postMessage
-				  }
-			});
-			var table = $("#messageTable").DataTable({
-				pageLength: 25,
-				ajax: {
-					url: "/svc/messages",
-					dataSrc: ""
-				},
-				columns: [
-					{ data: "messageId", defaultContent: "" },
-					{ data: "clientMessageId", defaultContent: "" },
-					{ data: "roomId", defaultContent: "" },
-					{ data: "senderPersonId", defaultContent: "" },
-					{ data: "postedAt", defaultContent: "" },
-					{ data: "text", defaultContent: "" },
-					{ data: "isDeleted", defaultContent: false },
-					{ data: "updatedAt", defaultContent: "" }
-				]
-			});
-			$("#messageTable tbody").on("click", "tr", function () {
-				setMessage(table.row(this).data());
-				dialog.dialog("open");
-			});
-			$("#createMessage").on("click", function() {
-				setMessage(null);
-				dialog.dialog("open");
-			});
-			$("#_postedAt").on("click", function() {
-				$("#postedAt").val(new Date().toISOString());
-			});
-			$("#_updatedAt").on("click", function() {
-				$("#updatedAt").val(new Date().toISOString());
-			});
-    	});
+		$(document).ready(loadSession);
 	</script>
 	<noscript>Info: JavaScript must be enabled.</noscript>
 </body>

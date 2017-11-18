@@ -10,6 +10,108 @@
 	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+	<script>
+		function setMember(member) {
+			$("#roomId").val((member && member.roomId) || null);
+			$("#personId").val((member && member.personId) || null);
+		}
+		function getMember() {
+			function set(object, property, personId) {
+				if (personId)
+					object[property] = personId;
+			}
+			var member = {};
+			set(member, "roomId", $("#roomId").val());
+			set(member, "personId", $("#personId").val());
+			return member;
+		}
+		function deleteMember(table, dialog) {
+			dialog.dialog("close");
+			var member = getMember();
+			if (member.roomId && member.personId) {
+				$.ajax({
+					url: "/svc/member/" + member.roomId + "/" + member.personId,
+					method: "DELETE",
+					success: table.ajax.reload.bind(null, null, false),
+					error: alert.bind(null, "Deletion failure")
+				});
+			}
+		}
+		function postMember(table, dialog) {
+			if (!$("#roomId").val() || !$("#personId").val()) {
+				alert("Error: Room Id or Person Id is empty");
+				return;
+			}
+			dialog.dialog("close");
+			var member = getMember();
+			var body = JSON.stringify(member);
+			$.ajax({
+				url: "/svc/member",
+				method: "POST",
+				contentType: "application/json; charset=UTF-8'",
+				data: body,
+				processData: false,
+				success: table.ajax.reload.bind(null, null, false),
+				error: alert.bind(null, "Posting failure")
+			});
+		}
+		function onStart() {
+			var table = $("#memberTable").DataTable({
+				pageLength: 25,
+				ajax: {
+					url: "/svc/members",
+					dataSrc: ""
+				},
+				columns: [
+					{ data: "roomId", defaultContent: "" },
+					{ data: "personId", defaultContent: "" }
+				]
+			});
+			var dialog = $("#dialog");
+			dialog.dialog({
+				autoOpen: false,
+				  height: 300,
+				  width: 360,
+				  modal: true,
+				  buttons: {
+					Delete: deleteMember.bind(null, table, dialog),
+					Save: postMember.bind(null, table, dialog)
+				  }
+			});
+			$("#memberTable tbody").on("click", "tr", function () {
+				setMember(table.row(this).data());
+				dialog.dialog("open");
+			});
+			$("#createMember").on("click", function() {
+				setMember(null);
+				dialog.dialog("open");
+			});
+    	};
+		function onLoadSession(response) {
+			var isLoggedIn = response && response.user;
+			var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
+			var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
+			//
+			if (isLoggedInAsAdmin) {
+				onStart();
+			} else {
+				if (isLoggedInAsUser) {
+					window.location.href = "../user/index.html";
+				} else {
+					window.location.href = "../index.html";
+				}
+			}
+		}
+		function loadSession() {
+			$.ajax({
+				url: "/svc/session",
+				method: "GET",
+				dataType: "json",
+				success: onLoadSession,
+				error: alert.bind(null, "Session failure")
+			});
+		}
+	</script>
 </head>
 <body>
 	<div style="display: none;">
@@ -49,82 +151,7 @@
 	</div>
 	<br/>
 	<script>
-		$(document).ready( function () {
-			var dialog = $("#dialog");
-			function setMember(member) {
-				$("#roomId").val((member && member.roomId) || null);
-				$("#personId").val((member && member.personId) || null);
-			}
-			function getMember() {
-				function set(object, property, personId) {
-					if (personId)
-						object[property] = personId;
-				}
-				var member = {};
-				set(member, "roomId", $("#roomId").val());
-				set(member, "personId", $("#personId").val());
-				return member;
-			}
-			function deleteMember() {
-				dialog.dialog("close");
-				var member = getMember();
-				if (member.roomId && member.personId) {
-					$.ajax({
-						url: "/svc/member/" + member.roomId + "/" + member.personId,
-						method: "DELETE",
-						success: table.ajax.reload.bind(null, null, false),
-						error: alert.bind(null, "Deletion failure")
-					});
-				}
-			}
-			function postMember() {
-				if (!$("#roomId").val() || !$("#personId").val()) {
-					alert("Error: Room Id or Person Id is empty");
-					return;
-				}
-				dialog.dialog("close");
-				var member = getMember();
-				var body = JSON.stringify(member);
-				$.ajax({
-					url: "/svc/member",
-					method: "POST",
-					contentType: "application/json; charset=UTF-8'",
-					data: body,
-					processData: false,
-					success: table.ajax.reload.bind(null, null, false),
-					error: alert.bind(null, "Posting failure")
-				});
-			}
-			dialog.dialog({
-				autoOpen: false,
-				  height: 300,
-				  width: 360,
-				  modal: true,
-				  buttons: {
-					Delete: deleteMember,
-					Save: postMember
-				  }
-			});
-			var table = $("#memberTable").DataTable({
-				pageLength: 25,
-				ajax: {
-					url: "/svc/members",
-					dataSrc: ""
-				},
-				columns: [
-					{ data: "roomId", defaultContent: "" },
-					{ data: "personId", defaultContent: "" }
-				]
-			});
-			$("#memberTable tbody").on("click", "tr", function () {
-				setMember(table.row(this).data());
-				dialog.dialog("open");
-			});
-			$("#createMember").on("click", function() {
-				setMember(null);
-				dialog.dialog("open");
-			});
-    	});
+		$(document).ready(loadSession);
 	</script>
 	<noscript>Info: JavaScript must be enabled.</noscript>
 </body>

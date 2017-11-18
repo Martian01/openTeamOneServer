@@ -7,52 +7,6 @@
 	<link rel="stylesheet" type="text/css" href="../css/default.css"/>
 	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script>
-		function setVisibility(id, isVisible) {
-			var element = document.getElementById(id);
-			if (element)
-				element.style.display = isVisible ? "block" : "none";
-		}
-		function onLoadSession(response) {
-			var isLoggedIn = response && response.user;
-			var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
-			var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
-			//
-			var infoLine;
-			if (isLoggedIn) {
-				infoLine = 'You are logged in as "' + response.user.userId + '". Your roles are:';
-				if (isLoggedInAsAdmin) {
-					infoLine += ' Administrator';
-				}
-				if (isLoggedInAsUser) {
-					infoLine += ' User';
-				}
-			} else {
-				infoLine = 'You are not logged in.';
-			}
-			document.getElementById("infoLine").innerText = infoLine;
-			setVisibility("loginForm", !isLoggedIn);
-			setVisibility("logoutForm", isLoggedIn);
-			setVisibility("adminFunctions", isLoggedInAsAdmin);
-			setVisibility("userFunctions", isLoggedInAsUser);
-			if (isLoggedInAsUser) {
-				setPerson(response.person);
-			} else {
-				if (isLoggedInAsAdmin) {
-					window.location.href = "../admin/index.html";
-				} else {
-					window.location.href = "../index.html";
-				}
-			}
-		}
-		function loadSession() {
-			$.ajax({
-				url: "/svc/session",
-				method: "GET",
-				dataType: "json",
-				success: onLoadSession,
-				error: alert.bind(null, "Session failure")
-			});
-		}
 		function setPerson(person) {
 			$("#personId").val((person && person.personId) || null);
 			$("#lastName").val((person && person.lastName) || null);
@@ -106,6 +60,54 @@
 				processData: false,
 				success: setPerson,
 				error: alert.bind(null, "Posting failure")
+			});
+		}
+		function setVisibility(id, isVisible) {
+			var element = document.getElementById(id);
+			if (element)
+				element.style.display = isVisible ? "block" : "none";
+		}
+		function onLoadSession(response) {
+			var isLoggedIn = response && response.user;
+			var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
+			var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
+			//
+			var infoLine;
+			if (isLoggedIn) {
+				infoLine = 'You are logged in as "' + response.user.userId + '". Your roles are:';
+				if (isLoggedInAsAdmin) {
+					infoLine += ' Administrator';
+				}
+				if (isLoggedInAsUser) {
+					infoLine += ' User';
+				}
+			} else {
+				infoLine = 'You are not logged in.';
+			}
+			document.getElementById("infoLine").innerText = infoLine;
+			setVisibility("loginForm", !isLoggedIn);
+			setVisibility("logoutForm", isLoggedIn);
+			setVisibility("adminFunctions", isLoggedInAsAdmin);
+			setVisibility("userFunctions", isLoggedInAsUser);
+			if (isLoggedInAsUser) {
+				setPerson(response.person);
+				$("#fileContent").on("change", postProfilePic);
+				$("#updatePerson").on("click", updatePerson);
+			} else {
+				if (isLoggedInAsAdmin) {
+					window.location.href = "../admin/index.html";
+				} else {
+					window.location.href = "../index.html";
+				}
+			}
+		}
+		function loadSession() {
+			$.ajax({
+				url: "/svc/session",
+				method: "GET",
+				dataType: "json",
+				success: onLoadSession,
+				error: alert.bind(null, "Session failure")
 			});
 		}
 	</script>
@@ -177,9 +179,7 @@
 	</div>
 	<br/>
 	<script>
-		$("#fileContent").on("change", postProfilePic);
-		$("#updatePerson").on("click", updatePerson);
-		loadSession();
+		$(document).ready(loadSession);
 	</script>
 	<noscript>Info: JavaScript must be enabled.</noscript>
 </body>

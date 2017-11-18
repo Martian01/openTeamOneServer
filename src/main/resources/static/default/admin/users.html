@@ -10,6 +10,124 @@
 	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+	<script>
+		function setUser(user) {
+			$("#userId").val((user && user.userId) || null);
+			$("#personId").val((user && user.personId) || null);
+			$("#hasUserRole").prop('checked', user && user.hasUserRole);
+			$("#hasAdminRole").prop('checked', user && user.hasAdminRole);
+			$("#password").val(null);
+			$("#password2").val(null);
+			$("#withPwd").prop('checked', false);
+		}
+		function getUser(withPwd) {
+			function set(object, property, value) {
+				if (value)
+					object[property] = value;
+			}
+			var user = {};
+			set(user, "userId", $("#userId").val());
+			set(user, "personId", $("#personId").val());
+			set(user, "hasUserRole", $("#hasUserRole").prop("checked"));
+			set(user, "hasAdminRole", $("#hasAdminRole").prop("checked"));
+			if (withPwd)
+				set(user, "password", $("#password").val());
+			return user;
+		}
+		function deleteUser(table, dialog) {
+			dialog.dialog("close");
+			var user = getUser();
+			if (user.userId) {
+				$.ajax({
+					url: "/svc/user/" + user.userId,
+					method: "DELETE",
+					success: table.ajax.reload.bind(null, null, false),
+					error: alert.bind(null, "Deletion failure")
+				});
+			}
+		}
+		function postUser(table, dialog) {
+			if (!$("#userId").val()) {
+				alert("Error: User Id is empty");
+				return;
+			}
+			var withPwd = $("#withPwd").prop("checked");
+			if (withPwd && (!$("#password").val() || $("#password").val() != $("#password2").val())) {
+				alert("Error: Passwords are empty or different");
+				return;
+			}
+			dialog.dialog("close");
+			var user = getUser(withPwd);
+			var body = JSON.stringify(user);
+			$.ajax({
+				url: "/svc/user",
+				method: "POST",
+				contentType: "application/json; charset=UTF-8'",
+				data: body,
+				processData: false,
+				success: table.ajax.reload.bind(null, null, false),
+				error: alert.bind(null, "Posting failure")
+			});
+		}
+		function onStart() {
+			var table = $("#userTable").DataTable({
+				pageLength: 25,
+				ajax: {
+					url: "/svc/users",
+					dataSrc: ""
+				},
+				columns: [
+					{ data: "userId", defaultContent: "" },
+					{ data: "personId", defaultContent: "" },
+					{ data: "hasUserRole", defaultContent: false },
+					{ data: "hasAdminRole", defaultContent: false }
+				]
+			});
+			var dialog = $("#dialog");
+			dialog.dialog({
+				autoOpen: false,
+				  height: 540,
+				  width: 360,
+				  modal: true,
+				  buttons: {
+					Delete: deleteUser.bind(null, table, dialog),
+					Save: postUser.bind(null, table, dialog)
+				  }
+			});
+			$("#userTable tbody").on("click", "tr", function () {
+				setUser(table.row(this).data());
+				dialog.dialog("open");
+			});
+			$("#createUser").on("click", function() {
+				setUser(null);
+				dialog.dialog("open");
+			});
+    	};
+		function onLoadSession(response) {
+			var isLoggedIn = response && response.user;
+			var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
+			var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
+			//
+			if (isLoggedInAsAdmin) {
+				onStart();
+			} else {
+				if (isLoggedInAsUser) {
+					window.location.href = "../user/index.html";
+				} else {
+					window.location.href = "../index.html";
+				}
+			}
+		}
+		function loadSession() {
+			$.ajax({
+				url: "/svc/session",
+				method: "GET",
+				dataType: "json",
+				success: onLoadSession,
+				error: alert.bind(null, "Session failure")
+			});
+		}
+	</script>
 </head>
 <body>
 	<div style="display: none;">
@@ -58,98 +176,7 @@
 	</div>
 	<br/>
 	<script>
-		$(document).ready( function () {
-			var dialog = $("#dialog");
-			function setUser(user) {
-				$("#userId").val((user && user.userId) || null);
-				$("#personId").val((user && user.personId) || null);
-				$("#hasUserRole").prop('checked', user && user.hasUserRole);
-				$("#hasAdminRole").prop('checked', user && user.hasAdminRole);
-				$("#password").val(null);
-				$("#password2").val(null);
-				$("#withPwd").prop('checked', false);
-			}
-			function getUser(withPwd) {
-				function set(object, property, value) {
-					if (value)
-						object[property] = value;
-				}
-				var user = {};
-				set(user, "userId", $("#userId").val());
-				set(user, "personId", $("#personId").val());
-				set(user, "hasUserRole", $("#hasUserRole").prop("checked"));
-				set(user, "hasAdminRole", $("#hasAdminRole").prop("checked"));
-				if (withPwd)
-					set(user, "password", $("#password").val());
-				return user;
-			}
-			function deleteUser() {
-				dialog.dialog("close");
-				var user = getUser();
-				if (user.userId) {
-					$.ajax({
-						url: "/svc/user/" + user.userId,
-						method: "DELETE",
-						success: table.ajax.reload.bind(null, null, false),
-						error: alert.bind(null, "Deletion failure")
-					});
-				}
-			}
-			function postUser() {
-				if (!$("#userId").val()) {
-					alert("Error: User Id is empty");
-					return;
-				}
-				var withPwd = $("#withPwd").prop("checked");
-				if (withPwd && (!$("#password").val() || $("#password").val() != $("#password2").val())) {
-					alert("Error: Passwords are empty or different");
-					return;
-				}
-				dialog.dialog("close");
-				var user = getUser(withPwd);
-				var body = JSON.stringify(user);
-				$.ajax({
-					url: "/svc/user",
-					method: "POST",
-					contentType: "application/json; charset=UTF-8'",
-					data: body,
-					processData: false,
-					success: table.ajax.reload.bind(null, null, false),
-					error: alert.bind(null, "Posting failure")
-				});
-			}
-			dialog.dialog({
-				autoOpen: false,
-				  height: 540,
-				  width: 360,
-				  modal: true,
-				  buttons: {
-					Delete: deleteUser,
-					Save: postUser
-				  }
-			});
-			var table = $("#userTable").DataTable({
-				pageLength: 25,
-				ajax: {
-					url: "/svc/users",
-					dataSrc: ""
-				},
-				columns: [
-					{ data: "userId", defaultContent: "" },
-					{ data: "personId", defaultContent: "" },
-					{ data: "hasUserRole", defaultContent: false },
-					{ data: "hasAdminRole", defaultContent: false }
-				]
-			});
-			$("#userTable tbody").on("click", "tr", function () {
-				setUser(table.row(this).data());
-				dialog.dialog("open");
-			});
-			$("#createUser").on("click", function() {
-				setUser(null);
-				dialog.dialog("open");
-			});
-    	});
+		$(document).ready(loadSession);
 	</script>
 	<noscript>Info: JavaScript must be enabled.</noscript>
 </body>

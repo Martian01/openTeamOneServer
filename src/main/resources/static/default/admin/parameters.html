@@ -10,6 +10,108 @@
 	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+	<script>
+		function setParameter(parameter) {
+			$("#name").val((parameter && parameter.name) || null);
+			$("#value").val((parameter && parameter.value) || null);
+		}
+		function getParameter() {
+			function set(object, property, value) {
+				if (value)
+					object[property] = value;
+			}
+			var parameter = {};
+			set(parameter, "name", $("#name").val());
+			set(parameter, "value", $("#value").val());
+			return parameter;
+		}
+		function deleteParameter(table, dialog) {
+			dialog.dialog("close");
+			var parameter = getParameter();
+			if (parameter.name) {
+				$.ajax({
+					url: "/svc/parameter/" + parameter.name,
+					method: "DELETE",
+					success: table.ajax.reload.bind(null, null, false),
+					error: alert.bind(null, "Deletion failure")
+				});
+			}
+		}
+		function postParameter(table, dialog) {
+			if (!$("#name").val()) {
+				alert("Error: Tenant parameter key is empty");
+				return;
+			}
+			dialog.dialog("close");
+			var parameter = getParameter();
+			var body = JSON.stringify(parameter);
+			$.ajax({
+				url: "/svc/parameter",
+				method: "POST",
+				contentType: "application/json; charset=UTF-8'",
+				data: body,
+				processData: false,
+				success: table.ajax.reload.bind(null, null, false),
+				error: alert.bind(null, "Posting failure")
+			});
+		}
+		function onStart() {
+			var table = $("#parameterTable").DataTable({
+				pageLength: 25,
+				ajax: {
+					url: "/svc/parameters",
+					dataSrc: ""
+				},
+				columns: [
+					{ data: "name", defaultContent: "" },
+					{ data: "value", defaultContent: "" }
+				]
+			});
+			var dialog = $("#dialog");
+			dialog.dialog({
+				autoOpen: false,
+				  height: 300,
+				  width: 360,
+				  modal: true,
+				  buttons: {
+					Delete: deleteParameter.bind(null, table, dialog),
+					Save: postParameter.bind(null, table, dialog)
+				  }
+			});
+			$("#parameterTable tbody").on("click", "tr", function () {
+				setParameter(table.row(this).data());
+				dialog.dialog("open");
+			});
+			$("#createParameter").on("click", function() {
+				setParameter(null);
+				dialog.dialog("open");
+			});
+    	};
+		function onLoadSession(response) {
+			var isLoggedIn = response && response.user;
+			var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
+			var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
+			//
+			if (isLoggedInAsAdmin) {
+				onStart();
+			} else {
+				if (isLoggedInAsUser) {
+					window.location.href = "../user/index.html";
+				} else {
+					window.location.href = "../index.html";
+				}
+			}
+		}
+		function loadSession() {
+			$.ajax({
+				url: "/svc/session",
+				method: "GET",
+				dataType: "json",
+				success: onLoadSession,
+				error: alert.bind(null, "Session failure")
+			});
+		}
+	</script>
 </head>
 <body>
 	<div style="display: none;">
@@ -49,82 +151,7 @@
 	</div>
 	<br/>
 	<script>
-		$(document).ready( function () {
-			var dialog = $("#dialog");
-			function setParameter(parameter) {
-				$("#name").val((parameter && parameter.name) || null);
-				$("#value").val((parameter && parameter.value) || null);
-			}
-			function getParameter() {
-				function set(object, property, value) {
-					if (value)
-						object[property] = value;
-				}
-				var parameter = {};
-				set(parameter, "name", $("#name").val());
-				set(parameter, "value", $("#value").val());
-				return parameter;
-			}
-			function deleteParameter() {
-				dialog.dialog("close");
-				var parameter = getParameter();
-				if (parameter.name) {
-					$.ajax({
-						url: "/svc/parameter/" + parameter.name,
-						method: "DELETE",
-						success: table.ajax.reload.bind(null, null, false),
-						error: alert.bind(null, "Deletion failure")
-					});
-				}
-			}
-			function postParameter() {
-				if (!$("#name").val()) {
-					alert("Error: Tenant parameter key is empty");
-					return;
-				}
-				dialog.dialog("close");
-				var parameter = getParameter();
-				var body = JSON.stringify(parameter);
-				$.ajax({
-					url: "/svc/parameter",
-					method: "POST",
-					contentType: "application/json; charset=UTF-8'",
-					data: body,
-					processData: false,
-					success: table.ajax.reload.bind(null, null, false),
-					error: alert.bind(null, "Posting failure")
-				});
-			}
-			dialog.dialog({
-				autoOpen: false,
-				  height: 300,
-				  width: 360,
-				  modal: true,
-				  buttons: {
-					Delete: deleteParameter,
-					Save: postParameter
-				  }
-			});
-			var table = $("#parameterTable").DataTable({
-				pageLength: 25,
-				ajax: {
-					url: "/svc/parameters",
-					dataSrc: ""
-				},
-				columns: [
-					{ data: "name", defaultContent: "" },
-					{ data: "value", defaultContent: "" }
-				]
-			});
-			$("#parameterTable tbody").on("click", "tr", function () {
-				setParameter(table.row(this).data());
-				dialog.dialog("open");
-			});
-			$("#createParameter").on("click", function() {
-				setParameter(null);
-				dialog.dialog("open");
-			});
-    	});
+		$(document).ready(loadSession);
 	</script>
 	<noscript>Info: JavaScript must be enabled.</noscript>
 </body>

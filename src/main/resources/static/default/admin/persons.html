@@ -10,6 +10,113 @@
 	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+	<script>
+		function setPerson(person) {
+			$("#personId").val((person && person.personId) || null);
+			$("#lastName").val((person && person.lastName) || null);
+			$("#firstName").val((person && person.firstName) || null);
+			$("#nickName").val((person && person.nickName) || null);
+			$("#pictureId").val((person && person.pictureId) || null);
+		}
+		function getPerson() {
+			function set(object, property, value) {
+				if (value)
+					object[property] = value;
+			}
+			var person = {};
+			set(person, "personId", $("#personId").val());
+			set(person, "lastName", $("#lastName").val());
+			set(person, "firstName", $("#firstName").val());
+			set(person, "nickName", $("#nickName").val());
+			set(person, "pictureId", $("#pictureId").val());
+			return person;
+		}
+		function deletePerson(table, dialog) {
+			dialog.dialog("close");
+			var person = getPerson();
+			if (person.personId) {
+				$.ajax({
+					url: "/svc/person/" + person.personId,
+					method: "DELETE",
+					success: table.ajax.reload.bind(null, null, false),
+					error: alert.bind(null, "Deletion failure")
+				});
+			}
+		}
+		function postPerson(table, dialog) {
+			dialog.dialog("close");
+			var person = getPerson();
+			var body = JSON.stringify(person);
+			$.ajax({
+				url: "/svc/person",
+				method: "POST",
+				contentType: "application/json; charset=UTF-8'",
+				data: body,
+				processData: false,
+				success: table.ajax.reload.bind(null, null, false),
+				error: alert.bind(null, "Posting failure")
+			});
+		}
+		function onStart() {
+			var table = $("#personTable").DataTable({
+				pageLength: 25,
+				ajax: {
+					url: "/svc/persons",
+					dataSrc: ""
+				},
+				columns: [
+					{ data: "personId", defaultContent: "" },
+					{ data: "firstName", defaultContent: "" },
+					{ data: "lastName", defaultContent: "" },
+					{ data: "nickName", defaultContent: "" },
+					{ data: "pictureId", defaultContent: "" }
+				]
+			});
+			var dialog = $("#dialog");
+			dialog.dialog({
+				autoOpen: false,
+				  height: 500,
+				  width: 360,
+				  modal: true,
+				  buttons: {
+					Delete: deletePerson.bind(null, table, dialog),
+					Save: postPerson.bind(null, table, dialog)
+				  }
+			});
+			$("#personTable tbody").on("click", "tr", function () {
+				setPerson(table.row(this).data());
+				dialog.dialog("open");
+			});
+			$("#createPerson").on("click", function() {
+				setPerson(null);
+				dialog.dialog("open");
+			});
+    	};
+		function onLoadSession(response) {
+			var isLoggedIn = response && response.user;
+			var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
+			var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
+			//
+			if (isLoggedInAsAdmin) {
+				onStart();
+			} else {
+				if (isLoggedInAsUser) {
+					window.location.href = "../user/index.html";
+				} else {
+					window.location.href = "../index.html";
+				}
+			}
+		}
+		function loadSession() {
+			$.ajax({
+				url: "/svc/session",
+				method: "GET",
+				dataType: "json",
+				success: onLoadSession,
+				error: alert.bind(null, "Session failure")
+			});
+		}
+	</script>
 </head>
 <body>
 	<div style="display: none;">
@@ -58,87 +165,7 @@
 	</div>
 	<br/>
 	<script>
-		$(document).ready( function () {
-			var dialog = $("#dialog");
-			function setPerson(person) {
-				$("#personId").val((person && person.personId) || null);
-				$("#lastName").val((person && person.lastName) || null);
-				$("#firstName").val((person && person.firstName) || null);
-				$("#nickName").val((person && person.nickName) || null);
-				$("#pictureId").val((person && person.pictureId) || null);
-			}
-			function getPerson() {
-				function set(object, property, value) {
-					if (value)
-						object[property] = value;
-				}
-				var person = {};
-				set(person, "personId", $("#personId").val());
-				set(person, "lastName", $("#lastName").val());
-				set(person, "firstName", $("#firstName").val());
-				set(person, "nickName", $("#nickName").val());
-				set(person, "pictureId", $("#pictureId").val());
-				return person;
-			}
-			function deletePerson() {
-				dialog.dialog("close");
-				var person = getPerson();
-				if (person.personId) {
-					$.ajax({
-						url: "/svc/person/" + person.personId,
-						method: "DELETE",
-						success: table.ajax.reload.bind(null, null, false),
-						error: alert.bind(null, "Deletion failure")
-					});
-				}
-			}
-			function postPerson() {
-				dialog.dialog("close");
-				var person = getPerson();
-				var body = JSON.stringify(person);
-				$.ajax({
-					url: "/svc/person",
-					method: "POST",
-					contentType: "application/json; charset=UTF-8'",
-					data: body,
-					processData: false,
-					success: table.ajax.reload.bind(null, null, false),
-					error: alert.bind(null, "Posting failure")
-				});
-			}
-			dialog.dialog({
-				autoOpen: false,
-				  height: 500,
-				  width: 360,
-				  modal: true,
-				  buttons: {
-					Delete: deletePerson,
-					Save: postPerson
-				  }
-			});
-			var table = $("#personTable").DataTable({
-				pageLength: 25,
-				ajax: {
-					url: "/svc/persons",
-					dataSrc: ""
-				},
-				columns: [
-					{ data: "personId", defaultContent: "" },
-					{ data: "firstName", defaultContent: "" },
-					{ data: "lastName", defaultContent: "" },
-					{ data: "nickName", defaultContent: "" },
-					{ data: "pictureId", defaultContent: "" }
-				]
-			});
-			$("#personTable tbody").on("click", "tr", function () {
-				setPerson(table.row(this).data());
-				dialog.dialog("open");
-			});
-			$("#createPerson").on("click", function() {
-				setPerson(null);
-				dialog.dialog("open");
-			});
-    	});
+		$(document).ready(loadSession);
 	</script>
 	<noscript>Info: JavaScript must be enabled.</noscript>
 </body>

@@ -10,6 +10,156 @@
 	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+	<script>
+		function setFile(file) {
+			$("#fileId").val((file && file.fileId) || null);
+			$("#mimeType").val((file && file.mimeType) || null);
+			$("#text").val((file && file.text) || null);
+			$("#referenceId").val((file && file.referenceId) || null);
+			$("#position").val((file && file.position) || null);
+			$("#directory").val((file && file.directory) || null);
+		}
+		function getFile() {
+			function set(object, property, value) {
+				if (value)
+					object[property] = value;
+			}
+			var file = {};
+			set(file, "fileId", $("#fileId").val());
+			set(file, "mimeType", $("#mimeType").val());
+			set(file, "text", $("#text").val());
+			set(file, "referenceId", $("#referenceId").val());
+			set(file, "position", $("#position").val());
+			set(file, "directory", $("#directory").val());
+			return file;
+		}
+		function deleteFile(table, dialog) {
+			dialog.dialog("close");
+			var file = getFile();
+			if (file.fileId) {
+				$.ajax({
+					url: "/svc/file/" + file.fileId,
+					method: "DELETE",
+					success: table.ajax.reload.bind(null, null, false),
+					error: alert.bind(null, "Deletion failure")
+				});
+			}
+		}
+		function putFile(table, dialog) {
+			if (!$("#fileId").val()) {
+				alert("Error: File Id is empty");
+				return;
+			}
+			dialog.dialog("close");
+			var file = getFile();
+			var body = JSON.stringify(file);
+			$.ajax({
+				url: "/svc/file",
+				method: "PUT",
+				contentType: "application/json; charset=UTF-8'",
+				data: body,
+				processData: false,
+				success: table.ajax.reload.bind(null, null, false),
+				error: alert.bind(null, "Update failure")
+			});
+		}
+		function postFile(table, dialog) {
+			if (!($("#fileContent")[0].files && $("#fileContent")[0].files[0])) {
+				alert("Error: No file selected");
+				return;
+			}
+			dialog.dialog("close");
+			var file = JSON.stringify(getFile());
+			var fileContent = $("#fileContent")[0].files[0];
+			var formData = new FormData();
+			formData.append("file", file);
+			formData.append("fileContent", fileContent);
+			$.ajax({
+				url: "/svc/file",
+				dataType: 'json',
+				cache: false,
+				contentType: false,
+				processData: false,
+				data: formData,
+				type: 'post',
+				success: table.ajax.reload.bind(null, null, false),
+				error: alert.bind(null, "Posting failure")
+			 });
+		}
+		function onStart() {
+			var table = $("#fileTable").DataTable({
+				pageLength: 25,
+				ajax: {
+					url: "/svc/files",
+					dataSrc: ""
+				},
+				columns: [
+					{ data: "fileId", defaultContent: "" },
+					{ data: "mimeType", defaultContent: "" },
+					{ data: "text", defaultContent: "" },
+					{ data: "referenceId", defaultContent: "" },
+					{ data: "position", defaultContent: "" },
+					{ data: "directory", defaultContent: "" },
+					{ data: "fileId",
+						defaultContent: "",
+						render: function ( data, type, row, meta ) {
+							return '<button onclick="window.location.href=\'/svc/file/' + data + '/content\'">View</button>';
+						},
+						className: "noclick"
+					}
+				]
+			});
+			var dialog = $("#dialog");
+			dialog.dialog({
+				autoOpen: false,
+				  height: 700,
+				  width: 500,
+				  modal: true,
+				  buttons: {
+					"Delete": deleteFile.bind(null, table, dialog),
+					"Update Attributes": putFile.bind(null, table, dialog),
+					"Upload File": postFile.bind(null, table, dialog)
+				  }
+			});
+			$("#fileTable tbody").on("click", "tr>td:not(.noclick)", function () {
+				setFile(table.row(this).data());
+				dialog.dialog("open");
+			});
+			$("#createFile").on("click", function() {
+				setFile(null);
+				dialog.dialog("open");
+			});
+			$("#fileContent").on("change", function() {
+				var mimeType = ($("#fileContent")[0].files && $("#fileContent")[0].files[0] && $("#fileContent")[0].files[0].type) || null;
+				if (mimeType)
+					$("#mimeType").val(mimeType);
+			});
+    	};
+		function onLoadSession(response) {
+			var isLoggedIn = response && response.user;
+			var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
+			var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
+			//
+			if (isLoggedInAsAdmin) {
+				onStart();
+			} else {
+				if (isLoggedInAsUser) {
+					window.location.href = "../user/index.html";
+				} else {
+					window.location.href = "../index.html";
+				}
+			}
+		}
+		function loadSession() {
+			$.ajax({
+				url: "/svc/session",
+				method: "GET",
+				dataType: "json",
+				success: onLoadSession,
+				error: alert.bind(null, "Session failure")
+			});
+		}
+	</script>
 </head>
 <body>
 	<div style="display: none;">
@@ -64,130 +214,7 @@
 	</div>
 	<br/>
 	<script>
-		$(document).ready( function () {
-			var dialog = $("#dialog");
-			function setFile(file) {
-				$("#fileId").val((file && file.fileId) || null);
-				$("#mimeType").val((file && file.mimeType) || null);
-				$("#text").val((file && file.text) || null);
-				$("#referenceId").val((file && file.referenceId) || null);
-				$("#position").val((file && file.position) || null);
-				$("#directory").val((file && file.directory) || null);
-			}
-			function getFile() {
-				function set(object, property, value) {
-					if (value)
-						object[property] = value;
-				}
-				var file = {};
-				set(file, "fileId", $("#fileId").val());
-				set(file, "mimeType", $("#mimeType").val());
-				set(file, "text", $("#text").val());
-				set(file, "referenceId", $("#referenceId").val());
-				set(file, "position", $("#position").val());
-				set(file, "directory", $("#directory").val());
-				return file;
-			}
-			function deleteFile() {
-				dialog.dialog("close");
-				var file = getFile();
-				if (file.fileId) {
-					$.ajax({
-						url: "/svc/file/" + file.fileId,
-						method: "DELETE",
-						success: table.ajax.reload.bind(null, null, false),
-						error: alert.bind(null, "Deletion failure")
-					});
-				}
-			}
-			function putFile() {
-				if (!$("#fileId").val()) {
-					alert("Error: File Id is empty");
-					return;
-				}
-				dialog.dialog("close");
-				var file = getFile();
-				var body = JSON.stringify(file);
-				$.ajax({
-					url: "/svc/file",
-					method: "PUT",
-					contentType: "application/json; charset=UTF-8'",
-					data: body,
-					processData: false,
-					success: table.ajax.reload.bind(null, null, false),
-					error: alert.bind(null, "Update failure")
-				});
-			}
-			function postFile() {
-				if (!($("#fileContent")[0].files && $("#fileContent")[0].files[0])) {
-					alert("Error: No file selected");
-					return;
-				}
-				dialog.dialog("close");
-				var file = JSON.stringify(getFile());
-				var fileContent = $("#fileContent")[0].files[0];
-				var formData = new FormData();
-				formData.append("file", file);
-				formData.append("fileContent", fileContent);
-				$.ajax({
-					url: "/svc/file",
-					dataType: 'json',
-					cache: false,
-					contentType: false,
-					processData: false,
-					data: formData,
-					type: 'post',
-					success: table.ajax.reload.bind(null, null, false),
-					error: alert.bind(null, "Posting failure")
-				 });
-     		}
-			dialog.dialog({
-				autoOpen: false,
-				  height: 700,
-				  width: 500,
-				  modal: true,
-				  buttons: {
-					"Delete": deleteFile,
-					"Update Attributes": putFile,
-					"Upload File": postFile
-				  }
-			});
-			var table = $("#fileTable").DataTable({
-				pageLength: 25,
-				ajax: {
-					url: "/svc/files",
-					dataSrc: ""
-				},
-				columns: [
-					{ data: "fileId", defaultContent: "" },
-					{ data: "mimeType", defaultContent: "" },
-					{ data: "text", defaultContent: "" },
-					{ data: "referenceId", defaultContent: "" },
-					{ data: "position", defaultContent: "" },
-					{ data: "directory", defaultContent: "" },
-					{ data: "fileId",
-						defaultContent: "",
-						render: function ( data, type, row, meta ) {
-							return '<button onclick="window.location.href=\'/svc/file/' + data + '/content\'">View</button>';
-						},
-						className: "noclick"
-					}
-				]
-			});
-			$("#fileTable tbody").on("click", "tr>td:not(.noclick)", function () {
-				setFile(table.row(this).data());
-				dialog.dialog("open");
-			});
-			$("#createFile").on("click", function() {
-				setFile(null);
-				dialog.dialog("open");
-			});
-			$("#fileContent").on("change", function() {
-				var mimeType = ($("#fileContent")[0].files && $("#fileContent")[0].files[0] && $("#fileContent")[0].files[0].type) || null;
-				if (mimeType)
-					$("#mimeType").val(mimeType);
-			});
-    	});
+		$(document).ready(loadSession);
 	</script>
 	<noscript>Info: JavaScript must be enabled.</noscript>
 </body>
