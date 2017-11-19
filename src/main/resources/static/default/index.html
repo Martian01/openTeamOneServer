@@ -17,19 +17,6 @@
 			var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
 			var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
 			//
-			var infoLine;
-			if (isLoggedIn) {
-				infoLine = 'You are logged in as "' + response.user.userId + '". Your roles are:';
-				if (isLoggedInAsAdmin) {
-					infoLine += ' Administrator';
-				}
-				if (isLoggedInAsUser) {
-					infoLine += ' User';
-				}
-			} else {
-				infoLine = 'Please log in';
-			}
-			document.getElementById("infoLine").innerText = infoLine;
 			setVisibility("loginForm", !isLoggedIn);
 			setVisibility("logoutForm", isLoggedIn);
 			setVisibility("adminFunctions", isLoggedInAsAdmin);
@@ -53,13 +40,16 @@
 </head>
 <body>
 	<h1>Open Team One</h1>
-	<img src="logo128.png" width="128" height="128"/>
-	<p>This is a first and unrefined version of a web app for Open Team One. It requires Javascript in the browser.</p>
-	<p>It would be great if we could have a modern and pretty web app at some point, with smooth CSS animations and the like.
-		This is definitely an area where experienced web developers can contribute. ^_^</p>
+	<div class="header">
+		<img src="logo128.png" class="logo"/>
+		<form id="logoutForm" action="/ui/logout" method="post" class="floater" style="display: none">
+			<input type="hidden" name="dummy" value=""/>
+			<input type="submit" value="Log Out"/>
+		</form>
+	</div>
+	<br/>
 	<br/>
 	<div>
-		<h2 id="infoLine"></h2>
 		<form id="loginForm" action="/ui/login" method="post" style="display: none;">
 			<fieldset>
 				<legend>Login Credentials</legend>
@@ -70,10 +60,6 @@
 				<input type="submit" value="Log In"/>
 			</fieldset>
 		</form>
-		<form id="logoutForm" action="/ui/logout" method="post" style="display: none;">
-			<input type="hidden" name="dummy" value=""/>
-			<input type="submit" value="Log Out"/>
-		</form>
 	</div>
 	<div id="adminFunctions">
 		<h2>Admin Menu</h2>
@@ -83,7 +69,6 @@
 		<h2>User Menu</h2>
 		<a href="user/index.html">User Home</a><br/>
 	</div>
-	<br/>
 	<script>
 		$(document).ready(loadSession);
 	</script>

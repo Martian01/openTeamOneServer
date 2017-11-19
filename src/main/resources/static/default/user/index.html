@@ -29,6 +29,10 @@
 			set(person, "pictureId", $("#pictureId").val());
 			return person;
 		}
+		function clearPassword() {
+			$("#newpassword").val(null);
+			$("#newpassword2").val(null);
+		}
 		function postProfilePic() {
 			if (!($("#fileContent")[0].files && $("#fileContent")[0].files[0])) {
 				return;
@@ -62,6 +66,22 @@
 				error: alert.bind(null, "Posting failure")
 			});
 		}
+		function updatePassword() {
+			if (!$("#newpassword").val() || $("#newpassword").val() != $("#newpassword2").val()) {
+				alert("Error: Passwords are empty or different");
+				return;
+			}
+			var body = JSON.stringify({password: $("#newpassword").val()});
+			$.ajax({
+				url: "/svc/self/password",
+				method: "POST",
+				contentType: "application/json; charset=UTF-8'",
+				data: body,
+				processData: false,
+				success: clearPassword,
+				error: alert.bind(null, "Posting failure")
+			});
+		}
 		function setVisibility(id, isVisible) {
 			var element = document.getElementById(id);
 			if (element)
@@ -72,27 +92,16 @@
 			var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;
 			var isLoggedInAsUser = isLoggedIn && response.user.hasUserRole;
 			//
-			var infoLine;
-			if (isLoggedIn) {
-				infoLine = 'You are logged in as "' + response.user.userId + '". Your roles are:';
-				if (isLoggedInAsAdmin) {
-					infoLine += ' Administrator';
-				}
-				if (isLoggedInAsUser) {
-					infoLine += ' User';
-				}
-			} else {
-				infoLine = 'You are not logged in.';
-			}
-			document.getElementById("infoLine").innerText = infoLine;
 			setVisibility("loginForm", !isLoggedIn);
 			setVisibility("logoutForm", isLoggedIn);
 			setVisibility("adminFunctions", isLoggedInAsAdmin);
 			setVisibility("userFunctions", isLoggedInAsUser);
 			if (isLoggedInAsUser) {
 				setPerson(response.person);
+				clearPassword();
 				$("#fileContent").on("change", postProfilePic);
 				$("#updatePerson").on("click", updatePerson);
+				$("#updatePassword").on("click", updatePassword);
 			} else {
 				if (isLoggedInAsAdmin) {
 					window.location.href = "../admin/index.html";
@@ -114,10 +123,17 @@
 </head>
 <body>
 	<h1>Open Team One Self-Service</h1>
-	<img src="../logo128.png" width="128" height="128"/>
+	<div class="header">
+		<img src="../logo128.png" class="logo"/>
+		<form id="logoutForm" action="/ui/logout" method="post" class="floater" style="display: none">
+			<input type="hidden" name="dummy" value=""/>
+			<input type="submit" value="Log Out"/>
+		</form>
+	</div>
+	<br/>
+	<br/>
 	<div>
-		<h2 id="infoLine"></h2>
-		<form id="loginForm" action="/ui/login" method="post" style="display: none;">
+		<form id="loginForm" action="/ui/login" method="post" style="display: none">
 			<fieldset>
 				<legend>Login Credentials</legend>
 				<label for="username">Username:</label><br/>
@@ -127,44 +143,52 @@
 				<input type="submit" value="Log In"/>
 			</fieldset>
 		</form>
-		<form id="logoutForm" action="/ui/logout" method="post" style="display: none;">
-			<input type="hidden" name="dummy" value=""/>
-			<input type="submit" value="Log Out"/>
-		</form>
 	</div>
-	<div id="userFunctions">
-		<br/>
-		<br/>
-		<div class="polaroid">
-			<img id="userPicture" class="polaroid" src="../empty_profile.png" alt="Profile Picture"/>
-			<div class="container">
-				<p>Profile Picture</p>
+	<div id="userFunctions" class="wrapper">
+		<div class="first">
+			<div class="polaroid">
+				<img id="userPicture" class="polaroid" src="../empty_profile.png" alt="Profile Picture"/>
+				<div class="container">
+					<p>Profile Picture</p>
+				</div>
 			</div>
+			<form class="polaroid">
+				<label for="fileContent">Upload new profile picture:</label><br/>
+				<input id="fileContent" type="file" name="fileContent"/><br/><br/>
+			</form>
 		</div>
-		<form>
-			<label for="fileContent">Upload new profile picture:</label><br/>
-			<input id="fileContent" type="file" name="fileContent"/><br/><br/>
-		</form>
-		<br/>
-		<br/>
-		<form>
-			<fieldset>
-				<legend>Person Data</legend>
-				<label for="firstName">First Name:</label><br/>
-				<input id="firstName" type="text" name="firstName"/><br/><br/>
-				<label for="lastName">Last Name:</label><br/>
-				<input id="lastName" type="text" name="lastName"/><br/><br/>
-				<label for="nickName">Nickname:</label><br/>
-				<input id="nickName" type="text" name="nickName"/><br/><br/>
-				<input id="personId" type="hidden" size="32" readonly disabled name="personId"/>
-				<input id="pictureId" type="hidden" size="32" readonly disabled name="pictureId"/>
-				<input id="updatePerson" type="button" value="Update Person Data"/>
-			</fieldset>
-		</form>
+		<div class="next">
+			<form>
+				<fieldset style="height: 390px">
+					<legend>Person Data</legend>
+					<label for="firstName">First Name:</label><br/>
+					<input id="firstName" type="text" name="firstName"/><br/><br/>
+					<label for="lastName">Last Name:</label><br/>
+					<input id="lastName" type="text" name="lastName"/><br/><br/>
+					<label for="nickName">Nickname:</label><br/>
+					<input id="nickName" type="text" name="nickName"/><br/><br/>
+					<input id="personId" type="hidden" size="32" readonly disabled name="personId"/>
+					<input id="pictureId" type="hidden" size="32" readonly disabled name="pictureId"/>
+					<br/><br/>
+					<input id="updatePerson" type="button" value="Update Person Data"/>
+				</fieldset>
+			</form>
+		</div>
+		<div class="next">
+			<form>
+				<fieldset style="height: 390px">
+					<legend>Password</legend>
+					<label for="newpassword">New Password:</label><br/>
+					<input id="newpassword" type="password" name="newpassword"/><br/><br/>
+					<label for="newpassword2">Repeat Password:</label><br/>
+					<input id="newpassword2" type="password" name="newpassword2"/><br/><br/>
+					<br/><br/>
+					<input id="updatePassword" type="button" value="Set New Password"/>
+				</fieldset>
+			</form>
+		</div>
 	</div>
 	<div id="adminFunctions">
-		<br/>
-		<br/>
 		<h2>Admin Menu</h2>
 		<a href="../admin/index.html">Admin Home</a><br/>
 		<a href="../admin/parameters.html">Tenant Parameters</a><br/>
@@ -177,7 +201,6 @@
 		<a href="../admin/subscriptions.html">Subscriptions</a><br/>
 		<a href="../admin/files.html">Files</a><br/>
 	</div>
-	<br/>
 	<script>
 		$(document).ready(loadSession);
 	</script>

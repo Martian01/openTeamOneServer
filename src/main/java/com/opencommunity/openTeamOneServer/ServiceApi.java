@@ -684,6 +684,23 @@ public class ServiceApi {
 		return Util.httpStringResponse(person.toJson(), HttpStatus.OK);
 	}
 
+	@RequestMapping(method = RequestMethod.POST, value = "/self/password")
+	public ResponseEntity<String> selfPasswordPost(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
+		User user = Util.getSessionUser(request, userRepository);
+		if (user == null)
+			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+		//
+		if (requestBody == null)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		String password = new JSONObject(requestBody).getString("password");
+		if (password == null || password.length() == 0)
+			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+		user.setPassword(password);
+		userRepository.save(user);
+		//
+		return Util.httpStringResponse(HttpStatus.OK);
+	}
+
 	/* helper functions */
 
 	private File deleteFileContent(SymbolicFile symbolicFile) {

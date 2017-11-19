@@ -32,7 +32,7 @@ You copy the complete content of the project directory "demo" into the designate
 
 ### Step 2: Starting the Server
 
-Next step is to start the server and log in to the admin section. Since this project is distributed as source code, you would import it as Java project into a suitable IDE like IntelliJ IDEA or Eclipse. When asked for project types you would probably choose "Maven" since all dependencies are declared in a pom.xml file.
+Next step is to start the server and log in to the admin section. Since this project is distributed as source code, you would import it as Java project into a suitable IDE like IntelliJ IDEA or Eclipse. When asked for a project type you would probably choose "Maven" to take advantage of the provided _pom.xml_ file.
 
 You would start the server by hitting the "execute" button of your IDE. Alternatively you can build and execute a JAR file on the command line, as layed out in a section below.
 
@@ -142,7 +142,9 @@ The large JAR file can be copied to another machine and executed by a JRE (Java 
 
 Open Team One offers a web application for two user groups: administrators and users. There is a unified logon that is accessed by calling up server root, for instance http://localhost:8080 for a local installation.
 
-Users will be taken to a self-service, where they can change their display names and their profile picture.
+Users will be taken to a self-service, where they can change their profile picture, display name and password.
+
+![User Self Service](docu/webapp1.png)
 
 Administrators will be taken to a set of pages where they can browse and modify all tables and file attachments in the database. You have caught a glimpse of it in the quick guide section above.
 
