@@ -83,9 +83,11 @@ Here are a few screenshots of SAP Team One connected against Open Team One Serve
 
 ## Persistence via MariaDB
 
-MariaDB is a popular MySQL fork. In fact, MariaDB is the continuation of MySQL by the original author and a community. MariaDB is drop-in compatible with MySQL, so everything written in this section works for MySQL, too.
+For a first trial it is quite convenient to use the H2 in-memory database as it comes with Spring Boot and requires no configuration. After your first steps with Open Team One you might want to progress to a disk based SQL database, like MariaDB. MariaDB is a popular MySQL fork. In fact, MariaDB is the continuation of MySQL by the original author and a community. MariaDB is drop-in compatible with MySQL, so everything written in this section works for MySQL, too.
 
-For a first trial it is quite convenient to use the H2 in-memory database as it comes with Spring Boot and requires no configuration. It is also quite easy to switch to a disk based SQL database, like MariaDB. This can be done in the following way. First, make sure you have enabled UTF-8 with support for 4-byte characters. To that end I have added the following configuration to the MariaDB configuration file. In my installation the file is called _/etc/my.cnf.d/server.cnf_.
+When I first tried integrating with MariaDB, it seemed to be easy. However, I soon ran into issues related to character encoding. The same happened when I set up an instance running on a virtual server on the internet. It seems that we are already hitting the limits of MySQL and MariaDB with an application like Open Team One in an internationalized (non-English) environment. Sorry folks, the days of the empire are over, and Unicode is required these days. The good news is, with the following recipe I managed to get Open Team One to run on a MariaDB database.
+
+First, make sure you have enabled UTF-8 with support for 4-byte characters. To that end, make sure the following configuration is in the MariaDB configuration files. On Debian you do not need to do anything. On Slackware you need to modify _/etc/my.cnf.d/server.cnf_. On other distros it will be similar.
 
 	[mysqld]
 	character_set_server = utf8mb4
@@ -96,10 +98,15 @@ Next you need to prepare an empty database for a standard user. Having started t
 	mysql --password
 	> create database teamone character set = 'utf8mb4' collate = 'utf8mb4_unicode_ci';
 	> create user 'springuser'@'localhost' identified by 'dbPassword';
-	> grant all on teamone.* to 'springuser'@'localhost';
-	> quit
+	> grant select, insert, update, delete on teamone.* to 'springuser'@'localhost';
 
-In this example the database is called _teamone_ and contains a user _springuser_ with password _dbPassword_. The database name, the user name and the password can be freely chosen. In a productive environment, once the database schema has been created, you are advised to reduce the granted authorizations to select, insert, update and delete.
+In this example the database is called _teamone_ and contains a user _springuser_ with password _dbPassword_. The database name, the user name and the password can be freely chosen.
+
+Now comes the tricky part. Since on the hosted system I ran into problems with key lengths and UTF-8, I could not use the SpringBoot framework to create the database tables automatically (which it normally will do). Instead I had to create the tables offline. You can do the same by simply pasting the provided [script](docu/create_tables_mysql) into the SQL console at this point. If you would like to experiment with SpringBoot instead, you need to elevate the user privileges by saying
+
+	> grant all to 'springuser'@'localhost';
+
+In the latter case, remember to lower the user privileges in a productive environment after table creation.
 
 Next you need to add the JDBC database driver to the project. We have already added the following dependency to our Maven file pom.xml:
 
@@ -120,8 +127,6 @@ Finally we add the following properties to the application.properties file. In f
 	spring.datasource.connectionProperties=useUnicode=true;characterEncoding=utf-8;
 
 Restart Open Team One Server and you're done. If you want to migrate the content over to the new DB, save and import a snapshot via the admin tools. 
-
-Note: we ran into one issue when running the server against MariaDB, caused by a Java property that coincided with a protected SQL identifier. We solved the issue by re-naming the property.
 
 ## Building a JAR file
 
