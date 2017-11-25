@@ -128,7 +128,7 @@ Finally we add the following properties to the application.properties file. In f
 
 Restart Open Team One Server and you're done. If you want to migrate the content over to the new DB, save and import a snapshot via the admin tools. 
 
-## Building a JAR file
+## Deploying a JAR file
 
 One of the most simple deployment options is to build a JAR file that can be executed anywhere. You simply call the Maven wrapper in the project root directory like this:
 
@@ -142,6 +142,14 @@ This will build the project in the "target" directory and create two JAR files: 
 The large JAR file can be copied to another machine and executed by a JRE (Java Runtime Environment) like this:
 
 	java -jar openTeamOneServer-0.0.1-SNAPSHOT.jar
+
+I was able to run and deploy the jar file on a virtual server on the internet. The server came with a minimal headless Debian 9.0 installation (around 500 MB). I only had to install the following two packages including their dependencies in an ssh console:
+
+	apt-get update
+	apt-get install mariadb-server
+	apt-get install openjdk-8-jre-headless
+
+Afterwards the system took up 1.2 GB on disk. The system used up 600 MB in RAM for the demo content. CPU load was not measurable under demo conditions. At this stage there is no experience how the server scales under heavy load.
 
 ## Web Application
 
