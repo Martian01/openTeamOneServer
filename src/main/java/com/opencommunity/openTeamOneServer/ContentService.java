@@ -22,6 +22,12 @@ public class ContentService {
 		return null;
 	}
 
+	public static JSONObject getSummary() throws JSONException {
+		if (instance != null)
+			return instance._getSummary();
+		return null;
+	}
+
 	public static void importFromJson(JSONObject jsonObject, boolean delete, boolean includeConfiguration, String protectedUserId) throws JSONException {
 		if (instance != null)
 			instance._importFromJson(jsonObject, delete, includeConfiguration, protectedUserId);
@@ -76,6 +82,20 @@ public class ContentService {
 		//
 		if (ur.countByHasAdminRoleTrue() == 0)
 			ur.save(new User("admin", "admin", null, false, true));
+	}
+
+	private JSONObject _getSummary() throws JSONException {
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("tenantParameters", tpr.count());
+		jsonObject.put("users", ur.count());
+		jsonObject.put("persons", pr.count());
+		jsonObject.put("rooms", rr.count());
+		jsonObject.put("roomMembers", rmr.count());
+		jsonObject.put("messages", mr.count());
+		jsonObject.put("files", sfr.count());
+		jsonObject.put("viewedConfirmations", vcr.count());
+		jsonObject.put("subscriptions", sr.count());
+		return jsonObject;
 	}
 
 	private JSONObject _exportToJson() throws JSONException {
