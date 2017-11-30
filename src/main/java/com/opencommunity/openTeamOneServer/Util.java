@@ -105,61 +105,84 @@ public class Util {
 		return cookieString == null ? null : splitCookieString(cookieString).get(SESSION_COOKIE_NAME);
 	}
 
-	public static User getSessionUser(HttpServletRequest request, UserRepository userRepository) {
+	public static Session getSession(HttpServletRequest request) {
 		String sessionId = getSessionId(request);
-		Session session = sessionId == null ? null : Session.getSession(sessionId);
+		return sessionId == null ? null : Session.getSession(sessionId);
+	}
+
+	public static User getSessionUser(Session session, UserRepository userRepository) {
 		return session == null ? null : userRepository.findOne(session.userId);
 	}
 
-	public static User getSessionContact(HttpServletRequest request, UserRepository userRepository) {
-		User user = getSessionUser(request, userRepository);
+	public static User getSessionContact(Session session, UserRepository userRepository) {
+		User user = getSessionUser(session, userRepository);
 		return user == null || user.personId == null || !user.hasUserRole ? null : user;
 	}
 
-	public static User getSessionAdmin(HttpServletRequest request, UserRepository userRepository) {
-		User user = getSessionUser(request, userRepository);
+	public static User getSessionAdmin(Session session, UserRepository userRepository) {
+		User user = getSessionUser(session, userRepository);
 		return user == null || !user.hasAdminRole ? null : user;
 	}
 
-	/* HTTP responses */
+	/* HTTP String responses */
 
-	private static String errorJsonString = "{}";
-	private static Resource errorJsonResource = new ByteArrayResource(errorJsonString.getBytes());
+	public static ResponseEntity<String> httpOkResponse = ResponseEntity.status(HttpStatus.OK)
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
 
-	public static ResponseEntity<Resource> httpResourceResponse(HttpStatus httpStatus) {
-		return ResponseEntity.status(httpStatus)
-				.contentType(MediaType.APPLICATION_JSON)
-				.body(errorJsonResource);
-	}
+	public static ResponseEntity<String> httpUnauthorizedResponse = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
 
-	public static ResponseEntity<Resource> httpResourceResponse(Resource resource, MediaType mediaType) {
-		return ResponseEntity.ok()
-				.contentType(mediaType)
-				.body(resource);
-	}
+	public static ResponseEntity<String> httpForbiddenResponse = ResponseEntity.status(HttpStatus.FORBIDDEN)
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
 
-	public static ResponseEntity<String> httpStringResponse(JSONObject body, HttpStatus httpStatus) {
+	public static ResponseEntity<String> httpRelogResponse = ResponseEntity.status(HttpStatus.SEE_OTHER)
+			.header("Location", "/sap/hana/xs/formLogin/login.html") // in theory a forwarding URI should be absolute...
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
+
+	public static ResponseEntity<String> httpBadRequestResponse = ResponseEntity.status(HttpStatus.BAD_REQUEST)
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
+
+	public static ResponseEntity<String> httpInternalErrorResponse = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
+
+	public static ResponseEntity<String> httpNotFoundResponse = ResponseEntity.status(HttpStatus.NOT_FOUND)
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
+
+	public static ResponseEntity<String> httpGoneResponse = ResponseEntity.status(HttpStatus.GONE)
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
+
+	public static ResponseEntity<String> httpCreatedResponse = ResponseEntity.status(HttpStatus.CREATED)
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
+
+	public static ResponseEntity<String> httpResponse(JSONObject body, HttpStatus httpStatus) {
 		return ResponseEntity.status(httpStatus)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(body.toString());
 	}
 
-	public static ResponseEntity<String> httpStringResponse(HttpStatus httpStatus) {
-		return ResponseEntity.status(httpStatus)
-				.contentType(MediaType.APPLICATION_JSON)
-				.body(errorJsonString);
-	}
-
-	public static ResponseEntity<String> httpStringResponse(JSONObject body) {
+	public static ResponseEntity<String> httpOkResponse(JSONObject body) {
 		return ResponseEntity.ok()
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(body.toString());
 	}
 
-	public static ResponseEntity<String> httpStringResponse(JSONArray body) {
+	public static ResponseEntity<String> httpOkResponse(JSONArray body) {
 		return ResponseEntity.ok()
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(body.toString());
+	}
+
+	public static ResponseEntity<String> httpUnauthorizedResponse(Session session) {
+		return session != null && session.iosMode ? httpRelogResponse : httpUnauthorizedResponse;
 	}
 
 	public static String getDefaultTarget(TenantParameterRepository tpr, User user) {
@@ -177,20 +200,24 @@ public class Util {
 				.body(null);
 	}
 
-	public static File getDataDirectory(TenantParameterRepository tpr, String subdirectory) {
-		TenantParameter tp = tpr.findOne("dataDirectory");
-		if (tp == null)
-			return null;
-		File directory = new File(tp.value);
-		if (subdirectory != null)
-			directory = new File(directory, subdirectory);
-		directory.mkdirs();
-		return directory.isDirectory() ? directory : null;
-	}
+	/* HTTP Resource responses */
 
-	public static File getFile(TenantParameterRepository tpr, String subdirectory, String fileId) {
-		File directory = getDataDirectory(tpr, subdirectory);
-		return directory == null || fileId == null ? null : new File(directory, fileId);
+	public static ResponseEntity<Resource> httpUnauthorizedResourceResponse = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
+
+	public static ResponseEntity<Resource> httpInternalErrorResourceResponse = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
+
+	public static ResponseEntity<Resource> httpNotFoundResourceResponse = ResponseEntity.status(HttpStatus.NOT_FOUND)
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
+
+	public static ResponseEntity<Resource> httpResourceResponse(Resource resource, MediaType mediaType) {
+		return ResponseEntity.ok()
+				.contentType(mediaType)
+				.body(resource);
 	}
 
 	/* Files and Streams */
@@ -229,6 +256,22 @@ public class Util {
 		outputStream.close();
 		inputStream.close();
 		return outputStream.toByteArray();
+	}
+
+	public static File getDataDirectory(TenantParameterRepository tpr, String subdirectory) {
+		TenantParameter tp = tpr.findOne("dataDirectory");
+		if (tp == null)
+			return null;
+		File directory = new File(tp.value);
+		if (subdirectory != null)
+			directory = new File(directory, subdirectory);
+		directory.mkdirs();
+		return directory.isDirectory() ? directory : null;
+	}
+
+	public static File getFile(TenantParameterRepository tpr, String subdirectory, String fileId) {
+		File directory = getDataDirectory(tpr, subdirectory);
+		return directory == null || fileId == null ? null : new File(directory, fileId);
 	}
 
 }

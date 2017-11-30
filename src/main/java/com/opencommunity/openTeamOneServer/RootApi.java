@@ -22,9 +22,10 @@ public class RootApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/sap/sports/pe/api/messaging/versions")
 	public ResponseEntity<String> versions(HttpServletRequest request) throws JSONException {
-		User user = Util.getSessionContact(request, userRepository);
+		Session session = Util.getSession(request);
+		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpUnauthorizedResponse(session);
 		//
 		JSONObject teamOneAndroid = new JSONObject();
 		teamOneAndroid.put("required", 360);
@@ -38,12 +39,13 @@ public class RootApi {
 		body.put("versions", versions);
 		body.put("clients", clients);
 		//
-		return Util.httpStringResponse(body);
+		return Util.httpOkResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = {"", "/", "/admin", "/admin/"})
-	public ResponseEntity<String> admin(HttpServletRequest request) {
-		User user = Util.getSessionUser(request, userRepository);
+	public ResponseEntity<String> root(HttpServletRequest request) {
+		Session session = Util.getSession(request);
+		User user = Util.getSessionUser(session, userRepository);
 		return Util.httpForwardResponse(tenantParameterRepository, user, null);
 	}
 

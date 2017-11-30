@@ -13,12 +13,14 @@ public class Session {
 	public String userId;
 	public long startTime;
 	public long lastAccessTime;
+	public boolean iosMode;
 
-	public Session(String userId) {
+	public Session(String userId, boolean iosMode) {
 		sessionId = Util.getUuid();
 		this.userId = userId;
 		startTime = System.currentTimeMillis();
 		lastAccessTime = startTime;
+		this.iosMode = iosMode;
 	}
 
 	public JSONObject toJson() throws JSONException {
@@ -58,9 +60,9 @@ public class Session {
 		}
 	}
 
-	public static Session newSession(@NotNull String userId) {
+	public static Session newSession(@NotNull String userId, boolean iosMode) {
 		synchronized (currentSessions) {
-			Session session = new Session(userId);
+			Session session = new Session(userId, iosMode);
 			currentSessions.put(session.sessionId, session);
 			return session;
 		}

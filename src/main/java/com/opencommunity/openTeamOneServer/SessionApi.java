@@ -26,26 +26,31 @@ public class SessionApi {
 
 	// Note: CSRF protection is irrelevant for mobile clients, and taken care of for browsers by SameSite cookies
 
+	private final ResponseEntity<String> httpCsrfResponse = ResponseEntity.status(HttpStatus.OK)
+			.header("x-csrf-token", "792E926C333D4BB88AF219F83CDA2CE1") // iOS app wants lower case header
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
+
 	@RequestMapping(method = RequestMethod.GET, value = "/token.xsjs")
 	public ResponseEntity<String> token(HttpServletRequest request) {
-		if (request.getHeader("Authorization") != null) // iOS app
-			return ResponseEntity.status(HttpStatus.OK)
-					.header("x-csrf-token", "792E926C333D4BB88AF219F83CDA2CE1") // iOS app wants lower case
-					.contentType(MediaType.TEXT_HTML)
-					.body("");
-		return Util.httpStringResponse(HttpStatus.OK); // Android app
+		return request.getHeader("Authorization") != null ? httpCsrfResponse : Util.httpOkResponse; // iOS vs. Android app
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/login.xscfunc")
 	public ResponseEntity<String> login(HttpServletRequest request, @RequestBody String requestBody) throws JSONException {
+		Session session = null;
 		Map<String, String> formData = Util.splitQueryString(requestBody);
 		String userId = formData.get("xs-username");
 		String password = formData.get("xs-password");
-		if (userId != null)
+		if (userId != null) {
 			userId = userId.toLowerCase();
-		User user = userId != null ? userRepository.findOne(userId) : null;
-		Person person = user != null && user.hasUserRole && user.personId != null ? personRepository.findOne(user.personId) : null;
-		Session session = person != null && user.matches(password) ? Session.newSession(userId) : null;
+			User user = userRepository.findOne(userId);
+			if (user != null && user.hasUserRole && user.personId != null) {
+				Person person = personRepository.findOne(user.personId);
+				if (person != null && user.matches(password))
+					session = Session.newSession(userId, request.getHeader("X-CSRF-TOKEN") != null);
+			}
+		}
 		//
 		JSONObject body = new JSONObject();
 		body.put("login", session != null);
@@ -60,22 +65,32 @@ public class SessionApi {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/pwchange.xscfunc")
 	public ResponseEntity<String> pwchange(HttpServletRequest request, @RequestBody String requestBody) throws JSONException {
+		Session session = null;
 		Map<String, String> formData = Util.splitQueryString(requestBody);
-		String userId = formData.get("xs-username").toLowerCase();
+		String userId = formData.get("xs-username");
 		String passwordNew = formData.get("xs-password-new");
 		String passwordOld = formData.get("xs-password-old");
-		boolean passwordOldConfirmed = false;
-		if (passwordOld == null) {
-			String oldSessionId = Util.getSessionId(request);
-			Session oldSession = oldSessionId == null ? null : Session.getSession(oldSessionId);
-			User oldSessionUser = oldSession == null ? null : userRepository.findOne(oldSession.userId);
-			passwordOldConfirmed = oldSessionUser != null & userId.equals(oldSession.userId);
-		}
-		User sessionUser = userId != null ? userRepository.findOne(userId) : null;
-		Session session = sessionUser != null && passwordNew != null && (sessionUser.matches(passwordOld) || passwordOldConfirmed) ? Session.newSession(userId) : null;
-		if (session != null) {
-			sessionUser.setPassword(passwordNew);
-			userRepository.save(sessionUser);
+		if (userId != null) {
+			userId = userId.toLowerCase();
+			User user = userRepository.findOne(userId);
+			boolean passwordOldConfirmed = false;
+			if (passwordOld == null) {
+				String oldSessionId = Util.getSessionId(request);
+				if (oldSessionId != null) {
+					Session oldSession = Session.getSession(oldSessionId);
+					if (oldSession != null) {
+						User oldSessionUser = userRepository.findOne(oldSession.userId);
+						if (oldSessionUser != null)
+							passwordOldConfirmed = userId.equals(oldSession.userId);
+					}
+				}
+			}
+			if (user != null && passwordNew != null && (passwordOldConfirmed || user.matches(passwordOld)))
+				session = Session.newSession(userId, request.getHeader("X-CSRF-TOKEN") != null);
+			if (session != null) {
+				user.setPassword(passwordNew);
+				userRepository.save(user);
+			}
 		}
 		//
 		JSONObject body = new JSONObject();

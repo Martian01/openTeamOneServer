@@ -35,43 +35,30 @@ public class MediaApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/picture/v1/service/rest/picture/{fileId}")
 	public ResponseEntity<Resource> picture(HttpServletRequest request, @PathVariable String fileId) throws Exception {
-		User user = Util.getSessionContact(request, userRepository); // for Android app
-		if (user == null)
-			user = Util.getBasicAuthContact(request, userRepository); // for iOS app
-		if (user == null)
-			return Util.httpResourceResponse(HttpStatus.UNAUTHORIZED);
-		//
-		return sendFileContent(fileId);
+		return getFileRequest(request, fileId);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{fileId}/content")
 	public ResponseEntity<Resource> mediaFileContent(HttpServletRequest request, @PathVariable String fileId) throws Exception {
-		User user = Util.getSessionContact(request, userRepository); // for Android app
-		if (user == null)
-			user = Util.getBasicAuthContact(request, userRepository); // for iOS app
-		if (user == null)
-			return Util.httpResourceResponse(HttpStatus.UNAUTHORIZED);
-		//
-		return sendFileContent(fileId);
+		return getFileRequest(request, fileId);
 	}
-
-	/* The following API calls are intentionally not implemented */
-
-	//@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{fileId}/preview")
-	//@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{fileId}/details")
-	//@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{fileId}/url")
 
 	/* helper functions */
 
-	private ResponseEntity<Resource> sendFileContent(String fileId) throws Exception {
+	private ResponseEntity<Resource> getFileRequest(HttpServletRequest request, String fileId) throws Exception {
+		Session session = Util.getSession(request);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
+		if (user == null)
+			return Util.httpUnauthorizedResourceResponse;
+		//
 		SymbolicFile symbolicFile = symbolicFileRepository.findOne(fileId);
 		if (symbolicFile == null)
-			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
+			return Util.httpNotFoundResourceResponse;
 		File file = Util.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
 		if (file == null)
-			return Util.httpResourceResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+			return Util.httpInternalErrorResourceResponse;
 		if (!file.canRead()) {
-			return Util.httpResourceResponse(HttpStatus.NOT_FOUND);
+			return Util.httpNotFoundResourceResponse;
 		}
 		Resource resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
 		return Util.httpResourceResponse(resource, MediaType.parseMediaType(symbolicFile.mimeType));

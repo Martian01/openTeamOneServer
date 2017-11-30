@@ -46,44 +46,47 @@ public class MessagingApi {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/device/subscription")
 	public ResponseEntity<String> deviceSubscription(HttpServletRequest request, @RequestBody String input) throws JSONException {
-		User user = Util.getSessionContact(request, userRepository);
+		Session session = Util.getSession(request);
+		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpUnauthorizedResponse(session);
 		//
 		if (input == null)
-			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+			return Util.httpBadRequestResponse;
 		Subscription subscription = getSubscription(new JSONObject(input), user.userId);
 		if (subscription == null)
-			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+			return Util.httpBadRequestResponse;
 		subscriptionRepository.save(subscription);
-		return Util.httpStringResponse(HttpStatus.OK);
+		return Util.httpOkResponse;
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/device/subscription")
 	public ResponseEntity<String> deviceSubscriptionDelete(HttpServletRequest request, @RequestBody String input) throws JSONException {
-		User user = Util.getSessionContact(request, userRepository);
+		Session session = Util.getSession(request);
+		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpUnauthorizedResponse(session);
 		//
 		if (input == null)
-			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+			return Util.httpBadRequestResponse;
 		SubscriptionKey key = getSubscriptionKey(new JSONObject(input), user.userId);
 		if (key == null)
-			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+			return Util.httpBadRequestResponse;
 		Subscription subscription = subscriptionRepository.findTopByTargetTypeAndAppIdAndDeviceTokenAndUserId(key.targetType, key.appId, key.deviceToken, key.userId);
 		if (subscription != null) {
 			subscription.isActive = false;
 			subscription.changedAt = System.currentTimeMillis();
 			subscriptionRepository.save(subscription);
 		}
-		return Util.httpStringResponse(HttpStatus.OK);
+		return Util.httpOkResponse;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/me")
 	public ResponseEntity<String> me(HttpServletRequest request) throws JSONException {
-		User user = Util.getSessionContact(request, userRepository);
+		Session session = Util.getSession(request);
+		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpUnauthorizedResponse(session);
 		//
 		JSONObject body = new JSONObject();
 		Person me = personRepository.findOne(user.personId);
@@ -100,14 +103,15 @@ public class MessagingApi {
 			body.put("tenant", tenant);
 		}
 		//
-		return Util.httpStringResponse(body);
+		return Util.httpOkResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/person/{personId}")
 	public ResponseEntity<String> person(HttpServletRequest request, @PathVariable String personId) throws JSONException {
-		User user = Util.getSessionContact(request, userRepository);
+		Session session = Util.getSession(request);
+		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpUnauthorizedResponse(session);
 		//
 		JSONObject body = new JSONObject();
 		Person person = personId == null ? null : personRepository.findOne(personId);
@@ -118,14 +122,15 @@ public class MessagingApi {
 			body.put("person", item);
 		}
 		//
-		return Util.httpStringResponse(body);
+		return Util.httpOkResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/contacts")
 	public ResponseEntity<String> contacts(HttpServletRequest request) throws JSONException {
-		User user = Util.getSessionContact(request, userRepository);
+		Session session = Util.getSession(request);
+		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpUnauthorizedResponse(session);
 		//
 		JSONObject body = new JSONObject();
 		Set<String> contactIds = getContactIds();
@@ -140,65 +145,69 @@ public class MessagingApi {
 			}
 		body.put("contacts", contactsJson);
 		//
-		return Util.httpStringResponse(body);
+		return Util.httpOkResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/contact/{contactId}/roomId")
 	public ResponseEntity<String> contactRoomId(HttpServletRequest request, @PathVariable String contactId) throws JSONException {
-		User user = Util.getSessionContact(request, userRepository);
+		Session session = Util.getSession(request);
+		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpUnauthorizedResponse(session);
 		//
 		JSONObject body = new JSONObject();
 		Person person = contactId == null || !getContactIds().contains(contactId) ? null : personRepository.findOne(contactId);
 		if (person == null || person.personId.equals(user.personId))
-			return Util.httpStringResponse(HttpStatus.NOT_FOUND);
+			return Util.httpNotFoundResponse;
 		String privateRoomId = getPrivateRoomId(contactId, user.personId);
 		if (privateRoomId == null)
 			privateRoomId = createPrivateRoom(person.personId, user.personId); // create the room on-the-fly
 		body.put("roomId", privateRoomId);
 		//
-		return Util.httpStringResponse(body);
+		return Util.httpOkResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/rooms")
 	public ResponseEntity<String> rooms(HttpServletRequest request) throws JSONException {
-		User user = Util.getSessionContact(request, userRepository);
+		Session session = Util.getSession(request);
+		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpUnauthorizedResponse(session);
 		//
 		JSONObject body = new JSONObject();
 		Iterable<Room> rooms = roomRepository.findAll();
 		Iterable<RoomMember> roomMembers = roomMemberRepository.findAll();
 		body.put("rooms", roomsToJsonArray(rooms, roomMembers, user.personId));
 		//
-		return Util.httpStringResponse(body);
+		return Util.httpOkResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/members")
 	public ResponseEntity<String> roomMembers(HttpServletRequest request, @PathVariable String roomId) throws JSONException {
-		User user = Util.getSessionContact(request, userRepository);
+		Session session = Util.getSession(request);
+		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpUnauthorizedResponse(session);
 		//
 		if (!isRoomMember(roomId, user.personId))
-			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
+			return Util.httpForbiddenResponse;
 		//
 		JSONObject body = new JSONObject();
 		Iterable<RoomMember> roomMembers = roomMemberRepository.findByRoomId(roomId);
 		body.put("roomMembers", RoomMember.toJsonArray(roomMembers));
 		//
-		return Util.httpStringResponse(body);
+		return Util.httpOkResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/messagesSince")
 	public ResponseEntity<String> roomMessagesSince(HttpServletRequest request, @PathVariable String roomId, @RequestParam(required = false) Long since, @RequestParam(required = false) Long notBefore) throws JSONException {
-		User user = Util.getSessionContact(request, userRepository);
+		Session session = Util.getSession(request);
+		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpUnauthorizedResponse(session);
 		//
 		if (!isRoomMember(roomId, user.personId))
-			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
+			return Util.httpForbiddenResponse;
 		//
 		JSONObject body = new JSONObject();
 		Iterable<Message> messages;
@@ -217,17 +226,18 @@ public class MessagingApi {
 		}
 		body.put("messages", messagesToJsonArray(messages, user.personId));
 		//
-		return Util.httpStringResponse(body);
+		return Util.httpOkResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/messagesUntil")
 	public ResponseEntity<String> roomMessagesUntil(HttpServletRequest request, @PathVariable String roomId, @RequestParam(required = false) Integer count, @RequestParam(required = false) Long until) throws JSONException {
-		User user = Util.getSessionContact(request, userRepository);
+		Session session = Util.getSession(request);
+		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpUnauthorizedResponse(session);
 		//
 		if (!isRoomMember(roomId, user.personId))
-			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
+			return Util.httpForbiddenResponse;
 		//
 		JSONObject body = new JSONObject();
 		Iterable<Message> messages;
@@ -242,38 +252,39 @@ public class MessagingApi {
 		}
 		body.put("messages", messagesToJsonArray(messages, user.personId));
 		//
-		return Util.httpStringResponse(body);
+		return Util.httpOkResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/message")
 	public ResponseEntity<String> roomMessage(MultipartHttpServletRequest multipartRequest, @PathVariable String roomId) throws Exception {
-		User user = Util.getSessionContact(multipartRequest, userRepository);
+		Session session = Util.getSession(multipartRequest);
+		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpUnauthorizedResponse(session);
 		//
 		if (!isRoomMember(roomId, user.personId))
-			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
+			return Util.httpForbiddenResponse;
 		//
 		if (multipartRequest == null)
-			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+			return Util.httpBadRequestResponse;
 		long now = System.currentTimeMillis();
 		// scan message part
 		String parameter = multipartRequest.getParameter("message");
 		if (parameter == null)
-			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+			return Util.httpBadRequestResponse;
 		ProtoMessage protoMessage = getProtoMessage(new JSONObject(parameter));
 		if (protoMessage == null)
-			return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+			return Util.httpBadRequestResponse;
 		// add mime types and save attachments in file system
 		if (protoMessage.protoSymbolicFiles != null) {
 			// first pass for validation of all attachments
 			for (ProtoSymbolicFile protoSymbolicFile : protoMessage.protoSymbolicFiles)
 				if (multipartRequest.getFile(protoSymbolicFile.clientId) == null)
-					return Util.httpStringResponse(HttpStatus.BAD_REQUEST);
+					return Util.httpBadRequestResponse;
 			// second pass for writing attachments
 			File directory = Util.getDataDirectory(tenantParameterRepository, SymbolicFile.DIRECTORY_ATTACHMENTS);
 			if (directory == null)
-				return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+				return Util.httpInternalErrorResponse;
 			for (ProtoSymbolicFile protoSymbolicFile : protoMessage.protoSymbolicFiles) {
 				MultipartFile multipartFile = multipartRequest.getFile(protoSymbolicFile.clientId);
 				protoSymbolicFile.mimeType = multipartFile.getContentType();
@@ -297,17 +308,18 @@ public class MessagingApi {
 		JSONObject body = new JSONObject();
 		JsonUtil.put(body, "message", messageToJson(message, user.personId, symbolicFiles));
 		//
-		return Util.httpStringResponse(body, HttpStatus.CREATED);
+		return Util.httpResponse(body, HttpStatus.CREATED);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/viewedConfirmation")
 	public ResponseEntity<String> roomViewedConfirmation(HttpServletRequest request, @PathVariable String roomId, @RequestParam(required = false) Long until) throws JSONException {
-		User user = Util.getSessionContact(request, userRepository);
+		Session session = Util.getSession(request);
+		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpUnauthorizedResponse(session);
 		//
 		if (!isRoomMember(roomId, user.personId))
-			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
+			return Util.httpForbiddenResponse;
 		//
 		long now = System.currentTimeMillis();
 		Iterable<Message> messages;
@@ -330,46 +342,48 @@ public class MessagingApi {
 			confirmations.add(new ViewedConfirmation(message.messageId, user.personId, message.roomId, message.postedAt, now));
 		viewedConfirmationRepository.save(confirmations);
 		//
-		return Util.httpStringResponse(HttpStatus.OK);
+		return Util.httpOkResponse;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/message/{messageId}/confirmations")
 	public ResponseEntity<String> messageConfirmations(HttpServletRequest request, @PathVariable String messageId) throws JSONException {
-		User user = Util.getSessionContact(request, userRepository);
+		Session session = Util.getSession(request);
+		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpUnauthorizedResponse(session);
 		//
 		Message message = messageId == null ? null : messageRepository.findOne(messageId);
 		if (message == null)
-			return Util.httpStringResponse(HttpStatus.NOT_FOUND);
+			return Util.httpNotFoundResponse;
 		if (!user.personId.equals(message.senderPersonId))
-			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
+			return Util.httpForbiddenResponse;
 		//
 		JSONObject body = new JSONObject();
 		Iterable<ViewedConfirmation> confirmations = viewedConfirmationRepository.findByMessageId(messageId);
 		body.put("confirmations", confirmationsToJsonArray(confirmations));
 		//
-		return Util.httpStringResponse(body);
+		return Util.httpOkResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/message/{messageId}")
 	public ResponseEntity<String> messageDelete(HttpServletRequest request, @PathVariable String messageId) throws JSONException {
-		User user = Util.getSessionContact(request, userRepository);
+		Session session = Util.getSession(request);
+		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpStringResponse(HttpStatus.UNAUTHORIZED);
+			return Util.httpUnauthorizedResponse(session);
 		//
 		Message message = messageId == null ? null : messageRepository.findOne(messageId);
 		if (message == null)
-			return Util.httpStringResponse(HttpStatus.GONE);
+			return Util.httpGoneResponse;
 		if (!user.personId.equals(message.senderPersonId))
-			return Util.httpStringResponse(HttpStatus.FORBIDDEN);
+			return Util.httpForbiddenResponse;
 		//
 		// delete attachments (DB objects and files in the file system)
 		Iterable<SymbolicFile> symbolicFiles = symbolicFileRepository.findByReferenceIdOrderByPositionAsc(messageId);
 		for (SymbolicFile symbolicFile : symbolicFiles) {
 			File file = Util.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
 			if (file == null)
-				return Util.httpStringResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+				return Util.httpInternalErrorResponse;
 			if (file.exists())
 				file.delete();
 		}
@@ -380,16 +394,8 @@ public class MessagingApi {
 		message.updatedAt = System.currentTimeMillis();
 		messageRepository.save(message);
 		//
-		return Util.httpStringResponse(HttpStatus.OK);
+		return Util.httpOkResponse;
 	}
-
-	/* The following API calls are intentionally not implemented */
-
-	//@RequestMapping(method = RequestMethod.GET, value = "/message/{messageId}")
-	//@RequestMapping(method = RequestMethod.POST, value = "/message/{messageId}/readConfirmation")
-	//@RequestMapping(method = RequestMethod.POST, value = "/messages/viewedConfirmation}")
-	//@RequestMapping(method = RequestMethod.GET, value = "/messagesSince")
-	//@RequestMapping(method = RequestMethod.GET, value = "/messagesUntil")
 
 	/* helper functions */
 
