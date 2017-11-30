@@ -31,14 +31,13 @@ public class MediaApi {
 	@Autowired
 	private SymbolicFileRepository symbolicFileRepository;
 
-	@Autowired
-	private ResourceLoader resourceLoader;
-
 	/* API implementation */
 
 	@RequestMapping(method = RequestMethod.GET, value = "/picture/v1/service/rest/picture/{fileId}")
 	public ResponseEntity<Resource> picture(HttpServletRequest request, @PathVariable String fileId) throws Exception {
-		User user = Util.getSessionContact(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository); // for Android app
+		if (user == null)
+			user = Util.getBasicAuthContact(request, userRepository); // for iOS app
 		if (user == null)
 			return Util.httpResourceResponse(HttpStatus.UNAUTHORIZED);
 		//
@@ -47,7 +46,9 @@ public class MediaApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{fileId}/content")
 	public ResponseEntity<Resource> mediaFileContent(HttpServletRequest request, @PathVariable String fileId) throws Exception {
-		User user = Util.getSessionContact(request, userRepository);
+		User user = Util.getSessionContact(request, userRepository); // for Android app
+		if (user == null)
+			user = Util.getBasicAuthContact(request, userRepository); // for iOS app
 		if (user == null)
 			return Util.httpResourceResponse(HttpStatus.UNAUTHORIZED);
 		//

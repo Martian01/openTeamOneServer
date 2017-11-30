@@ -24,12 +24,16 @@ public class SessionApi {
 	@Autowired
 	private PersonRepository personRepository;
 
-	// Dummy service
 	// Note: CSRF protection is irrelevant for mobile clients, and taken care of for browsers by SameSite cookies
 
 	@RequestMapping(method = RequestMethod.GET, value = "/token.xsjs")
-	public ResponseEntity<String> token() {
-		return Util.httpStringResponse(HttpStatus.OK);
+	public ResponseEntity<String> token(HttpServletRequest request) {
+		if (request.getHeader("Authorization") != null) // iOS app
+			return ResponseEntity.status(HttpStatus.OK)
+					.header("x-csrf-token", "792E926C333D4BB88AF219F83CDA2CE1") // iOS app wants lower case
+					.contentType(MediaType.TEXT_HTML)
+					.body("");
+		return Util.httpStringResponse(HttpStatus.OK); // Android app
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/login.xscfunc")

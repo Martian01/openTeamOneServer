@@ -2,6 +2,8 @@ The software is based on other Open Source projects, like SpringBoot (https://sp
 
 Those dependencies are included by maven at compile time and referenced in the pom.xml file.
 
+The java code includes a copy of migbase64 (https://sourceforge.net/projects/migbase64/). The license text can be found in the source code.
+
 The admin UI loads jQuery and the plugins jQuery UI and DataTables at runtime in the browser.
 
 The logo is a derivative work based on an icon made by Freepik from www.flaticon.com, available under the Creative Commons license of type "Attributions Share Alike" (BY-SA). Therefore the logo is shared under the same terms.

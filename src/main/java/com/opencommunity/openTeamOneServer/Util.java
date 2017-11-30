@@ -1,5 +1,6 @@
 package com.opencommunity.openTeamOneServer;
 
+import com.opencommunity.openTeamOneServer.util.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.core.io.ByteArrayResource;
@@ -58,6 +59,35 @@ public class Util {
 			}
 		}
 		return map;
+	}
+
+	/* Basic Auth services for the iOS app only */
+
+	public static String[] splitBasicAuthHeader(String authHeader) {
+		if (authHeader != null && authHeader.startsWith("Basic ")) {
+			try {
+				String decodedHeader = URLDecoder.decode(new String(Base64.decodeFast(authHeader.substring(6)), "UTF-8"), "UTF-8");
+				if (decodedHeader != null)
+					return decodedHeader.split(":");
+			} catch (Exception e) { }
+		}
+		return null;
+	}
+
+
+	public static User getBasicAuthUser(HttpServletRequest request, UserRepository userRepository) {
+		String[] credentials = Util.splitBasicAuthHeader(request.getHeader("Authorization"));
+		if (credentials == null || credentials.length != 2)
+			return null;
+		User user = userRepository.findOne(credentials[0].toLowerCase());
+		if (user == null)
+			return null;
+		return user.matches(credentials[1]) ? user : null;
+	}
+
+	public static User getBasicAuthContact(HttpServletRequest request, UserRepository userRepository) {
+		User user = getBasicAuthUser(request, userRepository);
+		return user == null || user.personId == null || !user.hasUserRole ? null : user;
 	}
 
 	/* User sessions */
