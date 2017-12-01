@@ -33,11 +33,6 @@ public class SessionApi {
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	private final ResponseEntity<String> httpLogonFailureResponse = ResponseEntity.status(HttpStatus.FORBIDDEN)
-			.header("Set-Cookie", Util.getSessionCookie(null))
-			.contentType(MediaType.TEXT_PLAIN)
-			.body(null);
-
 	@RequestMapping(method = RequestMethod.GET, value = "/token.xsjs")
 	public ResponseEntity<String> token(HttpServletRequest request) {
 		return request.getHeader("Authorization") != null ? httpCsrfResponse : Util.httpOkResponse; // iOS vs. Android app
@@ -50,17 +45,17 @@ public class SessionApi {
 		String userId = formData.get("xs-username");
 		String password = formData.get("xs-password");
 		if (userId == null || password == null)
-			return httpLogonFailureResponse;
+			return Util.httpForbiddenSessionResponse;
 		userId = userId.toLowerCase();
 		User user = userRepository.findOne(userId);
 		if (user == null)
-			return httpLogonFailureResponse;
+			return Util.httpForbiddenSessionResponse;
 		if (user.hasUserRole && user.personId != null) {
 			Person person = personRepository.findOne(user.personId);
 			if (person != null && user.matches(password))
 				session = Session.newSession(userId, request.getHeader("X-CSRF-TOKEN") != null);
 		}
-		return session == null ? httpLogonFailureResponse : sessionResponse(session);
+		return session == null ? Util.httpForbiddenSessionResponse : sessionResponse(session);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/pwchange.xscfunc")
@@ -71,11 +66,11 @@ public class SessionApi {
 		String passwordNew = formData.get("xs-password-new");
 		String passwordOld = formData.get("xs-password-old");
 		if (userId == null || passwordNew == null)
-			return httpLogonFailureResponse;
+			return Util.httpForbiddenSessionResponse;
 		userId = userId.toLowerCase();
 		User user = userRepository.findOne(userId);
 		if (user == null)
-			return httpLogonFailureResponse;
+			return Util.httpForbiddenSessionResponse;
 		boolean passwordOldConfirmed = false;
 		if (passwordOld == null) {
 			String oldSessionId = Util.getSessionId(request);
@@ -94,20 +89,16 @@ public class SessionApi {
 			userRepository.save(user);
 		}
 		//
-		return session == null ? httpLogonFailureResponse : sessionResponse(session);
+		return session == null ? Util.httpForbiddenSessionResponse : sessionResponse(session);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/logout.xscfunc")
 	public ResponseEntity<String> logout(HttpServletRequest request) {
-		HttpHeaders httpHeaders= new HttpHeaders();
 		String sessionId = Util.getSessionId(request);
-		if (sessionId != null) {
+		if (sessionId != null)
 			Session.invalidateSession(sessionId);
-			httpHeaders.set("Set-Cookie", Util.getSessionCookie(null));
-		}
 		//
-		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-		return new ResponseEntity<>("{}", httpHeaders, HttpStatus.OK);
+		return Util.httpNoSessionResponse;
 	}
 
 	/* helper functions */

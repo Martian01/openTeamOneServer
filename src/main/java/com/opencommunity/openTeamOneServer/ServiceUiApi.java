@@ -44,7 +44,7 @@ public class ServiceUiApi {
 		}
 		//
 		return ResponseEntity.status(HttpStatus.SEE_OTHER)
-				.header("Location", forward == null ? Util.getDefaultTarget(tenantParameterRepository, user) : forward)
+				.header("Location", forward == null ? Util.getDefaultTarget(tenantParameterRepository, session == null ? null : user) : forward)
 				.header("Set-Cookie", Util.getSessionCookie(session == null ? null : session.sessionId))
 				.contentType(MediaType.TEXT_PLAIN)
 				.body(null);
@@ -56,16 +56,14 @@ public class ServiceUiApi {
 		String forward = formData.get("forward");
 		//
 		String sessionId = Util.getSessionId(request);
-		if (sessionId != null) {
+		if (sessionId != null)
 			Session.invalidateSession(sessionId);
-			return ResponseEntity.status(HttpStatus.SEE_OTHER)
-					.header("Location", forward == null ? Util.getDefaultTarget(tenantParameterRepository, null) : forward)
-					.header("Set-Cookie", Util.getSessionCookie(null))
-					.contentType(MediaType.TEXT_PLAIN)
-					.body(null);
-		}
 		//
-		return Util.httpForwardResponse(tenantParameterRepository, null, forward);
+		return ResponseEntity.status(HttpStatus.SEE_OTHER)
+				.header("Location", forward == null ? Util.getDefaultTarget(tenantParameterRepository, null) : forward)
+				.header("Set-Cookie", Util.getSessionCookie(null))
+				.contentType(MediaType.TEXT_PLAIN)
+				.body(null);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/snapshot/save")

@@ -162,6 +162,16 @@ public class Util {
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
+	public static ResponseEntity<String> httpNoSessionResponse = ResponseEntity.status(HttpStatus.OK)
+			.header("Set-Cookie", getSessionCookie(null))
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
+
+	public static ResponseEntity<String> httpForbiddenSessionResponse = ResponseEntity.status(HttpStatus.FORBIDDEN)
+			.header("Set-Cookie", getSessionCookie(null))
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
+
 	public static ResponseEntity<String> httpResponse(JSONObject body, HttpStatus httpStatus) {
 		return ResponseEntity.status(httpStatus)
 				.contentType(MediaType.APPLICATION_JSON)
