@@ -3,7 +3,6 @@ package com.opencommunity.openTeamOneServer;
 import com.opencommunity.openTeamOneServer.util.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -61,7 +60,7 @@ public class Util {
 		return map;
 	}
 
-	/* Basic Auth services for the iOS app only */
+	/* Basic Auth services (for the iOS app) */
 
 	public static String[] splitBasicAuthHeader(String authHeader) {
 		if (authHeader != null && authHeader.startsWith("Basic ")) {

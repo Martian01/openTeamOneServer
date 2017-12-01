@@ -3,8 +3,6 @@ package com.opencommunity.openTeamOneServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,17 +33,17 @@ public class MediaApi {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/picture/v1/service/rest/picture/{fileId}")
 	public ResponseEntity<Resource> picture(HttpServletRequest request, @PathVariable String fileId) throws Exception {
-		return getFileRequest(request, fileId);
+		return handleFileRequest(request, fileId);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{fileId}/content")
 	public ResponseEntity<Resource> mediaFileContent(HttpServletRequest request, @PathVariable String fileId) throws Exception {
-		return getFileRequest(request, fileId);
+		return handleFileRequest(request, fileId);
 	}
 
 	/* helper functions */
 
-	private ResponseEntity<Resource> getFileRequest(HttpServletRequest request, String fileId) throws Exception {
+	private ResponseEntity<Resource> handleFileRequest(HttpServletRequest request, String fileId) throws Exception {
 		Session session = Util.getSession(request);
 		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
 		if (user == null)

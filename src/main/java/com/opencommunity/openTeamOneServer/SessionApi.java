@@ -26,8 +26,15 @@ public class SessionApi {
 
 	// Note: CSRF protection is irrelevant for mobile clients, and taken care of for browsers by SameSite cookies
 
+	private final String defaultCsrfToken = "792E926C333D4BB88AF219F83CDA2CE1";
+
 	private final ResponseEntity<String> httpCsrfResponse = ResponseEntity.status(HttpStatus.OK)
-			.header("x-csrf-token", "792E926C333D4BB88AF219F83CDA2CE1") // iOS app wants lower case header
+			.header("x-csrf-token", defaultCsrfToken) // iOS app wants lower case header
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
+
+	private final ResponseEntity<String> httpLogonFailureResponse = ResponseEntity.status(HttpStatus.FORBIDDEN)
+			.header("Set-Cookie", Util.getSessionCookie(null))
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
@@ -42,25 +49,18 @@ public class SessionApi {
 		Map<String, String> formData = Util.splitQueryString(requestBody);
 		String userId = formData.get("xs-username");
 		String password = formData.get("xs-password");
-		if (userId != null) {
-			userId = userId.toLowerCase();
-			User user = userRepository.findOne(userId);
-			if (user != null && user.hasUserRole && user.personId != null) {
-				Person person = personRepository.findOne(user.personId);
-				if (person != null && user.matches(password))
-					session = Session.newSession(userId, request.getHeader("X-CSRF-TOKEN") != null);
-			}
+		if (userId == null || password == null)
+			return httpLogonFailureResponse;
+		userId = userId.toLowerCase();
+		User user = userRepository.findOne(userId);
+		if (user == null)
+			return httpLogonFailureResponse;
+		if (user.hasUserRole && user.personId != null) {
+			Person person = personRepository.findOne(user.personId);
+			if (person != null && user.matches(password))
+				session = Session.newSession(userId, request.getHeader("X-CSRF-TOKEN") != null);
 		}
-		//
-		JSONObject body = new JSONObject();
-		body.put("login", session != null);
-		body.put("pwdChange", false);
-		JsonUtil.put(body, "username", userId);
-		//
-		HttpHeaders httpHeaders= new HttpHeaders();
-		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-		httpHeaders.set("Set-Cookie", Util.getSessionCookie(session == null ? null : session.sessionId));
-		return new ResponseEntity<>(body.toString(), httpHeaders, session == null ? HttpStatus.FORBIDDEN : HttpStatus.OK);
+		return session == null ? httpLogonFailureResponse : sessionResponse(session);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/pwchange.xscfunc")
@@ -70,38 +70,31 @@ public class SessionApi {
 		String userId = formData.get("xs-username");
 		String passwordNew = formData.get("xs-password-new");
 		String passwordOld = formData.get("xs-password-old");
-		if (userId != null) {
-			userId = userId.toLowerCase();
-			User user = userRepository.findOne(userId);
-			boolean passwordOldConfirmed = false;
-			if (passwordOld == null) {
-				String oldSessionId = Util.getSessionId(request);
-				if (oldSessionId != null) {
-					Session oldSession = Session.getSession(oldSessionId);
-					if (oldSession != null) {
-						User oldSessionUser = userRepository.findOne(oldSession.userId);
-						if (oldSessionUser != null)
-							passwordOldConfirmed = userId.equals(oldSession.userId);
-					}
+		if (userId == null || passwordNew == null)
+			return httpLogonFailureResponse;
+		userId = userId.toLowerCase();
+		User user = userRepository.findOne(userId);
+		if (user == null)
+			return httpLogonFailureResponse;
+		boolean passwordOldConfirmed = false;
+		if (passwordOld == null) {
+			String oldSessionId = Util.getSessionId(request);
+			if (oldSessionId != null) {
+				Session oldSession = Session.getSession(oldSessionId);
+				if (oldSession != null) {
+					User oldSessionUser = userRepository.findOne(oldSession.userId);
+					if (oldSessionUser != null)
+						passwordOldConfirmed = userId.equals(oldSession.userId);
 				}
 			}
-			if (user != null && passwordNew != null && (passwordOldConfirmed || user.matches(passwordOld)))
-				session = Session.newSession(userId, request.getHeader("X-CSRF-TOKEN") != null);
-			if (session != null) {
-				user.setPassword(passwordNew);
-				userRepository.save(user);
-			}
+		}
+		if (passwordOldConfirmed || user.matches(passwordOld)) {
+			session = Session.newSession(userId, request.getHeader("X-CSRF-TOKEN") != null);
+			user.setPassword(passwordNew);
+			userRepository.save(user);
 		}
 		//
-		JSONObject body = new JSONObject();
-		body.put("login", session != null);
-		body.put("pwdChange", false);
-		JsonUtil.put(body, "username", userId);
-		//
-		HttpHeaders httpHeaders= new HttpHeaders();
-		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-		httpHeaders.set("Set-Cookie", Util.getSessionCookie(session == null ? null : session.sessionId));
-		return new ResponseEntity<>(body.toString(), httpHeaders, session == null ? HttpStatus.FORBIDDEN : HttpStatus.OK);
+		return session == null ? httpLogonFailureResponse : sessionResponse(session);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/logout.xscfunc")
@@ -117,4 +110,23 @@ public class SessionApi {
 		return new ResponseEntity<>("{}", httpHeaders, HttpStatus.OK);
 	}
 
+	/* helper functions */
+
+	private ResponseEntity<String> sessionResponse(Session session) throws JSONException {
+		JSONObject body = new JSONObject();
+		body.put("login", true);
+		body.put("pwdChange", false);
+		JsonUtil.put(body, "username", session.userId);
+		//
+		return session.iosMode ?
+				ResponseEntity.status(HttpStatus.OK)
+						.header("Set-Cookie", Util.getSessionCookie(session.sessionId))
+						.header("x-csrf-token", defaultCsrfToken) // iOS app wants lower case header
+						.contentType(MediaType.APPLICATION_JSON)
+						.body(body.toString()) :
+				ResponseEntity.status(HttpStatus.OK)
+						.header("Set-Cookie", Util.getSessionCookie(session.sessionId))
+						.contentType(MediaType.APPLICATION_JSON)
+						.body(body.toString());
+	}
 }

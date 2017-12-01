@@ -60,6 +60,7 @@ public class Session {
 		}
 	}
 
+	@NotNull
 	public static Session newSession(@NotNull String userId, boolean iosMode) {
 		synchronized (currentSessions) {
 			Session session = new Session(userId, iosMode);
