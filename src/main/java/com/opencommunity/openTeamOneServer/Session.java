@@ -29,6 +29,7 @@ public class Session {
 		item.put("userId", userId);
 		item.put("startTime", JsonUtil.toIsoDate(startTime));
 		item.put("lastAccessTime", JsonUtil.toIsoDate(lastAccessTime));
+		item.put("iosMode", iosMode);
 		return item;
 	}
 
