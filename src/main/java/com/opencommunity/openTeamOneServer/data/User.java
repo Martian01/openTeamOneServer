@@ -1,27 +1,17 @@
-package com.opencommunity.openTeamOneServer;
+package com.opencommunity.openTeamOneServer.data;
 
+import com.opencommunity.openTeamOneServer.util.BCrypt;
+import com.opencommunity.openTeamOneServer.util.JsonUtil;
+import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.opencommunity.openTeamOneServer.util.BCrypt;
-import org.springframework.data.repository.CrudRepository;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.util.ArrayList;
 
-
-interface UserRepository extends CrudRepository<User, String> {
-	// for contacts
-	long countByPersonIdAndHasUserRoleTrue(String personId);
-	Iterable<User> findByPersonIdNotNullAndHasUserRoleTrue();
-	// for initialisation
-	long countByHasAdminRoleTrue();
-	// for deletion
-	Iterable<User> findByUserIdNot(String userId);
-	Iterable<User> findByHasAdminRoleFalseAndUserIdNot(String userId);
-}
 
 @Entity
 public class User {

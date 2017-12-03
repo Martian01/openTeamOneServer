@@ -1,5 +1,10 @@
-package com.opencommunity.openTeamOneServer;
+package com.opencommunity.openTeamOneServer.api;
 
+import com.opencommunity.openTeamOneServer.data.Session;
+import com.opencommunity.openTeamOneServer.data.User;
+import com.opencommunity.openTeamOneServer.persistence.TenantParameterRepository;
+import com.opencommunity.openTeamOneServer.persistence.UserRepository;
+import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

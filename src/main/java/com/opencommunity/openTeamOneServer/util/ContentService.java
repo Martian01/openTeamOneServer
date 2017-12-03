@@ -1,5 +1,7 @@
-package com.opencommunity.openTeamOneServer;
+package com.opencommunity.openTeamOneServer.util;
 
+import com.opencommunity.openTeamOneServer.data.*;
+import com.opencommunity.openTeamOneServer.persistence.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

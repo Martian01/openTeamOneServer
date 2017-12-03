@@ -1,9 +1,15 @@
-package com.opencommunity.openTeamOneServer;
+package com.opencommunity.openTeamOneServer.api;
 
+import com.opencommunity.openTeamOneServer.data.Person;
+import com.opencommunity.openTeamOneServer.data.Session;
+import com.opencommunity.openTeamOneServer.data.User;
+import com.opencommunity.openTeamOneServer.persistence.PersonRepository;
+import com.opencommunity.openTeamOneServer.persistence.UserRepository;
+import com.opencommunity.openTeamOneServer.util.JsonUtil;
+import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

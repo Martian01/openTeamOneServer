@@ -1,6 +1,10 @@
-package com.opencommunity.openTeamOneServer;
+package com.opencommunity.openTeamOneServer.util;
 
-import com.opencommunity.openTeamOneServer.util.Base64;
+import com.opencommunity.openTeamOneServer.data.Session;
+import com.opencommunity.openTeamOneServer.data.TenantParameter;
+import com.opencommunity.openTeamOneServer.data.User;
+import com.opencommunity.openTeamOneServer.persistence.TenantParameterRepository;
+import com.opencommunity.openTeamOneServer.persistence.UserRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.core.io.Resource;

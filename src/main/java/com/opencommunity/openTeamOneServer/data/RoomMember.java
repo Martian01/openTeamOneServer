@@ -1,28 +1,15 @@
-package com.opencommunity.openTeamOneServer;
+package com.opencommunity.openTeamOneServer.data;
 
+import com.opencommunity.openTeamOneServer.util.JsonUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.data.repository.CrudRepository;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import java.util.ArrayList;
-
-interface RoomMemberRepository extends CrudRepository<RoomMember, RoomMemberKey> {
-	// for members
-	Iterable<RoomMember> findByRoomId(String roomId);
-	// for rooms
-	Iterable<RoomMember> findByPersonId(String personId);
-	// full key
-	RoomMember findTopByRoomIdAndPersonId(String roomId, String personId);
-	// for private rooms
-	RoomMember findTopByRoomIdAndPersonIdNot(String roomId, String personId);
-	// for specific membership (validation)
-	long countByRoomIdAndPersonId(String roomId, String personId);
-}
 
 @Entity
 @IdClass(RoomMemberKey.class)

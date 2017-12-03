@@ -1,4 +1,4 @@
-package com.opencommunity.openTeamOneServer;
+package com.opencommunity.openTeamOneServer.data;
 
 import java.io.Serializable;
 

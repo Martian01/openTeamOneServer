@@ -1,28 +1,15 @@
-package com.opencommunity.openTeamOneServer;
+package com.opencommunity.openTeamOneServer.data;
 
+import com.opencommunity.openTeamOneServer.util.JsonUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.data.repository.CrudRepository;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import java.util.ArrayList;
-
-interface ViewedConfirmationRepository extends CrudRepository<ViewedConfirmation, ViewedConfirmationKey> {
-	// for message confirmations
-	Iterable<ViewedConfirmation> findByMessageId(String messageId);
-	// for viewedCount (simple version)
-	long countByMessageIdAndPersonIdNot(String messageId, String personId);
-	// for badgeCount etc.
-	ViewedConfirmation findTopByPersonIdAndRoomIdOrderByMessagePostedAtDesc(String personId, String roomId);
-	// for viewedAt etc.
-	ViewedConfirmation findTopByMessageIdAndPersonId(String messageId, String personId);
-	// for debugging
-	Iterable<ViewedConfirmation> findByPersonId(String personId);
-}
 
 @Entity
 @IdClass(ViewedConfirmationKey.class)

@@ -1,19 +1,15 @@
-package com.opencommunity.openTeamOneServer;
+package com.opencommunity.openTeamOneServer.data;
 
+import com.opencommunity.openTeamOneServer.util.JsonUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.data.repository.CrudRepository;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import java.util.ArrayList;
-
-interface SubscriptionRepository extends CrudRepository<Subscription, SubscriptionKey> {
-	Subscription findTopByTargetTypeAndAppIdAndDeviceTokenAndUserId(String targetType, String appId, String deviceToken, String userId);
-}
 
 @Entity
 @IdClass(SubscriptionKey.class)

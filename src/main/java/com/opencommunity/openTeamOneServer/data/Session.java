@@ -1,12 +1,13 @@
-package com.opencommunity.openTeamOneServer;
+package com.opencommunity.openTeamOneServer.data;
 
+import com.opencommunity.openTeamOneServer.util.JsonUtil;
+import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 

@@ -1,5 +1,12 @@
-package com.opencommunity.openTeamOneServer;
+package com.opencommunity.openTeamOneServer.api;
 
+import com.opencommunity.openTeamOneServer.data.Session;
+import com.opencommunity.openTeamOneServer.data.SymbolicFile;
+import com.opencommunity.openTeamOneServer.data.User;
+import com.opencommunity.openTeamOneServer.persistence.SymbolicFileRepository;
+import com.opencommunity.openTeamOneServer.persistence.TenantParameterRepository;
+import com.opencommunity.openTeamOneServer.persistence.UserRepository;
+import com.opencommunity.openTeamOneServer.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -14,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
 
 @RestController
 @RequestMapping("/sap/sports/fnd/api")

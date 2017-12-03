@@ -1,18 +1,16 @@
-package com.opencommunity.openTeamOneServer;
+package com.opencommunity.openTeamOneServer.data;
 
+import com.opencommunity.openTeamOneServer.util.JsonUtil;
+import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.data.repository.CrudRepository;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.util.ArrayList;
 
-
-interface PersonRepository extends CrudRepository<Person, String> {
-}
 
 @Entity
 public class Person {

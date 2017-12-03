@@ -1,4 +1,4 @@
-package com.opencommunity.openTeamOneServer;
+package com.opencommunity.openTeamOneServer.util;
 
 import org.json.JSONArray;
 import org.json.JSONException;
