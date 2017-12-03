@@ -3,7 +3,7 @@ package com.opencommunity.openTeamOneServer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mindrot.jbcrypt.BCrypt;
+import com.opencommunity.openTeamOneServer.util.BCrypt;
 import org.springframework.data.repository.CrudRepository;
 
 import javax.persistence.Column;
