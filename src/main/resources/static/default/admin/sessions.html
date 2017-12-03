@@ -11,44 +11,42 @@
 	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 	<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
 	<script>
-		function setPerson(person) {
-			$("#personId").val((person && person.personId) || null);
-			$("#lastName").val((person && person.lastName) || null);
-			$("#firstName").val((person && person.firstName) || null);
-			$("#nickName").val((person && person.nickName) || null);
-			$("#pictureId").val((person && person.pictureId) || null);
+		function setSession(session) {
+			$("#sessionId").val((session && session.sessionId) || null);
+			$("#userId").val((session && session.userId) || null);
+			$("#startTime").val((session && session.startTime) || null);
+			$("#lastAccessTime").val((session && session.lastAccessTime) || null);
 		}
-		function getPerson() {
+		function getSession() {
 			function set(object, property, value) {
 				if (value)
 					object[property] = value;
 			}
-			var person = {};
-			set(person, "personId", $("#personId").val());
-			set(person, "lastName", $("#lastName").val());
-			set(person, "firstName", $("#firstName").val());
-			set(person, "nickName", $("#nickName").val());
-			set(person, "pictureId", $("#pictureId").val());
-			return person;
+			var session = {};
+			set(session, "sessionId", $("#sessionId").val());
+			set(session, "userId", $("#userId").val());
+			set(session, "startTime", $("#startTime").val());
+			set(session, "lastAccessTime", $("#lastAccessTime").val());
+			return session;
 		}
-		function deletePerson(table, dialog) {
+		function deleteSession(table, dialog) {
 			dialog.dialog("close");
-			var person = getPerson();
-			if (person.personId) {
+			var session = getSession();
+			if (session.sessionId) {
 				$.ajax({
-					url: "/svc/person/" + person.personId,
+					url: "/svc/session/" + session.sessionId,
 					method: "DELETE",
 					success: table.ajax.reload.bind(null, null, false),
 					error: alert.bind(null, "Deletion failure")
 				});
 			}
 		}
-		function postPerson(table, dialog) {
+		function postSession(table, dialog) {
 			dialog.dialog("close");
-			var person = getPerson();
-			var body = JSON.stringify(person);
+			var session = getSession();
+			var body = JSON.stringify(session);
 			$.ajax({
-				url: "/svc/person",
+				url: "/svc/session",
 				method: "POST",
 				contentType: "application/json; charset=utf-8",
 				data: body,
@@ -58,18 +56,17 @@
 			});
 		}
 		function onStart() {
-			var table = $("#personTable").DataTable({
+			var table = $("#sessionTable").DataTable({
 				pageLength: 25,
 				ajax: {
-					url: "/svc/persons",
+					url: "/svc/sessions",
 					dataSrc: ""
 				},
 				columns: [
-					{ data: "personId", defaultContent: "" },
-					{ data: "firstName", defaultContent: "" },
-					{ data: "lastName", defaultContent: "" },
-					{ data: "nickName", defaultContent: "" },
-					{ data: "pictureId", defaultContent: "" }
+					{ data: "sessionId", defaultContent: "" },
+					{ data: "userId", defaultContent: "" },
+					{ data: "startTime", defaultContent: "" },
+					{ data: "lastAccessTime", defaultContent: "" },
 				]
 			});
 			var dialog = $("#dialog");
@@ -79,18 +76,26 @@
 				  width: 400,
 				  modal: true,
 				  buttons: {
-					Delete: deletePerson.bind(null, table, dialog),
-					Save: postPerson.bind(null, table, dialog)
+					Delete: deleteSession.bind(null, table, dialog)
+					//Save: postSession.bind(null, table, dialog)
 				  }
 			});
-			$("#personTable tbody").on("click", "tr", function () {
-				setPerson(table.row(this).data());
+			$("#sessionTable tbody").on("click", "tr", function () {
+				setSession(table.row(this).data());
 				dialog.dialog("open");
 			});
-			$("#createPerson").on("click", function() {
-				setPerson(null);
+			/*
+			$("#createSession").on("click", function() {
+				setSession(null);
 				dialog.dialog("open");
 			});
+			$("#_startTime").on("click", function() {
+				$("#startTime").val(new Date().toISOString());
+			});
+			$("#_lastAccessTime").on("click", function() {
+				$("#lastAccessTime").val(new Date().toISOString());
+			});
+			*/
     	};
 		function onLoadSession(response) {
 			var isLoggedIn = response && response.user;
@@ -120,35 +125,32 @@
 </head>
 <body>
 	<div style="display: none;">
-		<div id="dialog" title="Person Dialog">
+		<div id="dialog" title="Session Dialog">
 			<form id="form">
-				<label for="personId">Person Id:</label><br/>
-				<input id="personId" type="text" size="36" readonly disabled name="personId"/><br/><br/>
-				<label for="firstName">First Name:</label><br/>
-				<input id="firstName" type="text" name="firstName"/><br/><br/>
-				<label for="lastName">Last Name:</label><br/>
-				<input id="lastName" type="text" name="lastName"/><br/><br/>
-				<label for="nickName">Nickname:</label><br/>
-				<input id="nickName" type="text" name="nickName"/><br/><br/>
-				<label for="pictureId">Picture Id:</label><br/>
-				<input id="pictureId" type="text" size="36" name="pictureId"/><br/><br/>
+				<label for="sessionId">Session Id:</label><br/>
+				<input id="sessionId" type="text" size="36" readonly disabled name="sessionId"/><br/><br/>
+				<label for="userId">User Id:</label><br/>
+				<input id="userId" type="text" readonly disabled name="userId"/><br/><br/>
+				<label for="startTime">Start Time:</label><br/>
+				<input id="startTime" type="text" readonly disabled name="startTime"/><!-- &nbsp;<input id="_startTime" type="button" value="Now"/> --><br/><br/>
+				<label for="lastAccessTime">Last Access:</label><br/>
+				<input id="lastAccessTime" type="text" readonly disabled name="lastAccessTime"/><!-- &nbsp;<input id="_lastAccessTime" type="button" value="Now"/> --><br/><br/>
 			</form>
 		</div>
 	</div>
-	<h1>Persons</h1>
-	<table id="personTable" class="display" width="100%" cellspacing="0">
+	<h1>Sessions</h1>
+	<table id="sessionTable" class="display" width="100%" cellspacing="0">
 		<thead>
 		<tr>
-			<th>Person Id</th>
-			<th>First Name</th>
-			<th>Last Name</th>
-			<th>Nickname</th>
-			<th>Picture Id</th>
+			<th>Session Id</th>
+			<th>User Id</th>
+			<th>Start Time</th>
+			<th>Last Access</th>
 		</tr>
 		</thead>
 	</table>
-	<br/>
-	<input id="createPerson" type="button" value="Create New Person"/>
+	<!-- <br/>
+	<input id="createSession" type="button" value="Create New Session"/> -->
 	<br/><br/>
 	<div>
 		<h2>Admin Menu</h2>

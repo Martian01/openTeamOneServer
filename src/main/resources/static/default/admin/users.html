@@ -87,7 +87,7 @@
 			dialog.dialog({
 				autoOpen: false,
 				  height: 540,
-				  width: 360,
+				  width: 400,
 				  modal: true,
 				  buttons: {
 					Delete: deleteUser.bind(null, table, dialog),
@@ -120,7 +120,7 @@
 		}
 		function loadSession() {
 			$.ajax({
-				url: "/svc/session",
+				url: "/svc/sessioninfo",
 				method: "GET",
 				dataType: "json",
 				success: onLoadSession,
@@ -134,9 +134,9 @@
 		<div id="dialog" title="User Dialog">
 			<form id="form">
 				<label for="userId">User Id:</label><br/>
-				<input id="userId" type="text" size="32" name="userId"/><br/><br/>
+				<input id="userId" type="text" size="36" name="userId"/><br/><br/>
 				<label for="personId">Person Id:</label><br/>
-				<input id="personId" type="text" size="32" name="personId"/><br/><br/>
+				<input id="personId" type="text" size="36" name="personId"/><br/><br/>
 				<input id="hasUserRole" type="checkbox" name="hasUserRole"/>&nbsp;has user role<br/><br/>
 				<input id="hasAdminRole" type="checkbox" name="hasAdminRole"/>&nbsp;has admin role<br/><br/>
 				<label for="password">Password</label><br/>
@@ -173,6 +173,7 @@
 		<a href="confirmations.html">Viewed Confirmations</a><br/>
 		<a href="subscriptions.html">Subscriptions</a><br/>
 		<a href="files.html">Files</a><br/>
+		<a href="sessions.html">Sessions</a><br/>
 	</div>
 	<br/>
 	<script>

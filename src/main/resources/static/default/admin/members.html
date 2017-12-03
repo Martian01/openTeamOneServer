@@ -71,7 +71,7 @@
 			dialog.dialog({
 				autoOpen: false,
 				  height: 300,
-				  width: 360,
+				  width: 400,
 				  modal: true,
 				  buttons: {
 					Delete: deleteMember.bind(null, table, dialog),
@@ -104,7 +104,7 @@
 		}
 		function loadSession() {
 			$.ajax({
-				url: "/svc/session",
+				url: "/svc/sessioninfo",
 				method: "GET",
 				dataType: "json",
 				success: onLoadSession,
@@ -118,9 +118,9 @@
 		<div id="dialog" title="Room Member Dialog">
 			<form id="form">
 				<label for="roomId">Room Id:</label><br/>
-				<input id="roomId" type="text" size="32" name="roomId"/><br/><br/>
+				<input id="roomId" type="text" size="36" name="roomId"/><br/><br/>
 				<label for="personId">Person Id:</label><br/>
-				<input id="personId" type="text" size="32" name="personId"/><br/><br/>
+				<input id="personId" type="text" size="36" name="personId"/><br/><br/>
 			</form>
 		</div>
 	</div>
@@ -148,6 +148,7 @@
 		<a href="confirmations.html">Viewed Confirmations</a><br/>
 		<a href="subscriptions.html">Subscriptions</a><br/>
 		<a href="files.html">Files</a><br/>
+		<a href="sessions.html">Sessions</a><br/>
 	</div>
 	<br/>
 	<script>

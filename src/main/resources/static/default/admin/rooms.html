@@ -115,7 +115,7 @@
 		}
 		function loadSession() {
 			$.ajax({
-				url: "/svc/session",
+				url: "/svc/sessioninfo",
 				method: "GET",
 				dataType: "json",
 				success: onLoadSession,
@@ -129,7 +129,7 @@
 		<div id="dialog" title="Room Dialog">
 			<form id="form">
 				<label for="roomId">Room Id:</label><br/>
-				<input id="roomId" type="text" size="32" readonly disabled name="roomId"/><br/><br/>
+				<input id="roomId" type="text" size="36" readonly disabled name="roomId"/><br/><br/>
 				<label for="name">Name:</label><br/>
 				<input id="name" type="text" name="name"/><br/><br/>
 				<label for="shortName">Short Name:</label><br/>
@@ -137,9 +137,9 @@
 				<label for="roomType">Room Type:</label><br/>
 				<input id="roomType" type="text" name="roomType"/><br/><br/>
 				<label for="pictureId">Picture Id:</label><br/>
-				<input id="pictureId" type="text" size="32" name="pictureId"/><br/><br/>
+				<input id="pictureId" type="text" size="36" name="pictureId"/><br/><br/>
 				<label for="changedAt">Changed at:</label><br/>
-				<input id="changedAt" type="text" size="32" name="changedAt"/>&nbsp;<input id="_changedAt" type="button" value="Now"/><br/><br/>
+				<input id="changedAt" type="text" name="changedAt"/>&nbsp;<input id="_changedAt" type="button" value="Now"/><br/><br/>
 			</form>
 		</div>
 	</div>
@@ -171,6 +171,7 @@
 		<a href="confirmations.html">Viewed Confirmations</a><br/>
 		<a href="subscriptions.html">Subscriptions</a><br/>
 		<a href="files.html">Files</a><br/>
+		<a href="sessions.html">Sessions</a><br/>
 	</div>
 	<br/>
 	<script>

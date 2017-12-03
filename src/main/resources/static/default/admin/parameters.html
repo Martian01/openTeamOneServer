@@ -104,7 +104,7 @@
 		}
 		function loadSession() {
 			$.ajax({
-				url: "/svc/session",
+				url: "/svc/sessioninfo",
 				method: "GET",
 				dataType: "json",
 				success: onLoadSession,
@@ -148,6 +148,7 @@
 		<a href="confirmations.html">Viewed Confirmations</a><br/>
 		<a href="subscriptions.html">Subscriptions</a><br/>
 		<a href="files.html">Files</a><br/>
+		<a href="sessions.html">Sessions</a><br/>
 	</div>
 	<br/>
 	<script>

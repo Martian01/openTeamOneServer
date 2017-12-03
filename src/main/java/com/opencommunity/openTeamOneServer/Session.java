@@ -1,9 +1,12 @@
 package com.opencommunity.openTeamOneServer;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +26,16 @@ public class Session {
 		lastAccessTime = startTime;
 	}
 
+	public Session(JSONObject item) throws JSONException {
+		sessionId = JsonUtil.getString(item, "sessionId");
+		userId = JsonUtil.getString(item, "userId");
+		startTime = JsonUtil.getIsoDate(item, "startTime");
+		lastAccessTime = JsonUtil.getIsoDate(item, "lastAccessTime");
+		//
+		if (sessionId == null || sessionId.length() == 0)
+			sessionId = Util.getUuid();
+	}
+
 	public JSONObject toJson() throws JSONException {
 		JSONObject item = new JSONObject();
 		item.put("sessionId", sessionId);
@@ -30,6 +43,26 @@ public class Session {
 		item.put("startTime", JsonUtil.toIsoDate(startTime));
 		item.put("lastAccessTime", JsonUtil.toIsoDate(lastAccessTime));
 		return item;
+	}
+
+	public static Iterable<Session> fromJsonArray(JSONArray array) throws JSONException {
+		if (array == null)
+			return null;
+		ArrayList<Session> sessionList = new ArrayList<>();
+		for (int i = 0; i < array.length(); i++)
+			sessionList.add(new Session(array.getJSONObject(i)));
+		return sessionList;
+	}
+
+	public static JSONArray toJsonArray(Iterable<Session> sessions) throws JSONException {
+		JSONArray array = new JSONArray();
+		for (Session session : sessions)
+			array.put(session.toJson());
+		return array;
+	}
+
+	public static JSONArray toJsonArray() throws JSONException {
+		return toJsonArray(currentSessions.values());
 	}
 
 	@Override
@@ -55,6 +88,12 @@ public class Session {
 
 	private static Map<String, Session> currentSessions = new HashMap<>();
 
+	public static Session findSession(@NotNull String sessionId) {
+		synchronized (currentSessions) {
+			return currentSessions.get(sessionId);
+		}
+	}
+
 	public static Session getSession(@NotNull String sessionId) {
 		synchronized (currentSessions) {
 			long now = System.currentTimeMillis();
@@ -76,6 +115,12 @@ public class Session {
 			Session session = new Session(userId, iosMode);
 			currentSessions.put(session.sessionId, session);
 			return session;
+		}
+	}
+
+	public static void updateSession(@NotNull Session session) {
+		synchronized (currentSessions) {
+			currentSessions.put(session.sessionId, session);
 		}
 	}
 

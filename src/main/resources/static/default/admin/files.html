@@ -112,7 +112,7 @@
 			var dialog = $("#dialog");
 			dialog.dialog({
 				autoOpen: false,
-				  height: 700,
+				  height: 750,
 				  width: 500,
 				  modal: true,
 				  buttons: {
@@ -152,7 +152,7 @@
 		}
 		function loadSession() {
 			$.ajax({
-				url: "/svc/session",
+				url: "/svc/sessioninfo",
 				method: "GET",
 				dataType: "json",
 				success: onLoadSession,
@@ -166,13 +166,13 @@
 		<div id="dialog" title="File Dialog">
 			<form id="form">
 				<label for="fileId">File Id:</label><br/>
-				<input id="fileId" type="text" size="32" readonly disabled name="fileId"/><br/><br/>
+				<input id="fileId" type="text" size="36" readonly disabled name="fileId"/><br/><br/>
 				<label for="mimeType">MIME Type:</label><br/>
 				<input id="mimeType" type="text" name="mimeType"/><br/><br/>
 				<label for="text">Description:</label><br/>
-				<input id="text" type="text" size="40" name="text"/><br/><br/>
+				<textarea id="text" name="text" cols="40" rows="5" wrap="soft"></textarea><br/><br/>
 				<label for="referenceId">Reference Id:</label><br/>
-				<input id="referenceId" type="text" size="32" name="referenceId"/><br/><br/>
+				<input id="referenceId" type="text" size="36" name="referenceId"/><br/><br/>
 				<label for="position">Position:</label><br/>
 				<input id="position" type="text" name="position"/><br/><br/>
 				<label for="directory">Directory:</label><br/>
@@ -211,6 +211,7 @@
 		<a href="confirmations.html">Viewed Confirmations</a><br/>
 		<a href="subscriptions.html">Subscriptions</a><br/>
 		<a href="files.html">Files</a><br/>
+		<a href="sessions.html">Sessions</a><br/>
 	</div>
 	<br/>
 	<script>

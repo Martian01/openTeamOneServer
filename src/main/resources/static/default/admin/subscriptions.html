@@ -143,7 +143,7 @@
 		}
 		function loadSession() {
 			$.ajax({
-				url: "/svc/session",
+				url: "/svc/sessioninfo",
 				method: "GET",
 				dataType: "json",
 				success: onLoadSession,
@@ -171,16 +171,16 @@
 				<input id="userConsent" type="checkbox" name="userConsent"/>&nbsp;user consent<br/><br/>
 				<input id="isActive" type="checkbox" name="isActive"/>&nbsp;is active<br/><br/>
 				<label for="changedAt">Changed at:</label><br/>
-				<input id="changedAt" type="text" size="32" name="changedAt"/>&nbsp;<input id="_changedAt" type="button" value="Now"/><br/><br/>
+				<input id="changedAt" type="text" name="changedAt"/>&nbsp;<input id="_changedAt" type="button" value="Now"/><br/><br/>
 				<label for="deviceId">Device Id:</label><br/>
-				<input id="deviceId" type="text" size="32" name="deviceId"/><br/><br/>
-				<label for="deviceType">Device Token:</label><br/>
+				<input id="deviceId" type="text" name="deviceId"/><br/><br/>
+				<label for="deviceType">Device Type:</label><br/>
 				<input id="deviceType" type="text" name="deviceType"/><br/><br/>
-				<label for="osVersion">User Id:</label><br/>
+				<label for="osVersion">OS Version:</label><br/>
 				<input id="osVersion" type="text" name="osVersion"/><br/><br/>
-				<label for="encryption">Target Type:</label><br/>
+				<label for="encryption">Encryption:</label><br/>
 				<input id="encryption" type="text" name="encryption"/><br/><br/>
-				<label for="appVersion">App Id:</label><br/>
+				<label for="appVersion">App Version:</label><br/>
 				<input id="appVersion" type="text" name="appVersion"/><br/><br/>
 			</form>
 		</div>
@@ -221,6 +221,7 @@
 		<a href="confirmations.html">Viewed Confirmations</a><br/>
 		<a href="subscriptions.html">Subscriptions</a><br/>
 		<a href="files.html">Files</a><br/>
+		<a href="sessions.html">Sessions</a><br/>
 	</div>
 	<br/>
 	<script>

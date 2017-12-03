@@ -7,6 +7,16 @@
 	<link rel="stylesheet" type="text/css" href="../css/default.css"/>
 	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script>
+		function getName(person) {
+			var name = null;
+			if (person) {
+				var first = person.firstName || "";
+				var last = person.lastName || "";
+				var nick = person.nickName || "";
+				name = (first.trim() + " " + last.trim()).trim() || nick.trim();
+			}
+			return name ? name : "Profile Picture";
+		}
 		function setPerson(person) {
 			$("#personId").val((person && person.personId) || null);
 			$("#lastName").val((person && person.lastName) || null);
@@ -15,6 +25,7 @@
 			$("#pictureId").val((person && person.pictureId) || null);
 			if (person && person.pictureId)
 				$("#userPicture").attr("src", "/sap/sports/fnd/api/picture/v1/service/rest/picture/" + person.pictureId);
+			$("#imageCaption").html(getName(person));
 		}
 		function getPerson() {
 			function set(object, property, value) {
@@ -112,7 +123,7 @@
 		}
 		function loadSession() {
 			$.ajax({
-				url: "/svc/session",
+				url: "/svc/sessioninfo",
 				method: "GET",
 				dataType: "json",
 				success: onLoadSession,
@@ -149,7 +160,7 @@
 			<div class="polaroid">
 				<img id="userPicture" class="polaroid" src="../empty_profile.png" alt="Profile Picture"/>
 				<div class="container">
-					<p>Profile Picture</p>
+					<p id="imageCaption">Profile Picture</p>
 				</div>
 			</div>
 			<form class="polaroid">

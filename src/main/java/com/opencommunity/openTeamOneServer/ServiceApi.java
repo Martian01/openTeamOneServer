@@ -42,7 +42,7 @@ public class ServiceApi {
 
 	/* AJAX Services (with JSON responses) */
 
-	@RequestMapping(method = RequestMethod.GET, value = "/session")
+	@RequestMapping(method = RequestMethod.GET, value = "/sessioninfo")
 	public ResponseEntity<String>svcSession(HttpServletRequest request) throws JSONException {
 		String sessionId = Util.getSessionId(request);
 		Session session = sessionId == null ? null : Session.getSession(sessionId);
@@ -649,6 +649,68 @@ public class ServiceApi {
 		symbolicFileRepository.save(symbolicFile);
 		//
 		return Util.httpResponse(symbolicFile.toJson(), HttpStatus.CREATED);
+	}
+
+	/* CRUD Services for Session */
+
+	@RequestMapping(method = RequestMethod.GET, value = "/sessions")
+	public ResponseEntity<String> sessionsGet(HttpServletRequest request) throws Exception {
+		Session session = Util.getSession(request);
+		User user = Util.getSessionAdmin(session, userRepository);
+		if (user == null)
+			return Util.httpUnauthorizedResponse;
+		//
+		return Util.httpOkResponse(Session.toJsonArray());
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/session/{sessionId}")
+	public ResponseEntity<String> sessionGet(HttpServletRequest request, @PathVariable String sessionId) throws Exception {
+		Session session = Util.getSession(request);
+		User user = Util.getSessionAdmin(session, userRepository);
+		if (user == null)
+			return Util.httpUnauthorizedResponse;
+		//
+		Session targetSession = sessionId == null ? null : Session.findSession(sessionId);
+		if (targetSession == null)
+			return Util.httpNotFoundResponse;
+		//
+		return Util.httpOkResponse(targetSession.toJson());
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, value = "/session/{sessionId}")
+	public ResponseEntity<String> sessionDelete(HttpServletRequest request, @PathVariable String sessionId) throws Exception {
+		Session session = Util.getSession(request);
+		User user = Util.getSessionAdmin(session, userRepository);
+		if (user == null)
+			return Util.httpUnauthorizedResponse;
+		//
+		Session targetSession = sessionId == null ? null : Session.findSession(sessionId);
+		if (targetSession == null)
+			return Util.httpGoneResponse;
+		// it is not allowed to delete the logon session
+		if (sessionId.equals(session.sessionId))
+			return Util.httpForbiddenResponse;
+		Session.invalidateSession(sessionId);
+		//
+		return Util.httpOkResponse;
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/session")
+	public ResponseEntity<String> sessionPost(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
+		Session session = Util.getSession(request);
+		User user = Util.getSessionAdmin(session, userRepository);
+		if (user == null)
+			return Util.httpUnauthorizedResponse;
+		//
+		if (requestBody == null)
+			return Util.httpBadRequestResponse;
+		Session targetSession = new Session(new JSONObject(requestBody));
+		// it is not allowed to modify the logon session
+		if (targetSession.sessionId.equals(session.sessionId))
+			return Util.httpForbiddenResponse;
+		Session.updateSession(targetSession);
+		//
+		return Util.httpResponse(targetSession.toJson(), HttpStatus.CREATED);
 	}
 
 	/* User Self Service */

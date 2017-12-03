@@ -124,7 +124,7 @@
 		}
 		function loadSession() {
 			$.ajax({
-				url: "/svc/session",
+				url: "/svc/sessioninfo",
 				method: "GET",
 				dataType: "json",
 				success: onLoadSession,
@@ -138,20 +138,20 @@
 		<div id="dialog" title="Message Dialog">
 			<form id="form">
 				<label for="messageId">Message Id:</label><br/>
-				<input id="messageId" type="text" size="32" readonly disabled name="messageId"/><br/><br/>
+				<input id="messageId" type="text" size="36" readonly disabled name="messageId"/><br/><br/>
 				<label for="clientMessageId">Client Message Id:</label><br/>
-				<input id="clientMessageId" type="text" size="32" name="clientMessageId"/><br/><br/>
+				<input id="clientMessageId" type="text" size="36" name="clientMessageId"/><br/><br/>
 				<label for="roomId">Room Id:</label><br/>
-				<input id="roomId" type="text" size="32" name="roomId"/><br/><br/>
+				<input id="roomId" type="text" size="36" name="roomId"/><br/><br/>
 				<label for="senderPersonId">Sender Id:</label><br/>
-				<input id="senderPersonId" type="text" size="32" name="senderPersonId"/><br/><br/>
-				<label for="postedAt">Posted at:</label><br/>
-				<input id="postedAt" type="text" size="32" name="changedAt"/>&nbsp;<input id="_postedAt" type="button" value="Now"/><br/><br/>
+				<input id="senderPersonId" type="text" size="36" name="senderPersonId"/><br/><br/>
 				<label for="text">Text:</label><br/>
 				<textarea id="text" name="text" cols="40" rows="5" wrap="soft"></textarea><br/><br/>
-				<input id="isDeleted" type="checkbox" name="isDeleted"/>&nbsp;is deleted<br/><br/>
+				<label for="postedAt">Posted at:</label><br/>
+				<input id="postedAt" type="text" name="changedAt"/>&nbsp;<input id="_postedAt" type="button" value="Now"/><br/><br/>
 				<label for="updatedAt">Updated at:</label><br/>
-				<input id="updatedAt" type="text" size="32" name="updatedAt"/>&nbsp;<input id="_updatedAt" type="button" value="Now"/><br/><br/>
+				<input id="updatedAt" type="text" name="updatedAt"/>&nbsp;<input id="_updatedAt" type="button" value="Now"/><br/><br/>
+				<input id="isDeleted" type="checkbox" name="isDeleted"/>&nbsp;is deleted<br/><br/>
 			</form>
 		</div>
 	</div>
@@ -185,6 +185,7 @@
 		<a href="confirmations.html">Viewed Confirmations</a><br/>
 		<a href="subscriptions.html">Subscriptions</a><br/>
 		<a href="files.html">Files</a><br/>
+		<a href="sessions.html">Sessions</a><br/>
 	</div>
 	<br/>
 	<script>

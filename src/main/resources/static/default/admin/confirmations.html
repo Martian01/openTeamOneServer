@@ -80,7 +80,7 @@
 			dialog.dialog({
 				autoOpen: false,
 				  height: 500,
-				  width: 500,
+				  width: 400,
 				  modal: true,
 				  buttons: {
 					Delete: deleteConfirmation.bind(null, table, dialog),
@@ -119,7 +119,7 @@
 		}
 		function loadSession() {
 			$.ajax({
-				url: "/svc/session",
+				url: "/svc/sessioninfo",
 				method: "GET",
 				dataType: "json",
 				success: onLoadSession,
@@ -133,15 +133,15 @@
 		<div id="dialog" title="Viewed Confirmation Dialog">
 			<form id="form">
 				<label for="messageId">Message Id:</label><br/>
-				<input id="messageId" type="text" size="32" name="messageId"/><br/><br/>
+				<input id="messageId" type="text" size="36" name="messageId"/><br/><br/>
 				<label for="personId">Person Id:</label><br/>
-				<input id="personId" type="text" size="32" name="personId"/><br/><br/>
+				<input id="personId" type="text" size="36" name="personId"/><br/><br/>
 				<label for="roomId">Room Id:</label><br/>
-				<input id="roomId" type="text" size="32" name="roomId"/><br/><br/>
+				<input id="roomId" type="text" size="36" name="roomId"/><br/><br/>
 				<label for="messagePostedAt">Posted at:</label><br/>
-				<input id="messagePostedAt" type="text" size="32" name="messagePostedAt"/>&nbsp;<input id="_messagePostedAt" type="button" value="Now"/><br/><br/>
+				<input id="messagePostedAt" type="text" name="messagePostedAt"/>&nbsp;<input id="_messagePostedAt" type="button" value="Now"/><br/><br/>
 				<label for="confirmedAt">Confirmed at:</label><br/>
-				<input id="confirmedAt" type="text" size="32" name="confirmedAt"/>&nbsp;<input id="_confirmedAt" type="button" value="Now"/><br/><br/>
+				<input id="confirmedAt" type="text" name="confirmedAt"/>&nbsp;<input id="_confirmedAt" type="button" value="Now"/><br/><br/>
 			</form>
 		</div>
 	</div>
@@ -172,6 +172,7 @@
 		<a href="confirmations.html">Viewed Confirmations</a><br/>
 		<a href="subscriptions.html">Subscriptions</a><br/>
 		<a href="files.html">Files</a><br/>
+		<a href="sessions.html">Sessions</a><br/>
 	</div>
 	<br/>
 	<script>
