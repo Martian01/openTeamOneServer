@@ -44,7 +44,7 @@ public class ServiceUiApi {
 		}
 		//
 		return ResponseEntity.status(HttpStatus.SEE_OTHER)
-				.header("Location", forward == null ? Util.getDefaultTarget(tenantParameterRepository, session == null ? null : user) : forward)
+				.header("Location", forward == null ? Util.getDefaultTarget(request, tenantParameterRepository, session == null ? null : user) : forward)
 				.header("Set-Cookie", Util.getSessionCookie(session == null ? null : session.sessionId))
 				.contentType(MediaType.TEXT_PLAIN)
 				.body(null);
@@ -60,7 +60,7 @@ public class ServiceUiApi {
 			Session.invalidateSession(sessionId);
 		//
 		return ResponseEntity.status(HttpStatus.SEE_OTHER)
-				.header("Location", forward == null ? Util.getDefaultTarget(tenantParameterRepository, null) : forward)
+				.header("Location", forward == null ? Util.getDefaultTarget(request, tenantParameterRepository, null) : forward)
 				.header("Set-Cookie", Util.getSessionCookie(null))
 				.contentType(MediaType.TEXT_PLAIN)
 				.body(null);
@@ -85,7 +85,7 @@ public class ServiceUiApi {
 		String stringContent = jsonContent.toString();
 		Util.writeFile(stringContent.getBytes("UTF-8"), file);
 		//
-		return Util.httpForwardResponse(tenantParameterRepository, user, forward);
+		return Util.httpForwardResponse(request, tenantParameterRepository, user, forward);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/snapshot/load")
@@ -110,7 +110,7 @@ public class ServiceUiApi {
 		JSONObject jsonContent = new JSONObject(stringContent);
 		ContentService.importFromJson(jsonContent, true, includeConfiguration, user.userId);
 		//
-		return Util.httpForwardResponse(tenantParameterRepository, user, forward);
+		return Util.httpForwardResponse(request, tenantParameterRepository, user, forward);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/tenant/parameter")
@@ -129,7 +129,7 @@ public class ServiceUiApi {
 		TenantParameter tp = new TenantParameter(key, value);
 		tenantParameterRepository.save(tp);
 		//
-		return Util.httpForwardResponse(tenantParameterRepository, user, forward);
+		return Util.httpForwardResponse(request, tenantParameterRepository, user, forward);
 	}
 
 }

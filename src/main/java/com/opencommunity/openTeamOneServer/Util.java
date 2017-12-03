@@ -14,6 +14,8 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Util {
 
@@ -109,6 +111,14 @@ public class Util {
 		return sessionId == null ? null : Session.getSession(sessionId);
 	}
 
+	private static final Pattern serverUrlPattern = Pattern.compile("^(\\w+://[^/]+)");
+
+	public static String getServerUrl(HttpServletRequest request) {
+		String requestUrl = request.getRequestURL().toString();
+		Matcher m = serverUrlPattern.matcher(requestUrl);
+		return m.find() ? m.group(1) : "";
+	}
+
 	public static User getSessionUser(Session session, UserRepository userRepository) {
 		return session == null ? null : userRepository.findOne(session.userId);
 	}
@@ -134,11 +144,6 @@ public class Util {
 			.body(null);
 
 	public static ResponseEntity<String> httpForbiddenResponse = ResponseEntity.status(HttpStatus.FORBIDDEN)
-			.contentType(MediaType.TEXT_PLAIN)
-			.body(null);
-
-	public static ResponseEntity<String> httpRelogResponse = ResponseEntity.status(HttpStatus.SEE_OTHER)
-			.header("Location", "/sap/hana/xs/formLogin/login.html") // in theory a forwarding URI should be absolute...
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
@@ -190,19 +195,24 @@ public class Util {
 				.body(body.toString());
 	}
 
-	public static ResponseEntity<String> httpUnauthorizedResponse(Session session) {
-		return session != null && session.iosMode ? httpRelogResponse : httpUnauthorizedResponse;
+	public static ResponseEntity<String> httpStaleSessionResponse(HttpServletRequest request) {
+		if (Session.iosMode(getSessionId(request)))
+			return ResponseEntity.status(HttpStatus.SEE_OTHER)
+				.header("Location", getServerUrl(request) + "/sap/hana/xs/formLogin/login.html")
+				.contentType(MediaType.TEXT_PLAIN)
+				.body(null);
+		return httpUnauthorizedResponse;
 	}
 
-	public static String getDefaultTarget(TenantParameterRepository tpr, User user) {
+	public static String getDefaultTarget(HttpServletRequest request, TenantParameterRepository tpr, User user) {
 		String parameter = user == null ? "startPageNoLogon" : (user.hasAdminRole ? "startPageAdmin" : (user.hasUserRole ? "startPageUser" : "startPageLogon"));
 		TenantParameter tp = tpr.findOne(parameter);
-		return tp == null ? "/default/index.html" : tp.value; // in theory a forwarding URI should be absolute...
+		return getServerUrl(request) + (tp == null ? "/default/index.html" : tp.value);
 	}
 
-	public static ResponseEntity<String> httpForwardResponse(TenantParameterRepository tpr, User user, String targetUri) {
+	public static ResponseEntity<String> httpForwardResponse(HttpServletRequest request, TenantParameterRepository tpr, User user, String targetUri) {
 		if (targetUri == null)
-			targetUri = getDefaultTarget(tpr, user);
+			targetUri = getDefaultTarget(request, tpr, user);
 		return ResponseEntity.status(HttpStatus.SEE_OTHER)
 				.header("Location", targetUri)
 				.contentType(MediaType.TEXT_PLAIN)

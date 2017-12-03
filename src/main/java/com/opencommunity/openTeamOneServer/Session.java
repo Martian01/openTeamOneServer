@@ -13,14 +13,14 @@ public class Session {
 	public String userId;
 	public long startTime;
 	public long lastAccessTime;
-	public boolean iosMode;
 
 	public Session(String userId, boolean iosMode) {
 		sessionId = Util.getUuid();
+		if (iosMode)
+			sessionId += IOS_MARKER;
 		this.userId = userId;
 		startTime = System.currentTimeMillis();
 		lastAccessTime = startTime;
-		this.iosMode = iosMode;
 	}
 
 	public JSONObject toJson() throws JSONException {
@@ -29,7 +29,6 @@ public class Session {
 		item.put("userId", userId);
 		item.put("startTime", JsonUtil.toIsoDate(startTime));
 		item.put("lastAccessTime", JsonUtil.toIsoDate(lastAccessTime));
-		item.put("iosMode", iosMode);
 		return item;
 	}
 
@@ -40,6 +39,16 @@ public class Session {
 			output += toJson().toString();
 		} catch (JSONException e) { }
 		return output;
+	}
+
+	private static final String IOS_MARKER = "~";
+
+	public static boolean iosMode(String sessionId) {
+		return sessionId != null && sessionId.endsWith(IOS_MARKER);
+	}
+
+	public boolean iosMode() {
+		return iosMode(sessionId);
 	}
 
 	private static final long sessionMaximumAge = 1800000L;
@@ -73,15 +82,6 @@ public class Session {
 	public static void invalidateSession(@NotNull String sessionId) {
 		synchronized (currentSessions) {
 			currentSessions.remove(sessionId);
-		}
-	}
-
-	public static void invalidateOldSessions() {
-		synchronized (currentSessions) {
-			long now = System.currentTimeMillis();
-			for (Session session : currentSessions.values())
-				if (now - session.lastAccessTime > sessionMaximumAge)
-					currentSessions.remove(session.sessionId);
 		}
 	}
 

@@ -24,7 +24,7 @@ public class RootApi {
 		Session session = Util.getSession(request);
 		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse(session);
+			return Util.httpStaleSessionResponse(request);
 		//
 		JSONObject teamOneAndroid = new JSONObject();
 		teamOneAndroid.put("required", 360);
@@ -45,7 +45,7 @@ public class RootApi {
 	public ResponseEntity<String> root(HttpServletRequest request) {
 		Session session = Util.getSession(request);
 		User user = Util.getSessionUser(session, userRepository);
-		return Util.httpForwardResponse(tenantParameterRepository, user, null);
+		return Util.httpForwardResponse(request, tenantParameterRepository, user, null);
 	}
 
 }

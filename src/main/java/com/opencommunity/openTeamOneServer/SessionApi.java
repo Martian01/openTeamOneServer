@@ -109,7 +109,7 @@ public class SessionApi {
 		body.put("pwdChange", false);
 		JsonUtil.put(body, "username", session.userId);
 		//
-		return session.iosMode ?
+		return session.iosMode() ?
 				ResponseEntity.status(HttpStatus.OK)
 						.header("Set-Cookie", Util.getSessionCookie(session.sessionId))
 						.header("x-csrf-token", defaultCsrfToken) // iOS app wants lower case header

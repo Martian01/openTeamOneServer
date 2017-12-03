@@ -49,7 +49,7 @@ public class MessagingApi {
 		Session session = Util.getSession(request);
 		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse(session);
+			return Util.httpStaleSessionResponse(request);
 		//
 		if (input == null)
 			return Util.httpBadRequestResponse;
@@ -65,7 +65,7 @@ public class MessagingApi {
 		Session session = Util.getSession(request);
 		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse(session);
+			return Util.httpStaleSessionResponse(request);
 		//
 		if (input == null)
 			return Util.httpBadRequestResponse;
@@ -86,7 +86,7 @@ public class MessagingApi {
 		Session session = Util.getSession(request);
 		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse(session);
+			return Util.httpStaleSessionResponse(request);
 		//
 		JSONObject body = new JSONObject();
 		Person me = personRepository.findOne(user.personId);
@@ -111,7 +111,7 @@ public class MessagingApi {
 		Session session = Util.getSession(request);
 		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse(session);
+			return Util.httpStaleSessionResponse(request);
 		//
 		JSONObject body = new JSONObject();
 		Person person = personId == null ? null : personRepository.findOne(personId);
@@ -130,7 +130,7 @@ public class MessagingApi {
 		Session session = Util.getSession(request);
 		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse(session);
+			return Util.httpStaleSessionResponse(request);
 		//
 		JSONObject body = new JSONObject();
 		Set<String> contactIds = getContactIds();
@@ -153,7 +153,7 @@ public class MessagingApi {
 		Session session = Util.getSession(request);
 		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse(session);
+			return Util.httpStaleSessionResponse(request);
 		//
 		JSONObject body = new JSONObject();
 		Person person = contactId == null || !getContactIds().contains(contactId) ? null : personRepository.findOne(contactId);
@@ -172,7 +172,7 @@ public class MessagingApi {
 		Session session = Util.getSession(request);
 		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse(session);
+			return Util.httpStaleSessionResponse(request);
 		//
 		JSONObject body = new JSONObject();
 		Iterable<Room> rooms = roomRepository.findAll();
@@ -187,7 +187,7 @@ public class MessagingApi {
 		Session session = Util.getSession(request);
 		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse(session);
+			return Util.httpStaleSessionResponse(request);
 		//
 		if (!isRoomMember(roomId, user.personId))
 			return Util.httpForbiddenResponse;
@@ -204,7 +204,7 @@ public class MessagingApi {
 		Session session = Util.getSession(request);
 		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse(session);
+			return Util.httpStaleSessionResponse(request);
 		//
 		if (!isRoomMember(roomId, user.personId))
 			return Util.httpForbiddenResponse;
@@ -234,7 +234,7 @@ public class MessagingApi {
 		Session session = Util.getSession(request);
 		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse(session);
+			return Util.httpStaleSessionResponse(request);
 		//
 		if (!isRoomMember(roomId, user.personId))
 			return Util.httpForbiddenResponse;
@@ -260,7 +260,7 @@ public class MessagingApi {
 		Session session = Util.getSession(multipartRequest);
 		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse(session);
+			return Util.httpStaleSessionResponse(multipartRequest);
 		//
 		if (!isRoomMember(roomId, user.personId))
 			return Util.httpForbiddenResponse;
@@ -316,7 +316,7 @@ public class MessagingApi {
 		Session session = Util.getSession(request);
 		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse(session);
+			return Util.httpStaleSessionResponse(request);
 		//
 		if (!isRoomMember(roomId, user.personId))
 			return Util.httpForbiddenResponse;
@@ -350,7 +350,7 @@ public class MessagingApi {
 		Session session = Util.getSession(request);
 		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse(session);
+			return Util.httpStaleSessionResponse(request);
 		//
 		Message message = messageId == null ? null : messageRepository.findOne(messageId);
 		if (message == null)
@@ -370,7 +370,7 @@ public class MessagingApi {
 		Session session = Util.getSession(request);
 		User user = Util.getSessionContact(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse(session);
+			return Util.httpStaleSessionResponse(request);
 		//
 		Message message = messageId == null ? null : messageRepository.findOne(messageId);
 		if (message == null)
