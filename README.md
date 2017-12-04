@@ -128,7 +128,9 @@ Finally we add the following properties to the application.properties file. In f
 
 Restart Open Team One Server and you're done. If you want to migrate the content over to the new DB, save and import a snapshot via the admin tools. 
 
-## Deploying a JAR file
+## Server Deployment
+
+There is a number of options for the deployment of SpringBoot applications. Read about them in the blog article [Deploying Spring Boot Applications](https://spring.io/blog/2014/03/07/deploying-spring-boot-applications).
 
 One of the most simple deployment options is to build a JAR file that can be executed anywhere. You simply call the Maven wrapper in the project root directory like this:
 
