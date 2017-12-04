@@ -113,6 +113,7 @@ public class Session {
 	@NotNull
 	public static Session newSession(@NotNull String userId, boolean iosMode) {
 		synchronized (currentSessions) {
+			invalidateOldSessions(); // bit of housekeeping
 			Session session = new Session(userId, iosMode);
 			currentSessions.put(session.sessionId, session);
 			return session;
@@ -129,6 +130,15 @@ public class Session {
 		synchronized (currentSessions) {
 			currentSessions.remove(sessionId);
 		}
+	}
+
+	private static void invalidateOldSessions() {
+		//synchronized (currentSessions) {
+			long now = System.currentTimeMillis();
+			for (Session session : currentSessions.values())
+				if (now - session.lastAccessTime > sessionMaximumAge)
+					currentSessions.remove(session.sessionId);
+		//}
 	}
 
 }
