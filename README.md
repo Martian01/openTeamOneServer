@@ -117,7 +117,7 @@ Next you need to add the JDBC database driver to the project. We have already ad
 
 So, for MariaDB or MySQL you don't need to do anything. If you use a different SQL database, you'll have to add the corresponding driver.
 
-Finally we add the following properties to the application.properties file. In fact, you just need to uncomment them and insert the correct names and passwords, and maybe the TCP port of the database server.
+Finally we add the following properties to the _application.properties_ file. In fact, you just need to uncomment them and insert the correct names and passwords, and maybe the TCP port of the database server.
 
 	spring.jpa.hibernate.ddl-auto=update
 	spring.datasource.driver-class-name=com.mysql.jdbc.Driver
@@ -152,6 +152,31 @@ I was able to run and deploy the jar file on a virtual server on the internet. T
 	apt-get install openjdk-8-jre-headless
 
 Afterwards the system took up 1.2 GB on disk. The system used up 600 MB in RAM for the demo content. CPU load was not measurable under demo conditions. At this stage there is no experience how the server scales under heavy load.
+
+## SSL Configuration
+
+Sadly SSL configuration in Java is not as easy as it could be. However, Spring Boot offers a fairly easy approach if your requirements are simple. For more advanced requirements you are welcome to search the internet. The guide I found most helpful for the setup is [DZone: Spring Boot Secured By Let's Encrypt ](https://dzone.com/articles/spring-boot-secured-by-lets-encrypt).
+
+First of all you need a certificate confirming your domain. For test purposes you can sign your own certificate using the java helper called _keytool_. For productive use, however, you need a certificate signed by a CA (Certificate Authority) that is trusted by major web browsers. Some CAs charge money. However, there are free alternatives, like [Let's Encrypt](https://letsencrypt.org/getting-started/). Following the guide about [Debian](https://certbot.eff.org/#debianstretch-other) I basically did this:
+
+	apt-get install certbot
+	certbot certonly --standalone -d <your domain>
+
+This will generate a bunch of keys and certificates in _/etc/letsencrypt/_. Next you need to convert those files into a keystore that Tomcat (the web server embedded in the Spring Boot JAR file) actually understands:
+
+	cd /etc/letsencrypt/live/<your domain>/
+	openssl pkcs12 -export -in fullchain.pem -inkey privkey.pem -out keystore.p12 -name <your alias> -CAfile chain.pem -caname root
+
+You will be asked to set a password. Finally, you enter your details in the _application.properties_ file:
+
+	server.port=8443
+	security.require-ssl=true
+	server.ssl.key-store=/path/to/keystore.p12
+	server.ssl.key-store-password=yourKeyStorePassword
+	server.ssl.keyStoreType=PKCS12
+	server.ssl.keyAlias=yourAlias
+
+After restarting the server you can access it via HTTPS. If you need both HTTP and HTTPS access at the same time, configuration is a little harder. Check out the web tutorials for that.
 
 ## Web Application
 
