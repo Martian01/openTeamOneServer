@@ -27,7 +27,7 @@ public class RootApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/sap/sports/pe/api/messaging/versions")
 	public ResponseEntity<String> versions(HttpServletRequest request) throws JSONException {
 		Session session = Util.getSession(request);
-		User user = Util.getSessionContact(session, userRepository);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//

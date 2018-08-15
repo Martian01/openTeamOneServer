@@ -51,7 +51,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/device/subscription")
 	public ResponseEntity<String> deviceSubscription(HttpServletRequest request, @RequestBody String input) throws JSONException {
 		Session session = Util.getSession(request);
-		User user = Util.getSessionContact(session, userRepository);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//
@@ -67,7 +67,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/device/subscription")
 	public ResponseEntity<String> deviceSubscriptionDelete(HttpServletRequest request, @RequestBody String input) throws JSONException {
 		Session session = Util.getSession(request);
-		User user = Util.getSessionContact(session, userRepository);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//
@@ -88,7 +88,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/me")
 	public ResponseEntity<String> me(HttpServletRequest request) throws JSONException {
 		Session session = Util.getSession(request);
-		User user = Util.getSessionContact(session, userRepository);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//
@@ -113,7 +113,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/person/{personId}")
 	public ResponseEntity<String> person(HttpServletRequest request, @PathVariable String personId) throws JSONException {
 		Session session = Util.getSession(request);
-		User user = Util.getSessionContact(session, userRepository);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//
@@ -132,7 +132,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/contacts")
 	public ResponseEntity<String> contacts(HttpServletRequest request) throws JSONException {
 		Session session = Util.getSession(request);
-		User user = Util.getSessionContact(session, userRepository);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//
@@ -155,7 +155,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/contact/{contactId}/roomId")
 	public ResponseEntity<String> contactRoomId(HttpServletRequest request, @PathVariable String contactId) throws JSONException {
 		Session session = Util.getSession(request);
-		User user = Util.getSessionContact(session, userRepository);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//
@@ -174,7 +174,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/rooms")
 	public ResponseEntity<String> rooms(HttpServletRequest request) throws JSONException {
 		Session session = Util.getSession(request);
-		User user = Util.getSessionContact(session, userRepository);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//
@@ -189,7 +189,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/members")
 	public ResponseEntity<String> roomMembers(HttpServletRequest request, @PathVariable String roomId) throws JSONException {
 		Session session = Util.getSession(request);
-		User user = Util.getSessionContact(session, userRepository);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//
@@ -206,7 +206,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/messagesSince")
 	public ResponseEntity<String> roomMessagesSince(HttpServletRequest request, @PathVariable String roomId, @RequestParam(required = false) Long since, @RequestParam(required = false) Long notBefore) throws JSONException {
 		Session session = Util.getSession(request);
-		User user = Util.getSessionContact(session, userRepository);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//
@@ -236,7 +236,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/messagesUntil")
 	public ResponseEntity<String> roomMessagesUntil(HttpServletRequest request, @PathVariable String roomId, @RequestParam(required = false) Integer count, @RequestParam(required = false) Long until) throws JSONException {
 		Session session = Util.getSession(request);
-		User user = Util.getSessionContact(session, userRepository);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//
@@ -262,7 +262,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/message")
 	public ResponseEntity<String> roomMessage(MultipartHttpServletRequest multipartRequest, @PathVariable String roomId) throws Exception {
 		Session session = Util.getSession(multipartRequest);
-		User user = Util.getSessionContact(session, userRepository);
+		User user = session == null ? Util.getBasicAuthContact(multipartRequest, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
 		if (user == null)
 			return Util.httpStaleSessionResponse(multipartRequest);
 		//
@@ -318,7 +318,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/viewedConfirmation")
 	public ResponseEntity<String> roomViewedConfirmation(HttpServletRequest request, @PathVariable String roomId, @RequestParam(required = false) Long until) throws JSONException {
 		Session session = Util.getSession(request);
-		User user = Util.getSessionContact(session, userRepository);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//
@@ -352,7 +352,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/message/{messageId}/confirmations")
 	public ResponseEntity<String> messageConfirmations(HttpServletRequest request, @PathVariable String messageId) throws JSONException {
 		Session session = Util.getSession(request);
-		User user = Util.getSessionContact(session, userRepository);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//
@@ -372,7 +372,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/message/{messageId}")
 	public ResponseEntity<String> messageDelete(HttpServletRequest request, @PathVariable String messageId) throws JSONException {
 		Session session = Util.getSession(request);
-		User user = Util.getSessionContact(session, userRepository);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//
