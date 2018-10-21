@@ -308,6 +308,10 @@ public class MessagingApi {
 		// save without lock by saving the dependent items first
 		symbolicFileRepository.saveAll(symbolicFiles);
 		messageRepository.save(message);
+		// policy: mark the new message as viewed for the sender
+		viewedConfirmationRepository.save(new ViewedConfirmation(message.messageId, message.senderPersonId, message.roomId, message.postedAt, message.postedAt));
+		// TODO: trigger a push notification if configured
+		//
 		// construct response
 		JSONObject body = new JSONObject();
 		JsonUtil.put(body, "message", messageToJson(message, user.personId, symbolicFiles));
