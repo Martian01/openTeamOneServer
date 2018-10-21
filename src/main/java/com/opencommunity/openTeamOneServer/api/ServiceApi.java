@@ -58,18 +58,18 @@ public class ServiceApi {
 			item.put("startTime", JsonUtil.toIsoDate(session.startTime));
 			item.put("lastAccessTime", JsonUtil.toIsoDate(session.lastAccessTime));
 			body.put("session", item);
-			User user = session.userId == null ? null : userRepository.findOne(session.userId);
+			User user = session.userId == null ? null : userRepository.findById(session.userId).orElse(null);
 			if (user != null) {
 				item = new JSONObject();
 				item.put("userId", user.userId);
 				item.put("hasAdminRole", user.hasAdminRole);
 				item.put("hasUserRole", user.hasUserRole);
 				body.put("user", item);
-				Person person = user.personId == null ? null : personRepository.findOne(user.personId);
+				Person person = user.personId == null ? null : personRepository.findById(user.personId).orElse(null);
 				if (person != null)
 					body.put("person", person.toJson());
 				if (user.hasAdminRole) {
-					TenantParameter tp = tenantParameterRepository.findOne("dataDirectory");
+					TenantParameter tp = tenantParameterRepository.findById("dataDirectory").orElse(null);
 					if (tp != null && tp.value != null)
 						body.put("dataDirectory", tp.value);
 				}
@@ -98,7 +98,7 @@ public class ServiceApi {
 		if (user == null)
 			return Util.httpUnauthorizedResponse;
 		//
-		TenantParameter parameter = parameterId == null ? null : tenantParameterRepository.findOne(parameterId);
+		TenantParameter parameter = parameterId == null ? null : tenantParameterRepository.findById(parameterId).orElse(null);
 		if (parameter == null)
 			return Util.httpNotFoundResponse;
 		//
@@ -112,7 +112,7 @@ public class ServiceApi {
 		if (user == null)
 			return Util.httpUnauthorizedResponse;
 		//
-		TenantParameter parameter = parameterId == null ? null : tenantParameterRepository.findOne(parameterId);
+		TenantParameter parameter = parameterId == null ? null : tenantParameterRepository.findById(parameterId).orElse(null);
 		if (parameter == null)
 			return Util.httpGoneResponse;
 		tenantParameterRepository.delete(parameter);
@@ -154,7 +154,7 @@ public class ServiceApi {
 		if (user == null)
 			return Util.httpUnauthorizedResponse;
 		//
-		User targetUser = userId == null ? null : userRepository.findOne(userId);
+		User targetUser = userId == null ? null : userRepository.findById(userId).orElse(null);
 		if (targetUser == null)
 			return Util.httpNotFoundResponse;
 		//
@@ -168,7 +168,7 @@ public class ServiceApi {
 		if (user == null)
 			return Util.httpUnauthorizedResponse;
 		//
-		User targetUser = userId == null ? null : userRepository.findOne(userId);
+		User targetUser = userId == null ? null : userRepository.findById(userId).orElse(null);
 		if (targetUser == null)
 			return Util.httpGoneResponse;
 		// it is not allowed to delete the logon user
@@ -194,7 +194,7 @@ public class ServiceApi {
 			return Util.httpForbiddenResponse;
 		// if password was not provided, try and re-use existing password
 		if (targetUser.passwordHash == null) {
-			User oldUser = userRepository.findOne(targetUser.userId);
+			User oldUser = userRepository.findById(targetUser.userId).orElse(null);
 			if (oldUser != null)
 				targetUser.passwordHash = oldUser.passwordHash;
 		}
@@ -222,7 +222,7 @@ public class ServiceApi {
 		if (user == null)
 			return Util.httpUnauthorizedResponse;
 		//
-		Person person = personId == null ? null : personRepository.findOne(personId);
+		Person person = personId == null ? null : personRepository.findById(personId).orElse(null);
 		if (person == null)
 			return Util.httpNotFoundResponse;
 		//
@@ -236,7 +236,7 @@ public class ServiceApi {
 		if (user == null)
 			return Util.httpUnauthorizedResponse;
 		//
-		Person person = personId == null ? null : personRepository.findOne(personId);
+		Person person = personId == null ? null : personRepository.findById(personId).orElse(null);
 		if (person == null)
 			return Util.httpGoneResponse;
 		personRepository.delete(person);
@@ -278,7 +278,7 @@ public class ServiceApi {
 		if (user == null)
 			return Util.httpUnauthorizedResponse;
 		//
-		Room room = roomId == null ? null : roomRepository.findOne(roomId);
+		Room room = roomId == null ? null : roomRepository.findById(roomId).orElse(null);
 		if (room == null)
 			return Util.httpNotFoundResponse;
 		//
@@ -292,7 +292,7 @@ public class ServiceApi {
 		if (user == null)
 			return Util.httpUnauthorizedResponse;
 		//
-		Room room = roomId == null ? null : roomRepository.findOne(roomId);
+		Room room = roomId == null ? null : roomRepository.findById(roomId).orElse(null);
 		if (room == null)
 			return Util.httpGoneResponse;
 		roomRepository.delete(room);
@@ -392,7 +392,7 @@ public class ServiceApi {
 		if (user == null)
 			return Util.httpUnauthorizedResponse;
 		//
-		Message message = messageId == null ? null : messageRepository.findOne(messageId);
+		Message message = messageId == null ? null : messageRepository.findById(messageId).orElse(null);
 		if (message == null)
 			return Util.httpNotFoundResponse;
 		//
@@ -406,7 +406,7 @@ public class ServiceApi {
 		if (user == null)
 			return Util.httpUnauthorizedResponse;
 		//
-		Message message = messageId == null ? null : messageRepository.findOne(messageId);
+		Message message = messageId == null ? null : messageRepository.findById(messageId).orElse(null);
 		if (message == null)
 			return Util.httpGoneResponse;
 		messageRepository.delete(message);
@@ -566,7 +566,7 @@ public class ServiceApi {
 		if (user == null)
 			return Util.httpUnauthorizedResponse;
 		//
-		SymbolicFile symbolicFile = fileId == null ? null : symbolicFileRepository.findOne(fileId);
+		SymbolicFile symbolicFile = fileId == null ? null : symbolicFileRepository.findById(fileId).orElse(null);
 		if (symbolicFile == null)
 			return Util.httpNotFoundResponse;
 		//
@@ -580,7 +580,7 @@ public class ServiceApi {
 		if (user == null)
 			return Util.httpUnauthorizedResourceResponse;
 		//
-		SymbolicFile symbolicFile = symbolicFileRepository.findOne(fileId);
+		SymbolicFile symbolicFile = symbolicFileRepository.findById(fileId).orElse(null);
 		if (symbolicFile == null)
 			return Util.httpNotFoundResourceResponse;
 		File file = Util.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
@@ -600,7 +600,7 @@ public class ServiceApi {
 		if (user == null)
 			return Util.httpUnauthorizedResponse;
 		//
-		SymbolicFile symbolicFile = fileId == null ? null : symbolicFileRepository.findOne(fileId);
+		SymbolicFile symbolicFile = fileId == null ? null : symbolicFileRepository.findById(fileId).orElse(null);
 		if (symbolicFile == null)
 			return Util.httpGoneResponse;
 		if (deleteFileContent(symbolicFile) == null)
@@ -732,7 +732,7 @@ public class ServiceApi {
 			user.personId = person.personId = Util.getUuid();
 			userRepository.save(user);
 		} else {
-			person = personRepository.findOne(user.personId);
+			person = personRepository.findById(user.personId).orElse(null);
 			if (person == null)
 				return Util.httpInternalErrorResponse;
 		}
@@ -748,11 +748,11 @@ public class ServiceApi {
 			return Util.httpBadRequestResponse;
 		// delete old content and old symbolic file
 		if (person.pictureId != null) {
-			SymbolicFile oldSymbolicFile = symbolicFileRepository.findOne(person.pictureId);
+			SymbolicFile oldSymbolicFile = symbolicFileRepository.findById(person.pictureId).orElse(null);
 			File file = deleteFileContent(oldSymbolicFile);
 			if (file == null)
 				return Util.httpInternalErrorResponse;
-			symbolicFileRepository.delete(oldSymbolicFile.fileId);
+			symbolicFileRepository.deleteById(oldSymbolicFile.fileId);
 		}
 		// save byte stream under new fileId
 		SymbolicFile symbolicFile = new SymbolicFile(null, mimeType, null, null, 0, SymbolicFile.DIRECTORY_PROFILES);
@@ -788,7 +788,7 @@ public class ServiceApi {
 		} else {
 			if (!user.personId.equals(person.personId))
 				return Util.httpForbiddenResponse;
-			Person oldPerson = personRepository.findOne(user.personId);
+			Person oldPerson = personRepository.findById(user.personId).orElse(null);
 			if (oldPerson == null)
 				return Util.httpInternalErrorResponse;
 			if (!Util.equal(oldPerson.pictureId, person.pictureId))

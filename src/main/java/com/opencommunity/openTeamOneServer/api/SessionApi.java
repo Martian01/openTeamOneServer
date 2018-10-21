@@ -53,11 +53,11 @@ public class SessionApi {
 		if (userId == null || password == null)
 			return Util.httpForbiddenSessionResponse;
 		userId = userId.toLowerCase();
-		User user = userRepository.findOne(userId);
+		User user = userRepository.findById(userId).orElse(null);
 		if (user == null)
 			return Util.httpForbiddenSessionResponse;
 		if (user.hasUserRole && user.personId != null) {
-			Person person = personRepository.findOne(user.personId);
+			Person person = personRepository.findById(user.personId).orElse(null);
 			if (person != null && user.matches(password))
 				session = Session.newSession(userId, request.getHeader("X-CSRF-TOKEN") != null);
 		}
@@ -74,7 +74,7 @@ public class SessionApi {
 		if (userId == null || passwordNew == null)
 			return Util.httpForbiddenSessionResponse;
 		userId = userId.toLowerCase();
-		User user = userRepository.findOne(userId);
+		User user = userRepository.findById(userId).orElse(null);
 		if (user == null)
 			return Util.httpForbiddenSessionResponse;
 		boolean passwordOldConfirmed = false;
@@ -83,7 +83,7 @@ public class SessionApi {
 			if (oldSessionId != null) {
 				Session oldSession = Session.getSession(oldSessionId);
 				if (oldSession != null) {
-					User oldSessionUser = userRepository.findOne(oldSession.userId);
+					User oldSessionUser = userRepository.findById(oldSession.userId).orElse(null);
 					if (oldSessionUser != null)
 						passwordOldConfirmed = userId.equals(oldSession.userId);
 				}

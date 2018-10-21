@@ -55,7 +55,7 @@ public class MediaApi {
 		if (user == null)
 			return Util.httpUnauthorizedResourceResponse;
 		//
-		SymbolicFile symbolicFile = symbolicFileRepository.findOne(fileId);
+		SymbolicFile symbolicFile = symbolicFileRepository.findById(fileId).orElse(null);
 		if (symbolicFile == null)
 			return Util.httpNotFoundResourceResponse;
 		File file = Util.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);

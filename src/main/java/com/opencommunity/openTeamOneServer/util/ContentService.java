@@ -67,19 +67,19 @@ public class ContentService {
 
 	@PostConstruct
 	private void init() {
-		if (tpr.findOne("name") == null)
+		if (!tpr.findById("name").isPresent())
 			tpr.save(new TenantParameter("name", "OpenTeamOne"));
-		if (tpr.findOne("pictureId") == null)
+		if (!tpr.findById("pictureId").isPresent())
 			tpr.save(new TenantParameter("pictureId", "tenant"));
-		if (tpr.findOne("startPageNoLogon") == null)
+		if (!tpr.findById("startPageNoLogon").isPresent())
 			tpr.save(new TenantParameter("startPageNoLogon", "/default/index.html"));
-		if (tpr.findOne("startPageLogon") == null)
+		if (!tpr.findById("startPageLogon").isPresent())
 			tpr.save(new TenantParameter("startPageLogon", "/default/index.html"));
-		if (tpr.findOne("startPageAdmin") == null)
+		if (!tpr.findById("startPageAdmin").isPresent())
 			tpr.save(new TenantParameter("startPageAdmin", "/default/admin/index.html"));
-		if (tpr.findOne("startPageUser") == null)
+		if (!tpr.findById("startPageUser").isPresent())
 			tpr.save(new TenantParameter("startPageUser", "/default/user/index.html"));
-		if (tpr.findOne("dataDirectory") == null)
+		if (!tpr.findById("dataDirectory").isPresent())
 			tpr.save(new TenantParameter("dataDirectory", "/tmp"));
 		//
 		if (ur.countByHasAdminRoleTrue() == 0)
@@ -120,14 +120,14 @@ public class ContentService {
 		if (item != null && includeConfiguration) {
 			if (delete)
 				tpr.deleteAll();
-			tpr.save(TenantParameter.fromJsonArray(item));
+			tpr.saveAll(TenantParameter.fromJsonArray(item));
 		}
 		item = JsonUtil.getJSONArray(jsonObject, "users");
 		if (item != null && protectedUserId != null) {
 			Iterable<User> users;
 			if (delete) {
 				users = includeConfiguration ? ur.findByUserIdNot(protectedUserId) : ur.findByHasAdminRoleFalseAndUserIdNot(protectedUserId);
-				ur.delete(users);
+				ur.deleteAll(users);
 			}
 			users = User.fromJsonArray(item);
 			Iterator<User> iterator = users.iterator();
@@ -136,49 +136,49 @@ public class ContentService {
 				if ((!includeConfiguration && user.hasAdminRole) || protectedUserId.equals(user.userId))
 					iterator.remove();
 			}
-			ur.save(users);
+			ur.saveAll(users);
 		}
 		item = JsonUtil.getJSONArray(jsonObject, "persons");
 		if (item != null) {
 			if (delete)
 				pr.deleteAll();
-			pr.save(Person.fromJsonArray(item));
+			pr.saveAll(Person.fromJsonArray(item));
 		}
 		item = JsonUtil.getJSONArray(jsonObject, "rooms");
 		if (item != null) {
 			if (delete)
 				rr.deleteAll();
-			rr.save(Room.fromJsonArray(item));
+			rr.saveAll(Room.fromJsonArray(item));
 		}
 		item = JsonUtil.getJSONArray(jsonObject, "roomMembers");
 		if (item != null) {
 			if (delete)
 				rmr.deleteAll();
-			rmr.save(RoomMember.fromJsonArray(item));
+			rmr.saveAll(RoomMember.fromJsonArray(item));
 		}
 		item = JsonUtil.getJSONArray(jsonObject, "messages");
 		if (item != null) {
 			if (delete)
 				mr.deleteAll();
-			mr.save(Message.fromJsonArray(item));
+			mr.saveAll(Message.fromJsonArray(item));
 		}
 		item = JsonUtil.getJSONArray(jsonObject, "files");
 		if (item != null) {
 			if (delete)
 				sfr.deleteAll();
-			sfr.save(SymbolicFile.fromJsonArray(item));
+			sfr.saveAll(SymbolicFile.fromJsonArray(item));
 		}
 		item = JsonUtil.getJSONArray(jsonObject, "viewedConfirmations");
 		if (item != null) {
 			if (delete)
 				vcr.deleteAll();
-			vcr.save(ViewedConfirmation.fromJsonArray(item));
+			vcr.saveAll(ViewedConfirmation.fromJsonArray(item));
 		}
 		item = JsonUtil.getJSONArray(jsonObject, "subscriptions");
 		if (item != null) {
 			if (delete)
 				sr.deleteAll();
-			sr.save(Subscription.fromJsonArray(item));
+			sr.saveAll(Subscription.fromJsonArray(item));
 		}
 	}
 
@@ -186,7 +186,7 @@ public class ContentService {
 		if (includeConfiguration)
 			tpr.deleteAll();
 		if (protectedUserId != null)
-			ur.delete(includeConfiguration ? ur.findByUserIdNot(protectedUserId) : ur.findByHasAdminRoleFalseAndUserIdNot(protectedUserId));
+			ur.deleteAll(includeConfiguration ? ur.findByUserIdNot(protectedUserId) : ur.findByHasAdminRoleFalseAndUserIdNot(protectedUserId));
 		pr.deleteAll();
 		rr.deleteAll();
 		rmr.deleteAll();

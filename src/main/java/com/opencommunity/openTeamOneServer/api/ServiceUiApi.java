@@ -47,7 +47,7 @@ public class ServiceUiApi {
 		String forward = formData.get("forward");
 		if (userId != null) {
 			userId = userId.toLowerCase();
-			user = userRepository.findOne(userId);
+			user = userRepository.findById(userId).orElse(null);
 			if (user != null && user.matches(password))
 				session = Session.newSession(userId, false);
 		}

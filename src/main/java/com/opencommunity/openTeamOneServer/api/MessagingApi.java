@@ -93,11 +93,11 @@ public class MessagingApi {
 			return Util.httpStaleSessionResponse(request);
 		//
 		JSONObject body = new JSONObject();
-		Person me = personRepository.findOne(user.personId);
+		Person me = personRepository.findById(user.personId).orElse(null);
 		if (me != null)
 			body.put("loginPerson", personToJson(me));
-		TenantParameter tpName = tenantParameterRepository.findOne("name");
-		TenantParameter tpPictureId = tenantParameterRepository.findOne("pictureId");
+		TenantParameter tpName = tenantParameterRepository.findById("name").orElse(null);
+		TenantParameter tpPictureId = tenantParameterRepository.findById("pictureId").orElse(null);
 		if (tpName != null || tpPictureId != null) {
 			JSONObject tenant = new JSONObject();
 			if (tpName != null)
@@ -118,7 +118,7 @@ public class MessagingApi {
 			return Util.httpStaleSessionResponse(request);
 		//
 		JSONObject body = new JSONObject();
-		Person person = personId == null ? null : personRepository.findOne(personId);
+		Person person = personId == null ? null : personRepository.findById(personId).orElse(null);
 		if (person != null) {
 			JSONObject item = personToJson(person);
 			item.put("isContact", isContact(personId));
@@ -160,7 +160,7 @@ public class MessagingApi {
 			return Util.httpStaleSessionResponse(request);
 		//
 		JSONObject body = new JSONObject();
-		Person person = contactId == null || !getContactIds().contains(contactId) ? null : personRepository.findOne(contactId);
+		Person person = contactId == null || !getContactIds().contains(contactId) ? null : personRepository.findById(contactId).orElse(null);
 		if (person == null || person.personId.equals(user.personId))
 			return Util.httpNotFoundResponse;
 		String privateRoomId = getPrivateRoomId(contactId, user.personId);
@@ -306,7 +306,7 @@ public class MessagingApi {
 				symbolicFiles.add(new SymbolicFile(protoSymbolicFile.fileId, protoSymbolicFile.mimeType, protoSymbolicFile.text, protoMessage.messageId, i++, SymbolicFile.DIRECTORY_ATTACHMENTS));
 		}
 		// save without lock by saving the dependent items first
-		symbolicFileRepository.save(symbolicFiles);
+		symbolicFileRepository.saveAll(symbolicFiles);
 		messageRepository.save(message);
 		// construct response
 		JSONObject body = new JSONObject();
@@ -344,7 +344,7 @@ public class MessagingApi {
 		ArrayList<ViewedConfirmation> confirmations = new ArrayList<>();
 		for (Message message : messages)
 			confirmations.add(new ViewedConfirmation(message.messageId, user.personId, message.roomId, message.postedAt, now));
-		viewedConfirmationRepository.save(confirmations);
+		viewedConfirmationRepository.saveAll(confirmations);
 		//
 		return Util.httpOkResponse;
 	}
@@ -356,7 +356,7 @@ public class MessagingApi {
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//
-		Message message = messageId == null ? null : messageRepository.findOne(messageId);
+		Message message = messageId == null ? null : messageRepository.findById(messageId).orElse(null);
 		if (message == null)
 			return Util.httpNotFoundResponse;
 		if (!user.personId.equals(message.senderPersonId))
@@ -376,7 +376,7 @@ public class MessagingApi {
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//
-		Message message = messageId == null ? null : messageRepository.findOne(messageId);
+		Message message = messageId == null ? null : messageRepository.findById(messageId).orElse(null);
 		if (message == null)
 			return Util.httpGoneResponse;
 		if (!user.personId.equals(message.senderPersonId))
@@ -391,7 +391,7 @@ public class MessagingApi {
 			if (file.exists())
 				file.delete();
 		}
-		symbolicFileRepository.delete(symbolicFiles);
+		symbolicFileRepository.deleteAll(symbolicFiles);
 		// delete text and mark message as deleted
 		message.text = null;
 		message.isDeleted = true;
@@ -459,7 +459,7 @@ public class MessagingApi {
 	private Iterable<Message> getMessagesByPage(String roomId, int count, Long until) {
 		if (count > 0) {
 			Page<Message> page;
-			Pageable pageable = new PageRequest(0, count);
+			Pageable pageable = PageRequest.of(0, count);
 			if (until != null) {
 				page = messageRepository.findByRoomIdAndPostedAtLessThanOrderByPostedAtDesc(roomId, until, pageable);
 			} else {
@@ -585,7 +585,7 @@ public class MessagingApi {
 		String roomName = null;
 		String shortRoomName = null;
 		RoomMember partnerMember = roomMemberRepository.findTopByRoomIdAndPersonIdNot(roomId, personId);
-		Person partner = partnerMember == null || partnerMember.personId == null ? null : personRepository.findOne(partnerMember.personId);
+		Person partner = partnerMember == null || partnerMember.personId == null ? null : personRepository.findById(partnerMember.personId).orElse(null);
 		if (partner != null) {
 			String nickName = partner.nickName == null ? "" : partner.nickName.trim();
 			String firstName = partner.firstName == null ? "" : partner.firstName.trim();

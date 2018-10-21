@@ -84,7 +84,7 @@ public class Util {
 		String[] credentials = Util.splitBasicAuthHeader(request.getHeader("Authorization"));
 		if (credentials == null || credentials.length != 2)
 			return null;
-		User user = userRepository.findOne(credentials[0].toLowerCase());
+		User user = userRepository.findById(credentials[0].toLowerCase()).orElse(null);
 		if (user == null)
 			return null;
 		return user.matches(credentials[1]) ? user : null;
@@ -124,7 +124,7 @@ public class Util {
 	}
 
 	public static User getSessionUser(Session session, UserRepository userRepository) {
-		return session == null ? null : userRepository.findOne(session.userId);
+		return session == null ? null : userRepository.findById(session.userId).orElse(null);
 	}
 
 	public static User getSessionContact(Session session, UserRepository userRepository) {
@@ -210,7 +210,7 @@ public class Util {
 
 	public static String getDefaultTarget(HttpServletRequest request, TenantParameterRepository tpr, User user) {
 		String parameter = user == null ? "startPageNoLogon" : (user.hasAdminRole ? "startPageAdmin" : (user.hasUserRole ? "startPageUser" : "startPageLogon"));
-		TenantParameter tp = tpr.findOne(parameter);
+		TenantParameter tp = tpr.findById(parameter).orElse(null);
 		return getServerUrl(request) + (tp == null ? "/default/index.html" : tp.value);
 	}
 
@@ -282,7 +282,7 @@ public class Util {
 	}
 
 	public static File getDataDirectory(TenantParameterRepository tpr, String subdirectory) {
-		TenantParameter tp = tpr.findOne("dataDirectory");
+		TenantParameter tp = tpr.findById("dataDirectory").orElse(null);
 		if (tp == null)
 			return null;
 		File directory = new File(tp.value);
