@@ -8,17 +8,27 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 @RestController
@@ -310,8 +320,18 @@ public class MessagingApi {
 		messageRepository.save(message);
 		// policy: mark the new message as viewed for the sender
 		viewedConfirmationRepository.save(new ViewedConfirmation(message.messageId, message.senderPersonId, message.roomId, message.postedAt, message.postedAt));
-		// TODO: trigger a push notification if configured
-		//
+		// trigger push notifications if configured
+		TenantParameter tp = tenantParameterRepository.findById("fcmApiKey").orElse(null);
+		String apiKey = tp == null ? null : tp.value;
+		if (apiKey != null && apiKey.length() > 0)
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						sendFcmNotifications(apiKey, message);
+					} catch (Exception ignored) { }
+				}
+			}).run();
 		// construct response
 		JSONObject body = new JSONObject();
 		JsonUtil.put(body, "message", messageToJson(message, user.personId, symbolicFiles));
@@ -744,5 +764,71 @@ public class MessagingApi {
 		return subscriptionKey;
 	}
 
+	/* Push Notifications */
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+
+	private static final String SQL_QUERY =
+			"select s.device_token, s.client_account_id from subscription s " +
+					"join user u on u.user_id = s.user_id " +
+					"join room_member rm on rm.person_id = u.person_id " +
+					"where s.target_type = 'fcm' and s.is_active = 1 and s.changed_at > ? and rm.room_id = ?";
+
+	private static final long HORIZON = 1000L * 60 * 60 * 24 * 28;
+
+	public void sendFcmNotifications(String apiKey, Message message) throws Exception {
+		Long subscriptionDate = System.currentTimeMillis() - HORIZON;
+		List<JSONObject> notifications = jdbcTemplate.query(
+				SQL_QUERY,
+				new Object[]{subscriptionDate, message.roomId},
+				new RowMapper<JSONObject>() {
+					@Override
+					public JSONObject mapRow(ResultSet resultSet, int i) throws SQLException {
+						JSONObject root = new JSONObject();
+						JSONObject data = new JSONObject();
+						try {
+							root.put("to", resultSet.getString(1));
+							root.put("data", data);
+							data.put("messageType", 1);
+							data.put("clientAccountId", resultSet.getString(2));
+							data.put("roomId", message.roomId);
+							data.put("messageId", message.messageId);
+							data.put("timestamp", message.postedAt);
+						} catch (JSONException ignore) { }
+						return root;
+					}
+				}
+		);
+		//
+		for (JSONObject notification : notifications)
+			sendFcmNotification(apiKey, notification);
+	}
+
+	private static final String FCM_URL = "https://fcm.googleapis.com/fcm/send";
+
+	public void sendFcmNotification(String apiKey, JSONObject jsonBody) throws Exception {
+		byte[] body = jsonBody.toString().getBytes(StandardCharsets.UTF_8);
+		URL url = new URL(FCM_URL);
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		try {
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("Content-Type", "application/json");
+			conn.setRequestProperty("Authorization", "key=" + apiKey);
+			conn.setDoInput(true);
+			conn.setDoOutput(true);
+			conn.setUseCaches(false);
+			OutputStream outputStream = conn.getOutputStream();
+			outputStream.write(body);
+			outputStream.flush();
+			outputStream.close();
+			int responseCode = conn.getResponseCode();
+			if (responseCode > 299)
+				System.out.println("FCM response " + responseCode);
+		}
+		finally {
+			conn.disconnect();
+		}
+	}
 }
 
