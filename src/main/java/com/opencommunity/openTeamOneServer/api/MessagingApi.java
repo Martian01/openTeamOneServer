@@ -8,14 +8,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -104,10 +102,11 @@ public class MessagingApi {
 		//
 		JSONObject body = new JSONObject();
 		Person me = personRepository.findById(user.personId).orElse(null);
-		if (me != null)
-			body.put("loginPerson", personToJson(me));
 		TenantParameter tpName = tenantParameterRepository.findById("name").orElse(null);
 		TenantParameter tpPictureId = tenantParameterRepository.findById("pictureId").orElse(null);
+		// new structure, used by Android app
+		if (me != null)
+			body.put("loginPerson", personToJson(me));
 		if (tpName != null || tpPictureId != null) {
 			JSONObject tenant = new JSONObject();
 			if (tpName != null)
@@ -115,6 +114,15 @@ public class MessagingApi {
 			if (tpPictureId != null)
 				tenant.put("pictureId", tpPictureId.value);
 			body.put("tenant", tenant);
+		}
+		// old structure, used by the iOS app
+		if (me != null) {
+			JSONObject jsonMe = personToJson(me);
+			if (tpName != null)
+				jsonMe.put("ownClubName", tpName.value);
+			if (tpPictureId != null)
+				jsonMe.put("ownClubPictureId", tpPictureId.value);
+			body.put("me", jsonMe);
 		}
 		//
 		return Util.httpOkResponse(body);
@@ -235,7 +243,7 @@ public class MessagingApi {
 			if (notBefore != null) {
 				messages = messageRepository.findByRoomIdAndPostedAtGreaterThanEqual(roomId, notBefore);
 			} else {
-				messages = getMessagesByPage(roomId, 100, null);
+				messages = getRoomMessagesByPage(roomId, 100, null);
 			}
 		}
 		body.put("messages", messagesToJsonArray(messages, user.personId));
@@ -256,12 +264,12 @@ public class MessagingApi {
 		JSONObject body = new JSONObject();
 		Iterable<Message> messages;
 		if (count != null) {
-			messages = getMessagesByPage(roomId, count, until);
+			messages = getRoomMessagesByPage(roomId, count, until);
 		} else {
 			if (until != null) {
 				messages = messageRepository.findByRoomIdAndPostedAtLessThan(roomId, until);
 			} else {
-				messages = getMessagesByPage(roomId, 100, null);
+				messages = getRoomMessagesByPage(roomId, 100, null);
 			}
 		}
 		body.put("messages", messagesToJsonArray(messages, user.personId));
@@ -425,6 +433,81 @@ public class MessagingApi {
 		return Util.httpOkResponse;
 	}
 
+	@RequestMapping(method = RequestMethod.DELETE, value = "/messages/viewedConfirmation")
+	public ResponseEntity<String> messagesViewedConfirmation(HttpServletRequest request, @RequestBody String input) throws JSONException {
+		Session session = Util.getSession(request);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
+		if (user == null)
+			return Util.httpStaleSessionResponse(request);
+		//
+		if (input == null)
+			return Util.httpBadRequestResponse;
+		JSONArray messageIds = JsonUtil.getJSONArray(new JSONObject(input), "messageIds");
+		if (messageIds != null) {
+			long now = System.currentTimeMillis();
+			ArrayList<ViewedConfirmation> confirmations = new ArrayList<>();
+			for (int i = 0; i < messageIds.length(); i++)
+				try {
+					Message message = messageRepository.findById(messageIds.getString(i)).orElse(null);
+					if (message != null)
+						confirmations.add(new ViewedConfirmation(message.messageId, user.personId, message.roomId, message.postedAt, now));
+				} catch (Exception ignored) { }
+			viewedConfirmationRepository.saveAll(confirmations);
+		}
+		//
+		return Util.httpAcceptedResponse;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/messagesSince")
+	public ResponseEntity<String> messagesSince(HttpServletRequest request, @RequestParam(required = false) Long since, @RequestParam(required = false) Long notBefore) throws JSONException {
+		Session session = Util.getSession(request);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
+		if (user == null)
+			return Util.httpStaleSessionResponse(request);
+		//
+		JSONObject body = new JSONObject();
+		Iterable<Message> messages;
+		if (since != null) {
+			if (notBefore != null) {
+				messages = messageRepository.findByUpdatedAtGreaterThanAndPostedAtGreaterThanEqual(since, notBefore);
+			} else {
+				messages = messageRepository.findByUpdatedAtGreaterThan(since);
+			}
+		} else {
+			if (notBefore != null) {
+				messages = messageRepository.findByPostedAtGreaterThanEqual(notBefore);
+			} else {
+				messages = getMessagesByPage(100, null);
+			}
+		}
+		body.put("messages", messagesToJsonArray(messages, user.personId));
+		//
+		return Util.httpOkResponse(body);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/messagesUntil")
+	public ResponseEntity<String> messagesUntil(HttpServletRequest request, @RequestParam(required = false) Integer count, @RequestParam(required = false) Long until) throws JSONException {
+		Session session = Util.getSession(request);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
+		if (user == null)
+			return Util.httpStaleSessionResponse(request);
+		//
+		JSONObject body = new JSONObject();
+		Iterable<Message> messages;
+		if (count != null) {
+			messages = getMessagesByPage(count, until);
+		} else {
+			if (until != null) {
+				messages = messageRepository.findByPostedAtLessThan(until);
+			} else {
+				messages = getMessagesByPage(100, null);
+			}
+		}
+		body.put("messages", messagesToJsonArray(messages, user.personId));
+		//
+		return Util.httpOkResponse(body);
+	}
+
 	/* helper functions */
 
 	private boolean isContact(String personId) {
@@ -480,7 +563,7 @@ public class MessagingApi {
 		return viewedConfirmation == null ? null : viewedConfirmation.messagePostedAt;
 	}
 
-	private Iterable<Message> getMessagesByPage(String roomId, int count, Long until) {
+	private Iterable<Message> getRoomMessagesByPage(String roomId, int count, Long until) {
 		if (count > 0) {
 			Page<Message> page;
 			Pageable pageable = PageRequest.of(0, count);
@@ -496,6 +579,27 @@ public class MessagingApi {
 				long max = content.get(0).postedAt;
 				long min = content.get(content.size() - 1).postedAt;
 				return messageRepository.findByRoomIdAndPostedAtBetween(roomId, min, max);
+			}
+		}
+		return new ArrayList<>();
+	}
+
+	private Iterable<Message> getMessagesByPage(int count, Long until) {
+		if (count > 0) {
+			Page<Message> page;
+			Pageable pageable = PageRequest.of(0, count);
+			if (until != null) {
+				page = messageRepository.findByPostedAtLessThanOrderByPostedAtDesc(until, pageable);
+			} else {
+				page = messageRepository.findByOrderByPostedAtDesc(pageable);
+			}
+			// re-read messages by posting time
+			// (for the unlikely case that the end of the interval falls in between messages with the same posting time)
+			List<Message> content = page.getContent();
+			if (content.size() > 0) {
+				long max = content.get(0).postedAt;
+				long min = content.get(content.size() - 1).postedAt;
+				return messageRepository.findByPostedAtBetween(min, max);
 			}
 		}
 		return new ArrayList<>();

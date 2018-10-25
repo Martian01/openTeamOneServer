@@ -16,10 +16,19 @@ public interface MessageRepository extends CrudRepository<Message, String> {
 	Iterable<Message> findTop1ByRoomIdAndIsDeletedFalseOrderByPostedAtDesc(String roomId);
 	Iterable<Message> findTop1ByRoomIdAndIsDeletedFalseAndPostedAtLessThanEqualOrderByPostedAtDesc(String roomId, long postedAt);
 	// for messages since
+	Iterable<Message> findByUpdatedAtGreaterThanAndPostedAtGreaterThanEqual(long updatedAt, long postedAt);
+	Iterable<Message> findByUpdatedAtGreaterThan(long updatedAt);
+	Iterable<Message> findByPostedAtGreaterThanEqual(long postedAt);
+	// for room messages since
 	Iterable<Message> findByRoomIdAndUpdatedAtGreaterThanAndPostedAtGreaterThanEqual(String roomId, long updatedAt, long postedAt);
 	Iterable<Message> findByRoomIdAndUpdatedAtGreaterThan(String roomId, long updatedAt);
 	Iterable<Message> findByRoomIdAndPostedAtGreaterThanEqual(String roomId, long postedAt);
 	// for messages until
+	Page<Message> findByPostedAtLessThanOrderByPostedAtDesc(long postedAt, Pageable pageable);
+	Page<Message> findByOrderByPostedAtDesc(Pageable pageable);
+	Iterable<Message> findByPostedAtBetween(long postedAtLow, long postedAtHigh);
+	Iterable<Message> findByPostedAtLessThan(long postedAt);
+	// for room messages until
 	Page<Message> findByRoomIdAndPostedAtLessThanOrderByPostedAtDesc(String roomId, long postedAt, Pageable pageable);
 	Page<Message> findByRoomIdOrderByPostedAtDesc(String roomId, Pageable pageable);
 	Iterable<Message> findByRoomIdAndPostedAtBetween(String roomId, long postedAtLow, long postedAtHigh);

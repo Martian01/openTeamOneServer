@@ -143,11 +143,11 @@ public class Util {
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<String> httpUnauthorizedResponse = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+	public static ResponseEntity<String> httpCreatedResponse = ResponseEntity.status(HttpStatus.CREATED)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<String> httpForbiddenResponse = ResponseEntity.status(HttpStatus.FORBIDDEN)
+	public static ResponseEntity<String> httpAcceptedResponse = ResponseEntity.status(HttpStatus.ACCEPTED)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
@@ -155,7 +155,11 @@ public class Util {
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<String> httpInternalErrorResponse = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	public static ResponseEntity<String> httpUnauthorizedResponse = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
+
+	public static ResponseEntity<String> httpForbiddenResponse = ResponseEntity.status(HttpStatus.FORBIDDEN)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
@@ -167,7 +171,7 @@ public class Util {
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<String> httpCreatedResponse = ResponseEntity.status(HttpStatus.CREATED)
+	public static ResponseEntity<String> httpInternalErrorResponse = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
