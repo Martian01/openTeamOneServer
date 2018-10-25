@@ -8,13 +8,13 @@ Open Team One Server is a backend component to support the communication functio
 
 Open Team One Server aimes to provide a simple and functional solution of high performance for those needing a communication server under their own control - in terms of source code and operations. Instead of re-inventing the wheel we use freely available mobile clients, namely the SAP Team One mobile apps that are available for multiple platforms.
 
-The SAP Team One apps are normally operated against a SAP Sports One backend that integrates communication with multiple sports applications. Typical examples are injury notifications, videos, questionnaires to capture user feedback and performance KPIs, and information packages combining media and editorials. All those integration scenarios are missing from Open Team One for the simple reason that Open Team One is a best-of-breed communication hub for mobile users, not a sports solution.
+The SAP Team One apps are normally operated against a SAP Sports One backend that integrates communication with multiple sports applications. Typical examples are injury notifications, videos, questionnaires to capture user feedback and performance KPIs, and information packages combining media and editorials. All those integration scenarios are missing from Open Team One for the simple reason that Open Team One is purely a communication hub for mobile users, not a sports solution.
 
-One function that cannot be provided for legal reasons are push notifications. The delivery of push notifications would require to reverse-engineer a secret API key.
+Push notifications for Android devices will be generated *if* a suitable API key has been configured by the administrator. Those push notifications are conveyed via Firebase Cloud Messaging. However, since the API key used for the proprietary SAP app is not in the public domain, it cannot be delivered  as part of this open source project.
 
 ## Limitations
 
-Whilst the server is functionally complete within the scope described above, the user experience of the web apps for server administration and user self-service is still limited. Those web apps need a better user interaction & web design and a modern implementation resulting in a pleasant best-of-breed user experience.
+Whilst the server is functionally complete within the scope described above, the user experience of the web apps for server administration and user self-service is still experimental. Those web apps are fully functional, but they could do with a better user interaction design, better web design and a modern implementation resulting in a pleasant best-of-breed user experience.
 
 ## Quick Guide (How to run the server with demo content)
 
