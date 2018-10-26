@@ -151,7 +151,7 @@ I was able to run and deploy the jar file on a virtual server on the internet. T
 	apt-get install mariadb-server
 	apt-get install openjdk-8-jre-headless
 
-Afterwards the system took up 1.2 GB on disk. The system used up 600 MB in RAM for the demo content. CPU load was not measurable under demo conditions. At this stage there is no experience how the server scales under heavy load.
+Afterwards the system took up 1.2 GB on disk. The server used up 250 MB in RAM for the demo content, the whole system clocking in at 600 MB. CPU load was not measurable under demo conditions. At this stage there is no experience how the server scales under heavy load.
 
 ## SSL Configuration
 
