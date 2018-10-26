@@ -49,44 +49,44 @@
     {
       "fileId": "tenant",
       "directory": "profiles",
-      "mimeType": "image/jpg",
+      "mimeType": "image/jpeg",
       "position": 0
     },
     {
       "fileId": "profile1",
       "directory": "profiles",
-      "mimeType": "image/jpg",
+      "mimeType": "image/jpeg",
       "position": 0
     },
     {
       "fileId": "profile2",
       "directory": "profiles",
-      "mimeType": "image/jpg",
+      "mimeType": "image/jpeg",
       "position": 0
     },
     {
       "fileId": "profile3",
       "directory": "profiles",
-      "mimeType": "image/jpg",
+      "mimeType": "image/jpeg",
       "position": 0
     },
     {
       "fileId": "room1",
       "directory": "profiles",
-      "mimeType": "image/jpg",
+      "mimeType": "image/jpeg",
       "position": 0
     },
     {
       "fileId": "room2",
       "directory": "profiles",
-      "mimeType": "image/jpg",
+      "mimeType": "image/jpeg",
       "position": 0
     },
     {
       "referenceId": "9547464AD01B421E9A1F061985CB1B51",
       "fileId": "sailing1",
       "directory": "attachments",
-      "mimeType": "image/jpg",
+      "mimeType": "image/jpeg",
       "position": 0
     }
   ],
