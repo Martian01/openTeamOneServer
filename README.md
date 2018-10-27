@@ -153,6 +153,36 @@ I was able to run and deploy the jar file on a virtual server on the internet. T
 
 Afterwards the system took up 1.2 GB on disk. The server used up 250 MB in RAM for the demo content, the whole system clocking in at 600 MB. CPU load was not measurable under demo conditions. At this stage there is no experience how the server scales under heavy load.
 
+If you want to run the service under systemd control in order to be independent of login shells, create the following file under /etc/systemd/system/openTeamOne.service:
+
+	[Unit]
+	Description=OpenTeamOne Service
+	After=network.target
+
+	[Service]
+	Type=simple
+	User=root
+	ExecStart=/usr/bin/java -jar /opt/openTeamOneServer-1.0.0-SNAPSHOT.jar
+	Restart=on-abort
+
+	[Install]
+	WantedBy=multi-user.target
+
+Afterwards issue the commands
+
+	systemctl daemon-reload
+	systemctl start openTeamOne
+
+You can check the console output using the command
+
+	systemctl status openTeamOne
+
+Unsurprisingly you stop the server by saying
+
+	systemctl stop openTeamOne
+
+I was not successful running the server under a different user, but then again, I did not spend much time on the issue.
+
 ## SSL Configuration
 
 Sadly SSL configuration in Java is not as easy as it could be. However, Spring Boot offers a fairly easy approach if your requirements are simple. For more advanced requirements you are welcome to search the internet. The guide I found most helpful for the setup is [DZone: Spring Boot Secured By Let's Encrypt ](https://dzone.com/articles/spring-boot-secured-by-lets-encrypt).
