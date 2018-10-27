@@ -86,7 +86,7 @@ public class Session {
 		return iosMode(sessionId);
 	}
 
-	private static final long sessionMaximumAge = 1800000L;
+	private static final long sessionMaximumAge = 1800000L; // 30 minutes
 
 	private static Map<String, Session> currentSessions = new HashMap<>();
 
@@ -134,11 +134,11 @@ public class Session {
 	}
 
 	private static void _invalidateOldSessions() {
-			long now = System.currentTimeMillis();
-			Iterator<Session> it = currentSessions.values().iterator();
-			while (it.hasNext())
-				if (now - it.next().lastAccessTime > sessionMaximumAge)
-					it.remove();
+		long now = System.currentTimeMillis();
+		Iterator<Session> it = currentSessions.values().iterator();
+		while (it.hasNext())
+			if (now - it.next().lastAccessTime > sessionMaximumAge)
+				it.remove(); // removes the entire map entry
 	}
 
 }
