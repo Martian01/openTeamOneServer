@@ -155,18 +155,21 @@ Afterwards the system took up 1.2 GB on disk. The server used up 250 MB in RAM f
 
 If you want to run the service under systemd control in order to be independent of login shells, create the following file under /etc/systemd/system/openTeamOne.service:
 
-	[Unit]
-	Description=OpenTeamOne Service
-	After=network.target
+    [Unit]
+    Description=OpenTeamOne
+    After=mysqld.service
+    StartLimitBurst=5
+    StartLimitIntervalSec=60
 
-	[Service]
-	Type=simple
-	User=root
-	ExecStart=/usr/bin/java -jar /opt/openTeamOneServer-1.0.0-SNAPSHOT.jar
-	Restart=on-abort
+    [Service]
+    Type=simple
+    User=root
+    ExecStart=/usr/bin/java -jar /opt/openTeamOneServer-1.0.0-SNAPSHOT.jar
+    Restart=always
+    RestartSec=10
 
-	[Install]
-	WantedBy=multi-user.target
+    [Install]
+    WantedBy=multi-user.target
 
 Afterwards issue the commands
 

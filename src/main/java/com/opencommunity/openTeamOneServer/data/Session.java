@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class Session {
@@ -113,7 +114,7 @@ public class Session {
 	@NotNull
 	public static Session newSession(@NotNull String userId, boolean iosMode) {
 		synchronized (currentSessions) {
-			invalidateOldSessions(); // bit of housekeeping
+			_invalidateOldSessions(); // bit of housekeeping
 			Session session = new Session(userId, iosMode);
 			currentSessions.put(session.sessionId, session);
 			return session;
@@ -132,13 +133,12 @@ public class Session {
 		}
 	}
 
-	private static void invalidateOldSessions() {
-		//synchronized (currentSessions) {
+	private static void _invalidateOldSessions() {
 			long now = System.currentTimeMillis();
-			for (Session session : currentSessions.values())
-				if (now - session.lastAccessTime > sessionMaximumAge)
-					currentSessions.remove(session.sessionId);
-		//}
+			Iterator<Session> it = currentSessions.values().iterator();
+			while (it.hasNext())
+				if (now - it.next().lastAccessTime > sessionMaximumAge)
+					it.remove();
 	}
 
 }
