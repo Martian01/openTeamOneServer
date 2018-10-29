@@ -14,20 +14,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 @RestController
@@ -330,7 +322,7 @@ public class MessagingApi {
 		// policy: mark the new message as viewed for the sender
 		viewedConfirmationRepository.save(new ViewedConfirmation(message.messageId, message.senderPersonId, message.roomId, message.postedAt, message.postedAt));
 		// notify devices
-		Notification.pushToSubscribedDevices(message, user);
+		Notification.pushToSubscribedDevices(message);
 		// construct response
 		JSONObject body = new JSONObject();
 		JsonUtil.put(body, "message", messageToJson(message, user.personId, symbolicFiles));
