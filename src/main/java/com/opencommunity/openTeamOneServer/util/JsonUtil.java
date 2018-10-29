@@ -40,17 +40,9 @@ public class JsonUtil {
 
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
-	public static String toIsoDate(long millis) {
-		return sdf.format(new Date(millis));
-	}
-
 	public static long getIsoDate(JSONObject item, String key) throws JSONException {
 		String date = item == null || item.isNull(key) ? null : item.getString(key);
-		try {
-			return sdf.parse(date).getTime();
-		} catch (ParseException e) {
-			throw new JSONException("Wrong iso date format");
-		}
+			return TimeUtil.parseIsoDateTimeToMillis(date);
 	}
 
 	public static void put(JSONObject item, String key, int value) throws JSONException {

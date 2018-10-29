@@ -1,6 +1,7 @@
 package com.opencommunity.openTeamOneServer.data;
 
 import com.opencommunity.openTeamOneServer.util.JsonUtil;
+import com.opencommunity.openTeamOneServer.util.TimeUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,8 +53,8 @@ public class ViewedConfirmation {
 		item.put("messageId", messageId);
 		item.put("personId", personId);
 		item.put("roomId", roomId);
-		item.put("messagePostedAt", JsonUtil.toIsoDate(messagePostedAt));
-		item.put("confirmedAt", JsonUtil.toIsoDate(confirmedAt));
+		item.put("messagePostedAt", TimeUtil.toIsoDateString(messagePostedAt));
+		item.put("confirmedAt", TimeUtil.toIsoDateString(confirmedAt));
 		return item;
 	}
 

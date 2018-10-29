@@ -1,6 +1,7 @@
 package com.opencommunity.openTeamOneServer.data;
 
 import com.opencommunity.openTeamOneServer.util.JsonUtil;
+import com.opencommunity.openTeamOneServer.util.TimeUtil;
 import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,10 +67,10 @@ public class Message {
 		item.put("clientMessageId", clientMessageId);
 		item.put("roomId", roomId);
 		item.put("senderPersonId", senderPersonId);
-		item.put("postedAt", JsonUtil.toIsoDate(postedAt));
+		item.put("postedAt", TimeUtil.toIsoDateString(postedAt));
 		item.put("text", text);
 		item.put("isDeleted", isDeleted);
-		item.put("updatedAt", JsonUtil.toIsoDate(updatedAt));
+		item.put("updatedAt", TimeUtil.toIsoDateString(updatedAt));
 		return item;
 	}
 

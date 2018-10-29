@@ -1,6 +1,7 @@
 package com.opencommunity.openTeamOneServer.data;
 
 import com.opencommunity.openTeamOneServer.util.JsonUtil;
+import com.opencommunity.openTeamOneServer.util.TimeUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -79,7 +80,7 @@ public class Subscription {
 		item.put("clientAccountId", clientAccountId);
 		item.put("userConsent", userConsent);
 		item.put("isActive", isActive);
-		item.put("changedAt", JsonUtil.toIsoDate(changedAt));
+		item.put("changedAt", TimeUtil.toIsoDateString(changedAt));
 		item.put("deviceId", deviceId);
 		item.put("deviceType", deviceType);
 		item.put("osVersion", osVersion);

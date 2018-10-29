@@ -1,6 +1,7 @@
 package com.opencommunity.openTeamOneServer.data;
 
 import com.opencommunity.openTeamOneServer.util.JsonUtil;
+import com.opencommunity.openTeamOneServer.util.TimeUtil;
 import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,8 +43,8 @@ public class Session {
 		JSONObject item = new JSONObject();
 		item.put("sessionId", sessionId);
 		item.put("userId", userId);
-		item.put("startTime", JsonUtil.toIsoDate(startTime));
-		item.put("lastAccessTime", JsonUtil.toIsoDate(lastAccessTime));
+		item.put("startTime", TimeUtil.toIsoDateString(startTime));
+		item.put("lastAccessTime", TimeUtil.toIsoDateString(lastAccessTime));
 		return item;
 	}
 

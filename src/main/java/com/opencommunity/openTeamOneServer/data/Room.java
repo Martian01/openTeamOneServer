@@ -1,6 +1,7 @@
 package com.opencommunity.openTeamOneServer.data;
 
 import com.opencommunity.openTeamOneServer.util.JsonUtil;
+import com.opencommunity.openTeamOneServer.util.TimeUtil;
 import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,7 +60,7 @@ public class Room {
 		item.put("shortName", shortName);
 		item.put("roomType", roomType);
 		item.put("pictureId", pictureId);
-		item.put("changedAt", JsonUtil.toIsoDate(changedAt));
+		item.put("changedAt", TimeUtil.toIsoDateString(changedAt));
 		return item;
 	}
 

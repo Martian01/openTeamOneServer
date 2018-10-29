@@ -3,6 +3,7 @@ package com.opencommunity.openTeamOneServer.api;
 import com.opencommunity.openTeamOneServer.data.*;
 import com.opencommunity.openTeamOneServer.persistence.*;
 import com.opencommunity.openTeamOneServer.util.JsonUtil;
+import com.opencommunity.openTeamOneServer.util.TimeUtil;
 import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,8 +56,8 @@ public class ServiceApi {
 		JSONObject item;
 		if (session != null) {
 			item = new JSONObject();
-			item.put("startTime", JsonUtil.toIsoDate(session.startTime));
-			item.put("lastAccessTime", JsonUtil.toIsoDate(session.lastAccessTime));
+			item.put("startTime", TimeUtil.toIsoDateString(session.startTime));
+			item.put("lastAccessTime", TimeUtil.toIsoDateString(session.lastAccessTime));
 			body.put("session", item);
 			User user = session.userId == null ? null : userRepository.findById(session.userId).orElse(null);
 			if (user != null) {

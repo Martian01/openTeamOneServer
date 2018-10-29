@@ -4,6 +4,7 @@ import com.opencommunity.openTeamOneServer.data.*;
 import com.opencommunity.openTeamOneServer.persistence.*;
 import com.opencommunity.openTeamOneServer.util.JsonUtil;
 import com.opencommunity.openTeamOneServer.util.Notification;
+import com.opencommunity.openTeamOneServer.util.TimeUtil;
 import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -609,7 +610,7 @@ public class MessagingApi {
 			return null;
 		JSONObject item = new JSONObject();
 		item.put("personId", confirmation.personId);
-		item.put("viewedAt", JsonUtil.toIsoDate(confirmation.confirmedAt));
+		item.put("viewedAt", TimeUtil.toIsoDateString(confirmation.confirmedAt));
 		return item;
 	}
 
@@ -651,21 +652,21 @@ public class MessagingApi {
 		JSONObject messageContent = new JSONObject();
 		messageContent.put("roomId", message.roomId);
 		messageContent.put("senderPersonId", message.senderPersonId);
-		messageContent.put("postedAt", JsonUtil.toIsoDate(message.postedAt));
+		messageContent.put("postedAt", TimeUtil.toIsoDateString(message.postedAt));
 		messageContent.put("text", message.text);
 		messageContent.put("isOwnMessage", personId.equals(message.senderPersonId));
 		if (symbolicFiles != null)
 			messageContent.put("assets", symbolicFilesToJsonArray(symbolicFiles));
 		JSONObject messageStatus = new JSONObject();
 		messageStatus.put("isDeleted", message.isDeleted);
-		messageStatus.put("updatedAt", JsonUtil.toIsoDate(message.updatedAt));
+		messageStatus.put("updatedAt", TimeUtil.toIsoDateString(message.updatedAt));
 		JSONObject postedMessageStatus = new JSONObject();
 		postedMessageStatus.put("viewedCount", viewedConfirmationRepository.countByMessageIdAndPersonIdNot(message.messageId, personId));
 		messageStatus.put("postedMessageStatus", postedMessageStatus);
 		JSONObject receivedMessageStatus = new JSONObject();
 		ViewedConfirmation confirmation = viewedConfirmationRepository.findTopByMessageIdAndPersonId(message.messageId, personId);
 		if (confirmation != null)
-			receivedMessageStatus.put("viewedAt", JsonUtil.toIsoDate(confirmation.confirmedAt)); // semantics of this field is unclear at best
+			receivedMessageStatus.put("viewedAt", TimeUtil.toIsoDateString(confirmation.confirmedAt)); // semantics of this field is unclear at best
 		messageStatus.put("receivedMessageStatus", receivedMessageStatus);
 		JSONObject item = new JSONObject();
 		item.put("messageId", message.messageId);
@@ -715,7 +716,7 @@ public class MessagingApi {
 		boolean isPrivateRoom = "private".equals(room.roomType);
 		String[] privateRoomNames = isPrivateRoom ? getPrivateRoomNames(room.roomId, personId) : null;
 		JSONObject roomStatus = new JSONObject();
-		roomStatus.put("dataChangedAt", JsonUtil.toIsoDate(room.changedAt));
+		roomStatus.put("dataChangedAt", TimeUtil.toIsoDateString(room.changedAt));
 		JSONObject roomData = new JSONObject();
 		JsonUtil.put(roomData, "name", isPrivateRoom ? privateRoomNames[0] : room.name);
 		JsonUtil.put(roomData, "shortName", isPrivateRoom ? privateRoomNames[1] : room.shortName);
