@@ -330,7 +330,7 @@ public class MessagingApi {
 		// policy: mark the new message as viewed for the sender
 		viewedConfirmationRepository.save(new ViewedConfirmation(message.messageId, message.senderPersonId, message.roomId, message.postedAt, message.postedAt));
 		// notify devices
-		Notification.pushToSubscribedDevices(message);
+		Notification.pushToSubscribedDevices(message, user);
 		// construct response
 		JSONObject body = new JSONObject();
 		JsonUtil.put(body, "message", messageToJson(message, user.personId, symbolicFiles));
