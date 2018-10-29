@@ -4,10 +4,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 public class JsonUtil {
 
 	public static int getInt(JSONObject item, String key, int defaultValue) throws JSONException {
@@ -37,8 +33,6 @@ public class JsonUtil {
 	public static JSONArray getJSONArray(JSONObject item, String key) throws JSONException {
 		return item == null || item.isNull(key) ? null : item.getJSONArray(key);
 	}
-
-	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
 	public static long getIsoDate(JSONObject item, String key) throws JSONException {
 		String date = item == null || item.isNull(key) ? null : item.getString(key);
