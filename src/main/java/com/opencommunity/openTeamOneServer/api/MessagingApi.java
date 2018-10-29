@@ -3,6 +3,7 @@ package com.opencommunity.openTeamOneServer.api;
 import com.opencommunity.openTeamOneServer.data.*;
 import com.opencommunity.openTeamOneServer.persistence.*;
 import com.opencommunity.openTeamOneServer.util.JsonUtil;
+import com.opencommunity.openTeamOneServer.util.Notification;
 import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -328,18 +329,8 @@ public class MessagingApi {
 		messageRepository.save(message);
 		// policy: mark the new message as viewed for the sender
 		viewedConfirmationRepository.save(new ViewedConfirmation(message.messageId, message.senderPersonId, message.roomId, message.postedAt, message.postedAt));
-		// trigger push notifications if configured
-		TenantParameter tp = tenantParameterRepository.findById("fcmApiKey").orElse(null);
-		String apiKey = tp == null ? null : tp.value;
-		if (apiKey != null && apiKey.length() > 0)
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						sendFcmNotifications(apiKey, message);
-					} catch (Exception ignored) { }
-				}
-			}).run();
+		// notify devices
+		Notification.pushToSubscribedDevices(message);
 		// construct response
 		JSONObject body = new JSONObject();
 		JsonUtil.put(body, "message", messageToJson(message, user.personId, symbolicFiles));
@@ -433,7 +424,7 @@ public class MessagingApi {
 		return Util.httpOkResponse;
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE, value = "/messages/viewedConfirmation")
+	@RequestMapping(method = RequestMethod.POST, value = "/messages/viewedConfirmation")
 	public ResponseEntity<String> messagesViewedConfirmation(HttpServletRequest request, @RequestBody String input) throws JSONException {
 		Session session = Util.getSession(request);
 		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
@@ -868,71 +859,5 @@ public class MessagingApi {
 		return subscriptionKey;
 	}
 
-	/* Push Notifications */
-
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
-
-	private static final String SQL_QUERY =
-			"select s.device_token, s.client_account_id from subscription s " +
-					"join user u on u.user_id = s.user_id " +
-					"join room_member rm on rm.person_id = u.person_id " +
-					"where s.target_type = 'fcm' and s.is_active = 1 and s.changed_at > ? and rm.room_id = ?";
-
-	private static final long HORIZON = 1000L * 60 * 60 * 24 * 28;
-
-	public void sendFcmNotifications(String apiKey, Message message) throws Exception {
-		Long subscriptionDate = System.currentTimeMillis() - HORIZON;
-		List<JSONObject> notifications = jdbcTemplate.query(
-				SQL_QUERY,
-				new Object[]{subscriptionDate, message.roomId},
-				new RowMapper<JSONObject>() {
-					@Override
-					public JSONObject mapRow(ResultSet resultSet, int i) throws SQLException {
-						JSONObject root = new JSONObject();
-						JSONObject data = new JSONObject();
-						try {
-							root.put("to", resultSet.getString(1));
-							root.put("data", data);
-							data.put("messageType", 1);
-							data.put("clientAccountId", resultSet.getString(2));
-							data.put("roomId", message.roomId);
-							data.put("messageId", message.messageId);
-							data.put("timestamp", message.postedAt);
-						} catch (JSONException ignore) { }
-						return root;
-					}
-				}
-		);
-		//
-		for (JSONObject notification : notifications)
-			sendFcmNotification(apiKey, notification);
-	}
-
-	private static final String FCM_URL = "https://fcm.googleapis.com/fcm/send";
-
-	public void sendFcmNotification(String apiKey, JSONObject jsonBody) throws Exception {
-		byte[] body = jsonBody.toString().getBytes(StandardCharsets.UTF_8);
-		URL url = new URL(FCM_URL);
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		try {
-			conn.setRequestMethod("POST");
-			conn.setRequestProperty("Content-Type", "application/json");
-			conn.setRequestProperty("Authorization", "key=" + apiKey);
-			conn.setDoInput(true);
-			conn.setDoOutput(true);
-			conn.setUseCaches(false);
-			OutputStream outputStream = conn.getOutputStream();
-			outputStream.write(body);
-			outputStream.flush();
-			outputStream.close();
-			int responseCode = conn.getResponseCode();
-			if (responseCode > 299)
-				System.out.println("FCM response " + responseCode);
-		}
-		finally {
-			conn.disconnect();
-		}
-	}
 }
 

@@ -10,7 +10,7 @@ Open Team One Server aimes to provide a simple and functional solution of high p
 
 The SAP Team One apps are normally operated against a SAP Sports One backend that integrates communication with multiple sports applications. Typical examples are injury notifications, videos, questionnaires to capture user feedback and performance KPIs, and information packages combining media and editorials. All those integration scenarios are missing from Open Team One for the simple reason that Open Team One is purely a communication hub for mobile users, not a sports solution.
 
-Push notifications for Android devices will be generated *if* a suitable API key has been configured by the administrator. Those push notifications are conveyed via Firebase Cloud Messaging. However, since the API key used for the proprietary SAP app is not in the public domain, it cannot be delivered  as part of this open source project.
+An interface for the generation of push notifications has been provided. However, since the API keys and certificates used for the proprietary SAP app are not in the public domain, they cannot be provided as part of this open source project.
 
 ## Limitations
 
