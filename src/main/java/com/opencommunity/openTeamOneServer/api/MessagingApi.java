@@ -2,10 +2,7 @@ package com.opencommunity.openTeamOneServer.api;
 
 import com.opencommunity.openTeamOneServer.data.*;
 import com.opencommunity.openTeamOneServer.persistence.*;
-import com.opencommunity.openTeamOneServer.util.JsonUtil;
-import com.opencommunity.openTeamOneServer.util.Notification;
-import com.opencommunity.openTeamOneServer.util.TimeUtil;
-import com.opencommunity.openTeamOneServer.util.Util;
+import com.opencommunity.openTeamOneServer.util.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -298,14 +295,14 @@ public class MessagingApi {
 				if (multipartRequest.getFile(protoSymbolicFile.clientId) == null)
 					return Util.httpBadRequestResponse;
 			// second pass for writing attachments
-			File directory = Util.getDataDirectory(tenantParameterRepository, SymbolicFile.DIRECTORY_ATTACHMENTS);
+			File directory = StreamUtil.getDataDirectory(tenantParameterRepository, SymbolicFile.DIRECTORY_ATTACHMENTS);
 			if (directory == null)
 				return Util.httpInternalErrorResponse;
 			for (ProtoSymbolicFile protoSymbolicFile : protoMessage.protoSymbolicFiles) {
 				MultipartFile multipartFile = multipartRequest.getFile(protoSymbolicFile.clientId);
 				protoSymbolicFile.mimeType = multipartFile.getContentType();
 				File file = new File(directory, protoSymbolicFile.fileId);
-				Util.writeFile(multipartFile.getInputStream(), file);
+				StreamUtil.writeFile(multipartFile.getInputStream(), file);
 			}
 		}
 		// create BOs
@@ -401,7 +398,7 @@ public class MessagingApi {
 		// delete attachments (DB objects and files in the file system)
 		Iterable<SymbolicFile> symbolicFiles = symbolicFileRepository.findByReferenceIdOrderByPositionAsc(messageId);
 		for (SymbolicFile symbolicFile : symbolicFiles) {
-			File file = Util.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
+			File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
 			if (file == null)
 				return Util.httpInternalErrorResponse;
 			if (file.exists())

@@ -8,6 +8,7 @@ import com.opencommunity.openTeamOneServer.persistence.PersonRepository;
 import com.opencommunity.openTeamOneServer.persistence.TenantParameterRepository;
 import com.opencommunity.openTeamOneServer.persistence.UserRepository;
 import com.opencommunity.openTeamOneServer.util.ContentService;
+import com.opencommunity.openTeamOneServer.util.StreamUtil;
 import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,12 +88,12 @@ public class ServiceUiApi {
 		String forward = formData.get("forward");
 		if (filename == null)
 			return Util.httpBadRequestResponse;
-		File file = Util.getFile(tenantParameterRepository, SymbolicFile.DIRECTORY_SNAPSHOTS, filename);
+		File file = StreamUtil.getFile(tenantParameterRepository, SymbolicFile.DIRECTORY_SNAPSHOTS, filename);
 		if (file == null)
 			return Util.httpInternalErrorResponse;
 		JSONObject jsonContent = ContentService.exportToJson();
 		String stringContent = jsonContent.toString();
-		Util.writeFile(stringContent.getBytes("UTF-8"), file);
+		StreamUtil.writeFile(stringContent.getBytes("UTF-8"), file);
 		//
 		return Util.httpForwardResponse(request, tenantParameterRepository, user, forward);
 	}
@@ -110,12 +111,12 @@ public class ServiceUiApi {
 		String forward = formData.get("forward");
 		if (filename == null)
 			return Util.httpBadRequestResponse;
-		File file = Util.getFile(tenantParameterRepository, SymbolicFile.DIRECTORY_SNAPSHOTS, filename);
+		File file = StreamUtil.getFile(tenantParameterRepository, SymbolicFile.DIRECTORY_SNAPSHOTS, filename);
 		if (file == null)
 			return Util.httpInternalErrorResponse;
 		if (!file.canRead())
 			return Util.httpNotFoundResponse;
-		String stringContent = new String(Util.readFile(file), "UTF-8");
+		String stringContent = new String(StreamUtil.readFile(file), "UTF-8");
 		JSONObject jsonContent = new JSONObject(stringContent);
 		ContentService.importFromJson(jsonContent, true, includeConfiguration, user.userId);
 		//

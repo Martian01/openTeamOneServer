@@ -2,6 +2,7 @@ package com.opencommunity.openTeamOneServer.api;
 
 import com.opencommunity.openTeamOneServer.data.*;
 import com.opencommunity.openTeamOneServer.persistence.*;
+import com.opencommunity.openTeamOneServer.util.StreamUtil;
 import com.opencommunity.openTeamOneServer.util.TimeUtil;
 import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONException;
@@ -583,7 +584,7 @@ public class ServiceApi {
 		SymbolicFile symbolicFile = symbolicFileRepository.findById(fileId).orElse(null);
 		if (symbolicFile == null)
 			return Util.httpNotFoundResourceResponse;
-		File file = Util.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
+		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
 		if (file == null)
 			return Util.httpInternalErrorResourceResponse;
 		if (!file.canRead()) {
@@ -648,7 +649,7 @@ public class ServiceApi {
 		if (file == null)
 			return Util.httpInternalErrorResponse;
 		// save byte stream under same fileId
-		Util.writeFile(multipartFile.getInputStream(), file);
+		StreamUtil.writeFile(multipartFile.getInputStream(), file);
 		// save descriptor
 		symbolicFileRepository.save(symbolicFile);
 		//
@@ -756,13 +757,13 @@ public class ServiceApi {
 		}
 		// save byte stream under new fileId
 		SymbolicFile symbolicFile = new SymbolicFile(null, mimeType, null, null, 0, SymbolicFile.DIRECTORY_PROFILES);
-		File file = Util.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
+		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
 		if (file == null) { // unlikely
 			person.pictureId = null;
 			personRepository.save(person);
 			return Util.httpInternalErrorResponse;
 		}
-		Util.writeFile(multipartFile.getInputStream(), file);
+		StreamUtil.writeFile(multipartFile.getInputStream(), file);
 		// save descriptor
 		symbolicFileRepository.save(symbolicFile);
 		// save person
@@ -822,7 +823,7 @@ public class ServiceApi {
 	private File deleteFileContent(SymbolicFile symbolicFile) {
 		if (symbolicFile == null)
 			return null;
-		File file = Util.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
+		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
 		if (file != null && file.exists())
 			file.delete();
 		return file;

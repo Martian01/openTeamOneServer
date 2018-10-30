@@ -6,6 +6,7 @@ import com.opencommunity.openTeamOneServer.data.User;
 import com.opencommunity.openTeamOneServer.persistence.SymbolicFileRepository;
 import com.opencommunity.openTeamOneServer.persistence.TenantParameterRepository;
 import com.opencommunity.openTeamOneServer.persistence.UserRepository;
+import com.opencommunity.openTeamOneServer.util.StreamUtil;
 import com.opencommunity.openTeamOneServer.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -58,7 +59,7 @@ public class MediaApi {
 		SymbolicFile symbolicFile = symbolicFileRepository.findById(fileId).orElse(null);
 		if (symbolicFile == null)
 			return Util.httpNotFoundResourceResponse;
-		File file = Util.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
+		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
 		if (file == null)
 			return Util.httpInternalErrorResourceResponse;
 		if (!file.canRead()) {

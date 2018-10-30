@@ -92,6 +92,7 @@ First, make sure you have enabled UTF-8 with support for 4-byte characters. To t
 	[mysqld]
 	character_set_server = utf8mb4
 	collation_server = utf8mb4_unicode_ci
+    default-time-zone = '+00:00'
 
 Next you need to prepare an empty database for a standard user. Having started the database daemon, you simply enter the following three commands in any SQL console connected to the database, for instance the _mysql_ binary:
 
