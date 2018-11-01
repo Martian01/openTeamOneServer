@@ -11,6 +11,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
@@ -211,19 +212,23 @@ public class Util {
 		return httpUnauthorizedResponse;
 	}
 
-	public static String getDefaultTarget(HttpServletRequest request, TenantParameterRepository tpr, User user) {
-		String parameter = user == null ? "startPageNoLogon" : (user.hasAdminRole ? "startPageAdmin" : (user.hasUserRole ? "startPageUser" : "startPageLogon"));
-		TenantParameter tp = tpr.findById(parameter).orElse(null);
-		return getServerUrl(request) + (tp == null ? "/default/index.html" : tp.value);
+	public static ResponseEntity<String> httpForwardResponse(@NonNull String targetUri) {
+		return ResponseEntity.status(HttpStatus.SEE_OTHER)
+				.header("Location", targetUri)
+				.contentType(MediaType.TEXT_PLAIN)
+				.body(null);
 	}
 
 	public static ResponseEntity<String> httpForwardResponse(HttpServletRequest request, TenantParameterRepository tpr, User user, String targetUri) {
 		if (targetUri == null)
 			targetUri = getDefaultTarget(request, tpr, user);
-		return ResponseEntity.status(HttpStatus.SEE_OTHER)
-				.header("Location", targetUri)
-				.contentType(MediaType.TEXT_PLAIN)
-				.body(null);
+		return httpForwardResponse(targetUri);
+	}
+
+	public static String getDefaultTarget(HttpServletRequest request, TenantParameterRepository tpr, User user) {
+		String parameter = user == null ? "startPageNoLogon" : (user.hasAdminRole ? "startPageAdmin" : (user.hasUserRole ? "startPageUser" : "startPageLogon"));
+		TenantParameter tp = tpr.findById(parameter).orElse(null);
+		return getServerUrl(request) + (tp == null ? "/default/index.html" : tp.value);
 	}
 
 	/* HTTP Resource responses */
@@ -239,6 +244,13 @@ public class Util {
 	public static ResponseEntity<Resource> httpNotFoundResourceResponse = ResponseEntity.status(HttpStatus.NOT_FOUND)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
+
+	public static ResponseEntity<Resource> httpForwardResourceResponse(@NonNull String targetUri, Resource resource) {
+		return ResponseEntity.status(HttpStatus.SEE_OTHER)
+				.header("Location", targetUri)
+				.contentType(MediaType.TEXT_PLAIN)
+				.body(resource);
+	}
 
 	public static ResponseEntity<Resource> httpResourceResponse(Resource resource, MediaType mediaType) {
 		return ResponseEntity.ok()

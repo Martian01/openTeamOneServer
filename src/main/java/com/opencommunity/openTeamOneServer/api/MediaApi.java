@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -65,8 +66,13 @@ public class MediaApi {
 		if (!file.canRead()) {
 			return Util.httpNotFoundResourceResponse;
 		}
-		Resource resource = new ByteArrayResource(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
-		return Util.httpResourceResponse(resource, MediaType.parseMediaType(symbolicFile.mimeType));
+		//
+		byte[] targetUriBytes = StreamUtil.readFile(file);
+		String targetUri = new String(targetUriBytes, StandardCharsets.UTF_8);
+		Resource body = new ByteArrayResource(targetUriBytes);
+		return "application/vnd.sap.sports.link".equals(symbolicFile.mimeType) ? // Special treatment for compatibility
+				Util.httpForwardResourceResponse(targetUri, body):
+				Util.httpResourceResponse(body, MediaType.parseMediaType(symbolicFile.mimeType));
 	}
 
 }
