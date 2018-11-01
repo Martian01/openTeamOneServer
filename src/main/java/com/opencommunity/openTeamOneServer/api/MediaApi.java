@@ -68,11 +68,13 @@ public class MediaApi {
 		}
 		//
 		byte[] targetUriBytes = StreamUtil.readFile(file);
-		String targetUri = new String(targetUriBytes, StandardCharsets.UTF_8);
+		//
+		if ("application/vnd.sap.sports.link".equals(symbolicFile.mimeType)) { // Special treatment for compatibility
+			String targetUri = new String(targetUriBytes, StandardCharsets.UTF_8);
+			return Util.httpForwardResourceResponse(targetUri);
+		}
 		Resource body = new ByteArrayResource(targetUriBytes);
-		return "application/vnd.sap.sports.link".equals(symbolicFile.mimeType) ? // Special treatment for compatibility
-				Util.httpForwardResourceResponse(targetUri, body):
-				Util.httpResourceResponse(body, MediaType.parseMediaType(symbolicFile.mimeType));
+		return Util.httpResourceResponse(body, MediaType.parseMediaType(symbolicFile.mimeType));
 	}
 
 }

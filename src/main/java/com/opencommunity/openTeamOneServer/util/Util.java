@@ -213,7 +213,7 @@ public class Util {
 	}
 
 	public static ResponseEntity<String> httpForwardResponse(@NonNull String targetUri) {
-		return ResponseEntity.status(HttpStatus.SEE_OTHER)
+		return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT)
 				.header("Location", targetUri)
 				.contentType(MediaType.TEXT_PLAIN)
 				.body(null);
@@ -245,11 +245,11 @@ public class Util {
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<Resource> httpForwardResourceResponse(@NonNull String targetUri, Resource resource) {
-		return ResponseEntity.status(HttpStatus.SEE_OTHER)
+	public static ResponseEntity<Resource> httpForwardResourceResponse(@NonNull String targetUri) {
+		return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT)
 				.header("Location", targetUri)
 				.contentType(MediaType.TEXT_PLAIN)
-				.body(resource);
+				.body(null);
 	}
 
 	public static ResponseEntity<Resource> httpResourceResponse(Resource resource, MediaType mediaType) {
