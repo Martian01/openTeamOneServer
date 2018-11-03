@@ -624,8 +624,11 @@ public class MessagingApi {
 		JSONObject sapSportsFile = new JSONObject();
 		sapSportsFile.put("fileId", symbolicFile.fileId);
 		sapSportsFile.put("mimeType", symbolicFile.mimeType);
+		//if (symbolicFile.mimeType != null && symbolicFile.mimeType.startsWith("application/vnd.sap.sports"))
+		//	sapSportsFile.put("details", JSONObject.NULL); // for iOS app
 		JSONObject attachmentContent = new JSONObject();
-		JsonUtil.put(attachmentContent, "text", symbolicFile.text);
+		String text = symbolicFile.text != null && symbolicFile.text.length() > 0 ? symbolicFile.text : null;
+		JsonUtil.put(attachmentContent, "text", text);
 		JsonUtil.put(attachmentContent, "mimeType", "application/vnd.sap.sports.file");
 		JsonUtil.put(attachmentContent, "sapSportsFile", sapSportsFile);
 		JSONObject item = new JSONObject();
