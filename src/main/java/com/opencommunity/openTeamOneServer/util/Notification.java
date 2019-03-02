@@ -40,9 +40,9 @@ public class Notification {
 			"select s.target_type, s.app_id, s.device_token, s.client_account_id, u.person_id from subscription s " +
 					"join user u on u.user_id = s.user_id " +
 					"join room_member rm on rm.person_id = u.person_id " +
-					"where s.is_active = 1 and s.changed_at > ? and rm.room_id = ?";
+					"where s.is_active = 1 and rm.room_id = ? and s.changed_at >= ?";
 
-	private static final long HORIZON = 1000L * 60 * 60 * 24 * 28;
+	private static final long MILLIS_PER_DAY = 1000L * 60 * 60 * 24;
 
 	private static final Map<String, String> endPoints = new HashMap<String, String>() {{
 		put("fcm/com.sap.sports.teamone", "fcm/TeamOne");
@@ -74,10 +74,12 @@ public class Notification {
 			@Override
 			public void run() {
 				try {
-					Long subscriptionDate = System.currentTimeMillis() - HORIZON;
+					TenantParameter tp = tenantParameterRepository.findById("horizonDays").orElse(null);
+					Long horizonDays = tp == null ? null : Long.getLong(tp.value);
+					Long subscriptionHorizon = horizonDays == null ? 0L : System.currentTimeMillis() - horizonDays * MILLIS_PER_DAY;
 					List<Recipient> recipients = jdbcTemplate.query(
 							SQL_QUERY,
-							new Object[]{subscriptionDate, message.roomId},
+							new Object[]{message.roomId, subscriptionHorizon},
 							new RowMapper<Recipient>() {
 								@Override
 								public Recipient mapRow(ResultSet resultSet, int i) throws SQLException {
