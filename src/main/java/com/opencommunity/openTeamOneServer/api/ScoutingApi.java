@@ -61,7 +61,7 @@ public class ScoutingApi {
 		//
 		JSONObject body = new JSONObject();
 		Person me = personRepository.findById(user.personId).orElse(null);
-		TenantParameter tpName = tenantParameterRepository.findById("name").orElse(null);
+		TenantParameter tpName = tenantParameterRepository.findById("tenantName").orElse(null);
 		TenantParameter tpPictureId = tenantParameterRepository.findById("pictureId").orElse(null);
 		//
 		if (me != null)
