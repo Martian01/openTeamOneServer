@@ -94,7 +94,7 @@ public class MessagingApi {
 		JSONObject body = new JSONObject();
 		Person me = personRepository.findById(user.personId).orElse(null);
 		TenantParameter tpName = tenantParameterRepository.findById("tenantName").orElse(null);
-		TenantParameter tpPictureId = tenantParameterRepository.findById("pictureId").orElse(null);
+		TenantParameter tpPictureId = tenantParameterRepository.findById("tenantPictureId").orElse(null);
 		// new structure, used by Android app
 		if (me != null)
 			body.put("loginPerson", personToJson(me));
