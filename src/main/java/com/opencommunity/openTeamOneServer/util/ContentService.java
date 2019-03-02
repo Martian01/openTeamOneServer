@@ -68,7 +68,7 @@ public class ContentService {
 	@PostConstruct
 	private void init() {
 		if (!tpr.findById("tenantName").isPresent())
-			tpr.save(new TenantParameter("tenantName", "OpenTeamOne"));
+			tpr.save(new TenantParameter("tenantName", "Open Team One"));
 		if (!tpr.findById("pictureId").isPresent())
 			tpr.save(new TenantParameter("pictureId", "tenant"));
 		if (!tpr.findById("startPageNoLogon").isPresent())
