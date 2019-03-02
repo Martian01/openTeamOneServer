@@ -26,7 +26,7 @@ public class Util {
 	/* Misc */
 
 	public static boolean equal(Object x, Object y) {
-		return (x == null && y == null) || (x != null && y != null && x.equals(y));
+		return (x == null && y == null) || (x != null && x.equals(y));
 	}
 
 	public static String getUuid() {
@@ -46,8 +46,7 @@ public class Util {
 				if (parts.length == 2)
 					try {
 						map.put(parts[0], URLDecoder.decode(parts[1], "UTF-8"));
-					} catch (Exception e) {
-					}
+					} catch (Exception ignored) { }
 			}
 		}
 		return map;
@@ -74,7 +73,7 @@ public class Util {
 				String decodedHeader = URLDecoder.decode(new String(Base64.decodeFast(authHeader.substring(6)), "UTF-8"), "UTF-8");
 				if (decodedHeader != null)
 					return decodedHeader.split(":");
-			} catch (Exception e) { }
+			} catch (Exception ignored) { }
 		}
 		return null;
 	}
