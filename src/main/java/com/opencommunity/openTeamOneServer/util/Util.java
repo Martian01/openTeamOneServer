@@ -232,6 +232,10 @@ public class Util {
 
 	/* HTTP Resource responses */
 
+	public static ResponseEntity<Resource> httpBadRequestResourceResponse = ResponseEntity.status(HttpStatus.BAD_REQUEST)
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
+
 	public static ResponseEntity<Resource> httpUnauthorizedResourceResponse = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);

@@ -8,6 +8,8 @@ import com.opencommunity.openTeamOneServer.persistence.TenantParameterRepository
 import com.opencommunity.openTeamOneServer.persistence.UserRepository;
 import com.opencommunity.openTeamOneServer.util.StreamUtil;
 import com.opencommunity.openTeamOneServer.util.Util;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -21,8 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/sap/sports/fnd/api")
@@ -49,6 +49,16 @@ public class MediaApi {
 		return handleFileRequest(request, fileId);
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/token/{fileId}")
+	public ResponseEntity<Resource> mediaTokenContent(HttpServletRequest request, @PathVariable String fileId) throws Exception {
+		return handleTokenRequest(request, fileId);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{fileId}/details")
+	public ResponseEntity<String> mediaFileDetails(HttpServletRequest request, @PathVariable String fileId) throws Exception {
+		return handleFileDetailsRequest(request, fileId);
+	}
+
 	/* helper functions */
 
 	private ResponseEntity<Resource> handleFileRequest(HttpServletRequest request, String fileId) throws Exception {
@@ -60,6 +70,19 @@ public class MediaApi {
 		SymbolicFile symbolicFile = symbolicFileRepository.findById(fileId).orElse(null);
 		if (symbolicFile == null)
 			return Util.httpNotFoundResourceResponse;
+		return sendSymbolicFile(symbolicFile);
+	}
+
+	private ResponseEntity<Resource> handleTokenRequest(HttpServletRequest request, String token) throws Exception {
+		SymbolicFile symbolicFile = symbolicFileRepository.findById(token).orElse(null); // TODO: proper token handling
+		if (symbolicFile == null)
+			return Util.httpNotFoundResourceResponse;
+		if (!symbolicFile.mimeType.startsWith("video/"))
+			return Util.httpBadRequestResourceResponse;
+		return sendSymbolicFile(symbolicFile);
+	}
+
+	private ResponseEntity<Resource> sendSymbolicFile(SymbolicFile symbolicFile) throws Exception {
 		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
 		if (file == null)
 			return Util.httpInternalErrorResourceResponse;
@@ -75,6 +98,60 @@ public class MediaApi {
 		}
 		Resource body = new ByteArrayResource(targetUriBytes);
 		return Util.httpResourceResponse(body, MediaType.parseMediaType(symbolicFile.mimeType));
+	}
+
+	private ResponseEntity<String> handleFileDetailsRequest(HttpServletRequest request, String fileId) throws Exception {
+		Session session = Util.getSession(request);
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
+		if (user == null)
+			return Util.httpUnauthorizedResponse;
+		//
+		SymbolicFile symbolicFile = symbolicFileRepository.findById(fileId).orElse(null);
+		if (symbolicFile == null)
+			return Util.httpNotFoundResponse;
+		if (!symbolicFile.mimeType.startsWith("video/"))
+			return Util.httpBadRequestResponse;
+		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
+		if (file == null)
+			return Util.httpInternalErrorResponse;
+		if (!file.canRead()) {
+			return Util.httpNotFoundResponse;
+		}
+		//
+		JSONObject tempUrl = new JSONObject();
+		tempUrl.put("url", Util.getServerUrl(request) + "/sap/sports/fnd/api/media/v1/token/" + symbolicFile.fileId); // TODO: proper token handling
+		tempUrl.put("validUntil", "2659-12-31T23:59:59.999Z"); // 640 years ought to be enough for anybody
+		JSONObject source = new JSONObject();
+		source.put("sourceName", symbolicFile.fileId);
+		source.put("mimeType", symbolicFile.mimeType);
+		source.put("path", symbolicFile.fileId);
+		source.put("size", file.length());
+		source.put("tempUrl", tempUrl);
+		source.put("isOriginal", true);
+		source.put("isAdaptive", false);
+		source.put("isDownloadable", true);
+		//source.put("isTrimmed", false);
+		//source.put("fourCC", "avc1");
+		//source.put("duration", 0);
+		//source.put("width", 0);
+		//source.put("height", 0);
+		//source.put("bitrate", 0);
+		//source.put("targetBitrate", 0);
+		//source.put("framerate", 0);
+		//source.put("trimOffset", 0);
+		//source.put("trimDuration", 0);
+		JSONArray sources = new JSONArray();
+		sources.put(source); // note: no preview pic
+		JSONObject v2 = new JSONObject();
+		v2.put("isFinal", true);
+		v2.put("sources", sources);
+		JSONObject details = new JSONObject();
+		details.put("v2", v2);
+		JSONObject body = new JSONObject();
+		body.put("fileId", symbolicFile.fileId);
+		body.put("details", details);
+		//
+		return Util.httpOkResponse(body);
 	}
 
 }
