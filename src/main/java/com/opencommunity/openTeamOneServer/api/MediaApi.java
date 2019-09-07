@@ -63,7 +63,7 @@ public class MediaApi {
 
 	private ResponseEntity<Resource> handleFileRequest(HttpServletRequest request, String fileId) throws Exception {
 		Session session = Util.getSession(request);
-		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
 			return Util.httpUnauthorizedResourceResponse;
 		//
@@ -102,7 +102,7 @@ public class MediaApi {
 
 	private ResponseEntity<String> handleFileDetailsRequest(HttpServletRequest request, String fileId) throws Exception {
 		Session session = Util.getSession(request);
-		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
 			return Util.httpUnauthorizedResponse;
 		//

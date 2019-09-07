@@ -7,6 +7,7 @@ import com.opencommunity.openTeamOneServer.persistence.TenantParameterRepository
 import com.opencommunity.openTeamOneServer.persistence.UserRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -78,7 +79,6 @@ public class Util {
 		return null;
 	}
 
-
 	public static User getBasicAuthUser(HttpServletRequest request, UserRepository userRepository) {
 		String[] credentials = Util.splitBasicAuthHeader(request.getHeader("Authorization"));
 		if (credentials == null || credentials.length != 2)
@@ -138,48 +138,48 @@ public class Util {
 
 	/* HTTP String responses */
 
-	public static ResponseEntity<String> httpOkResponse = ResponseEntity.status(HttpStatus.OK)
+	public static final ResponseEntity<String> httpOkResponse = ResponseEntity.status(HttpStatus.OK)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<String> httpCreatedResponse = ResponseEntity.status(HttpStatus.CREATED)
+	public static final ResponseEntity<String> httpCreatedResponse = ResponseEntity.status(HttpStatus.CREATED)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<String> httpAcceptedResponse = ResponseEntity.status(HttpStatus.ACCEPTED)
+	public static final ResponseEntity<String> httpAcceptedResponse = ResponseEntity.status(HttpStatus.ACCEPTED)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<String> httpBadRequestResponse = ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	public static final ResponseEntity<String> httpBadRequestResponse = ResponseEntity.status(HttpStatus.BAD_REQUEST)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<String> httpUnauthorizedResponse = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+	public static final ResponseEntity<String> httpUnauthorizedResponse = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<String> httpForbiddenResponse = ResponseEntity.status(HttpStatus.FORBIDDEN)
+	public static final ResponseEntity<String> httpForbiddenResponse = ResponseEntity.status(HttpStatus.FORBIDDEN)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<String> httpNotFoundResponse = ResponseEntity.status(HttpStatus.NOT_FOUND)
+	public static final ResponseEntity<String> httpNotFoundResponse = ResponseEntity.status(HttpStatus.NOT_FOUND)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<String> httpGoneResponse = ResponseEntity.status(HttpStatus.GONE)
+	public static final ResponseEntity<String> httpGoneResponse = ResponseEntity.status(HttpStatus.GONE)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<String> httpInternalErrorResponse = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	public static final ResponseEntity<String> httpInternalErrorResponse = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<String> httpNoSessionResponse = ResponseEntity.status(HttpStatus.OK)
+	public static final ResponseEntity<String> httpNoSessionResponse = ResponseEntity.status(HttpStatus.OK)
 			.header("Set-Cookie", getSessionCookie(null))
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<String> httpForbiddenSessionResponse = ResponseEntity.status(HttpStatus.FORBIDDEN)
+	public static final ResponseEntity<String> httpForbiddenSessionResponse = ResponseEntity.status(HttpStatus.FORBIDDEN)
 			.header("Set-Cookie", getSessionCookie(null))
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
@@ -230,21 +230,28 @@ public class Util {
 		return getServerUrl(request) + (tp == null ? "/default/index.html" : tp.value);
 	}
 
+	public static final String defaultCsrfToken = "792E926C333D4BB88AF219F83CDA2CE1";
+
+	public static final ResponseEntity<String> httpCsrfResponse = ResponseEntity.status(HttpStatus.OK)
+			.header("x-csrf-token", defaultCsrfToken) // iOS app wants lower case header
+			.contentType(MediaType.TEXT_PLAIN)
+			.body(null);
+
 	/* HTTP Resource responses */
 
-	public static ResponseEntity<Resource> httpBadRequestResourceResponse = ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	public static final ResponseEntity<Resource> httpBadRequestResourceResponse = ResponseEntity.status(HttpStatus.BAD_REQUEST)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<Resource> httpUnauthorizedResourceResponse = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+	public static final ResponseEntity<Resource> httpUnauthorizedResourceResponse = ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<Resource> httpInternalErrorResourceResponse = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	public static final ResponseEntity<Resource> httpInternalErrorResourceResponse = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 
-	public static ResponseEntity<Resource> httpNotFoundResourceResponse = ResponseEntity.status(HttpStatus.NOT_FOUND)
+	public static final ResponseEntity<Resource> httpNotFoundResourceResponse = ResponseEntity.status(HttpStatus.NOT_FOUND)
 			.contentType(MediaType.TEXT_PLAIN)
 			.body(null);
 

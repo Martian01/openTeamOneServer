@@ -33,7 +33,7 @@ public class ScoutingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/sap/sports/sct/api/mobile/versions")
 	public ResponseEntity<String> versions(HttpServletRequest request) throws JSONException {
 		Session session = Util.getSession(request);
-		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//
@@ -55,7 +55,7 @@ public class ScoutingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/sap/sports/sct/api/mobile/v1/service/rest/me")
 	public ResponseEntity<String> me(HttpServletRequest request) throws JSONException {
 		Session session = Util.getSession(request);
-		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // iOS vs. Android app
+		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
 			return Util.httpStaleSessionResponse(request);
 		//

@@ -30,18 +30,9 @@ public class SessionApi {
 	@Autowired
 	private PersonRepository personRepository;
 
-	// Note: CSRF protection is irrelevant for mobile clients, and taken care of for browsers by SameSite cookies
-
-	private final String defaultCsrfToken = "792E926C333D4BB88AF219F83CDA2CE1";
-
-	private final ResponseEntity<String> httpCsrfResponse = ResponseEntity.status(HttpStatus.OK)
-			.header("x-csrf-token", defaultCsrfToken) // iOS app wants lower case header
-			.contentType(MediaType.TEXT_PLAIN)
-			.body(null);
-
 	@RequestMapping(method = RequestMethod.GET, value = "/token.xsjs")
-	public ResponseEntity<String> token(HttpServletRequest request) {
-		return request.getHeader("Authorization") != null ? httpCsrfResponse : Util.httpOkResponse; // iOS vs. Android app
+	public ResponseEntity<String> loginToken(HttpServletRequest request) {
+		return Util.httpCsrfResponse;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/login.xscfunc")
@@ -118,7 +109,7 @@ public class SessionApi {
 		return session.iosMode() ?
 				ResponseEntity.status(HttpStatus.OK)
 						.header("Set-Cookie", Util.getSessionCookie(session.sessionId))
-						.header("x-csrf-token", defaultCsrfToken) // iOS app wants lower case header
+						.header("x-csrf-token", Util.defaultCsrfToken) // iOS app wants lower case header
 						.contentType(MediaType.APPLICATION_JSON)
 						.body(body.toString()) :
 				ResponseEntity.status(HttpStatus.OK)
