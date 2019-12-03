@@ -125,7 +125,7 @@
 			$("#_changedAt").on("click", function() {
 				$("#changedAt").val(new Date().toISOString());
 			});
-    	};
+		}
 		function onLoadSession(response) {
 			var isLoggedIn = response && response.user;
 			var isLoggedInAsAdmin = isLoggedIn && response.user.hasAdminRole;

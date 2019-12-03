@@ -81,6 +81,27 @@ Here are a few screenshots of SAP Team One connected against Open Team One Serve
 ![Room content](docu/screenshot3.png)
 ![Room details](docu/screenshot4.png)
 
+## Web Application
+
+Open Team One offers a web application for two user groups: administrators and users. There is a unified logon that is accessed by calling up server root, for instance http://localhost:8080 for a local installation.
+
+Users will be taken to a self-service, where they can change their profile picture, display name and password.
+
+![User Self Service](docu/webapp1.png)
+
+Administrators will be taken to a set of pages where they can browse and modify all tables and file attachments in the database. You have caught a glimpse of it in the quick guide section.
+
+Open Team One is designed to support different web applications, should there ever be more than one. The default web applikation is meant to be a fully functional proof-of-concept. It resides in the project directory src/main/resources/static/default/ and is served via the URL http://localhost:8080/default/ . Additional web applications can be placed into subdirectories that are sibling to src/main/resources/static/default/.
+
+The server offers the following tenant parameters to control the navigation. The /ui/* services will automatically redirect to the targets specified by those tenant parameters. By overwriting them in the database you can set another web application as default.
+
+| Tenant Parameter | Default value             | Usage                                      |
+|------------------|---------------------------|--------------------------------------------|
+| startPageNoLogon | /default/index.html       | when called without valid session context  |
+| startPageLogon   | /default/index.html       | for logins that are neither admin nor user |
+| startPageAdmin   | /default/admin/index.html | for logged-in administrators               |
+| startPageUser    | /default/user/index.html  | for logged-in users                        |
+
 ## Persistence via MariaDB
 
 For a first trial it is quite convenient to use the H2 in-memory database as it comes with Spring Boot and requires no configuration. After your first steps with Open Team One you might want to progress to a disk based SQL database, like MariaDB. MariaDB is a popular MySQL fork. In fact, MariaDB is the continuation of MySQL by the original author and a community. MariaDB is drop-in compatible with MySQL, so everything written in this section works for MySQL, too.
@@ -129,11 +150,36 @@ Finally we add the following properties to the _application.properties_ file. In
 
 Restart Open Team One Server and you're done. If you want to migrate the content over to the new DB, save and import a snapshot via the admin tools. 
 
+## SSL Configuration
+
+Sadly SSL configuration in Java is not as easy as it could be. However, Spring Boot offers a fairly easy approach if your requirements are simple. For more advanced requirements you are welcome to search the internet. The guide I found most helpful for the setup is [DZone: Spring Boot Secured By Let's Encrypt ](https://dzone.com/articles/spring-boot-secured-by-lets-encrypt).
+
+First of all you need a certificate confirming your domain. For test purposes you can sign your own certificate using the java helper called _keytool_. For productive use, however, you need a certificate signed by a CA (Certificate Authority) that is trusted by major web browsers. Some CAs charge money. However, there are free alternatives, like [Let's Encrypt](https://letsencrypt.org/getting-started/). Following the guide about [Debian](https://certbot.eff.org/#debianstretch-other) I basically did this:
+
+	apt-get install certbot
+	certbot certonly --standalone -d <your domain>
+
+This will generate a bunch of keys and certificates in _/etc/letsencrypt/_. Next you need to convert those files into a keystore that Tomcat (the web server embedded in the Spring Boot JAR file) actually understands:
+
+	cd /etc/letsencrypt/live/<your domain>/
+	openssl pkcs12 -export -in fullchain.pem -inkey privkey.pem -out keystore.p12 -name <your alias> -CAfile chain.pem -caname root
+
+You will be asked to set a password. Finally, you enter your details in the _application.properties_ file:
+
+	server.port=8443
+	security.require-ssl=true
+	server.ssl.key-store=/path/to/keystore.p12
+	server.ssl.key-store-password=yourKeyStorePassword
+	server.ssl.keyStoreType=PKCS12
+	server.ssl.keyAlias=yourAlias
+
+After restarting the server you can access it via HTTPS. If you need both HTTP and HTTPS access at the same time, configuration is a little harder. Check out the web tutorials for that.
+
 ## Server Deployment
 
 There is a number of options for the deployment of Spring Boot applications. Read about them in the blog article [Deploying Spring Boot Applications](https://spring.io/blog/2014/03/07/deploying-spring-boot-applications).
 
-One of the most simple deployment option is to build a JAR file that can be executed anywhere. You simply call the Maven wrapper in the project root directory like this:
+One of the most simple deployment options is to build a JAR file that can be executed anywhere. You simply call the Maven wrapper in the project root directory like this:
 
 	$ ./mvnw package
 
@@ -187,50 +233,18 @@ Unsurprisingly you stop the server by saying
 
 I was not successful running the server under a different user, but then again, I did not spend much time on the issue.
 
-## SSL Configuration
+## Cloud Service Deployment
 
-Sadly SSL configuration in Java is not as easy as it could be. However, Spring Boot offers a fairly easy approach if your requirements are simple. For more advanced requirements you are welcome to search the internet. The guide I found most helpful for the setup is [DZone: Spring Boot Secured By Let's Encrypt ](https://dzone.com/articles/spring-boot-secured-by-lets-encrypt).
+The previous section was about manual deployment on a single server. However, in a cloud context you might want to start up and shut down instances of application and persistence services based on current demand. The services will be configured at runtime, automatically, through the injection of parameters via file system or environment.
 
-First of all you need a certificate confirming your domain. For test purposes you can sign your own certificate using the java helper called _keytool_. For productive use, however, you need a certificate signed by a CA (Certificate Authority) that is trusted by major web browsers. Some CAs charge money. However, there are free alternatives, like [Let's Encrypt](https://letsencrypt.org/getting-started/). Following the guide about [Debian](https://certbot.eff.org/#debianstretch-other) I basically did this:
+Since you do not want to compile a new version of Open Team One every time you need new parameters you can inject application properties at runtime. To that end, inject a file into your runtime image, say
 
-	apt-get install certbot
-	certbot certonly --standalone -d <your domain>
+    /mnt/injected/application.properties
 
-This will generate a bunch of keys and certificates in _/etc/letsencrypt/_. Next you need to convert those files into a keystore that Tomcat (the web server embedded in the Spring Boot JAR file) actually understands:
+and start Open Team One with the command line
 
-	cd /etc/letsencrypt/live/<your domain>/
-	openssl pkcs12 -export -in fullchain.pem -inkey privkey.pem -out keystore.p12 -name <your alias> -CAfile chain.pem -caname root
+    /usr/bin/java -jar /opt/openTeamOneServer-1.0.0-SNAPSHOT.jar -Dspring.config.additional-location=file:/mnt/injected/
 
-You will be asked to set a password. Finally, you enter your details in the _application.properties_ file:
+The parameters in the injected file will override the parameters in the jar file.
 
-	server.port=8443
-	security.require-ssl=true
-	server.ssl.key-store=/path/to/keystore.p12
-	server.ssl.key-store-password=yourKeyStorePassword
-	server.ssl.keyStoreType=PKCS12
-	server.ssl.keyAlias=yourAlias
-
-After restarting the server you can access it via HTTPS. If you need both HTTP and HTTPS access at the same time, configuration is a little harder. Check out the web tutorials for that.
-
-## Web Application
-
-Open Team One offers a web application for two user groups: administrators and users. There is a unified logon that is accessed by calling up server root, for instance http://localhost:8080 for a local installation.
-
-Users will be taken to a self-service, where they can change their profile picture, display name and password.
-
-![User Self Service](docu/webapp1.png)
-
-Administrators will be taken to a set of pages where they can browse and modify all tables and file attachments in the database. You have caught a glimpse of it in the quick guide section above.
-
-Open Team One is designed to support different web applications, should there ever be more than one. The default web applikation is meant to be a fully functional proof-of-concept. It resides in the project directory src/main/resources/static/default/ and is served via the URL http://localhost:8080/default/ . Additional web applications can be placed into subdirectories that are sibling to src/main/resources/static/default/.
-
-The server offers the following tenant parameters to control the navigation. The /ui/* services will automatically redirect to the targets specified by those tenant parameters. By overwriting them in the database you can set another web application as default.
-
-| Tenant Parameter | Default value             | Usage                                      |
-|------------------|---------------------------|--------------------------------------------|
-| startPageNoLogon | /default/index.html       | when called without valid session context  |
-| startPageLogon   | /default/index.html       | for logins that are neither admin nor user |
-| startPageAdmin   | /default/admin/index.html | for logged-in administrators               |
-| startPageUser    | /default/user/index.html  | for logged-in users                        |
-
-
+Caveat: I have verified this to work when starting Open Team One on a remote server. However, for some reason it failed to work when putting the service under systemd control. I am still investigating.
