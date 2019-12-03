@@ -146,7 +146,7 @@ Finally we add the following properties to the _application.properties_ file. In
 	spring.datasource.url=jdbc:mysql://localhost:3306/teamone
 	spring.datasource.username=springuser
 	spring.datasource.password=dbPassword
-	spring.datasource.connectionProperties=useUnicode=true;characterEncoding=utf-8;
+	spring.datasource.connectionProperties=useUnicode=true;characterEncoding=utf-8;serverTimezone=UTC;
 
 Restart Open Team One Server and you're done. If you want to migrate the content over to the new DB, save and import a snapshot via the admin tools. 
 
@@ -237,13 +237,13 @@ I was not successful running the server under a different user, but then again, 
 
 The previous section was about manual deployment on a single server. However, in a cloud context you might want to start up and shut down instances of application and persistence services based on current demand. The services will be configured at runtime, automatically, through the injection of parameters via file system or environment.
 
-Since you do not want to compile a new version of Open Team One every time you need new parameters you can inject application properties at runtime. To that end, inject a file into your runtime image, say
+Since you do not want to compile a new version of Open Team One every time you need different parameters you can inject application properties at runtime. To that end, mount a file into your runtime image, say
 
-    /mnt/injected/application.properties
+    /mnt/inject/application.properties
 
 and start Open Team One with the command line
 
-    /usr/bin/java -jar /opt/openTeamOneServer-1.0.0-SNAPSHOT.jar -Dspring.config.additional-location=file:/mnt/injected/
+    /usr/bin/java -jar openTeamOneServer.jar -Dspring.config.additional-location=file:/mnt/inject/
 
 The parameters in the injected file will override the parameters in the jar file.
 
