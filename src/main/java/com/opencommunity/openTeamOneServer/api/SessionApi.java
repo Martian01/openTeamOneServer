@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
 import java.util.Map;
 
 @RestController
@@ -50,9 +51,9 @@ public class SessionApi {
 		if (user.hasUserRole && user.personId != null) {
 			Person person = personRepository.findById(user.personId).orElse(null);
 			if (person != null && user.matches(password))
-				session = Session.newSession(userId, request.getHeader("X-CSRF-TOKEN") != null);
+				session = Session.newSession(userId, iosMode(request));
 		}
-		return session == null ? Util.httpForbiddenSessionResponse : sessionResponse(session);
+		return session == null ? Util.httpForbiddenSessionResponse : sessionResponse(session, withCsrfToken(request));
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/pwchange.xscfunc")
@@ -81,12 +82,12 @@ public class SessionApi {
 			}
 		}
 		if (passwordOldConfirmed || user.matches(passwordOld)) {
-			session = Session.newSession(userId, request.getHeader("X-CSRF-TOKEN") != null);
+			session = Session.newSession(userId, iosMode(request));
 			user.setPassword(passwordNew);
 			userRepository.save(user);
 		}
 		//
-		return session == null ? Util.httpForbiddenSessionResponse : sessionResponse(session);
+		return session == null ? Util.httpForbiddenSessionResponse : sessionResponse(session, withCsrfToken(request));
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/logout.xscfunc")
@@ -100,13 +101,36 @@ public class SessionApi {
 
 	/* helper functions */
 
-	private ResponseEntity<String> sessionResponse(Session session) throws JSONException {
+	private boolean iosMode(HttpServletRequest request) {
+		String header = request.getHeader("user-agent");
+		return header != null && (header.contains("iPhone") || header.contains("iPad"));
+	}
+
+	private boolean withCsrfToken(HttpServletRequest request) {
+		String header = request.getHeader("x-csrf-token");
+		return header != null && header.toLowerCase().equals("fetch");
+	}
+
+	/*
+	private void logHeaders(HttpServletRequest request) {
+		Enumeration<String> headers = request.getHeaderNames();
+		while (headers.hasMoreElements()) {
+			String header = headers.nextElement();
+			System.out.println("# " + header + "\n");
+			Enumeration<String> values = request.getHeaders(header);
+			while (values.hasMoreElements())
+				System.out.println(">   " + values.nextElement() + "\n");
+		}
+	}
+	*/
+
+	private ResponseEntity<String> sessionResponse(Session session, boolean withCsrfToken) throws JSONException {
 		JSONObject body = new JSONObject();
 		body.put("login", true);
 		body.put("pwdChange", false);
 		JsonUtil.put(body, "username", session.userId);
 		//
-		return session.iosMode() ?
+		return withCsrfToken ?
 				ResponseEntity.status(HttpStatus.OK)
 						.header("Set-Cookie", Util.getSessionCookie(session.sessionId))
 						.header("x-csrf-token", Util.defaultCsrfToken) // iOS app wants lower case header

@@ -12,9 +12,9 @@ The SAP Team One apps are normally operated against a SAP Sports One backend tha
 
 An interface for the generation of push notifications has been provided. However, since the API keys and certificates used for the proprietary SAP app are not in the public domain, they cannot be provided as part of this open source project.
 
-## Limitations
+## Request for Help
 
-Whilst the server is functionally complete within the scope described above, the user experience of the web apps for server administration and user self-service is still experimental. Those web apps are fully functional, but they could do with a better user interaction design, better web design and a modern implementation resulting in a pleasant best-of-breed user experience.
+Whilst the server is functionally complete within the scope described above, the user experience of the web apps for server administration and user self-service is still experimental. Those web apps are fully functional, but they could do with a better web design and a modern frontend implementation resulting in a best-of-breed user experience.
 
 ## Quick Guide (How to run the server with demo content)
 

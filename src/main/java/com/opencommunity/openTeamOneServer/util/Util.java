@@ -80,7 +80,7 @@ public class Util {
 	}
 
 	public static User getBasicAuthUser(HttpServletRequest request, UserRepository userRepository) {
-		String[] credentials = Util.splitBasicAuthHeader(request.getHeader("Authorization"));
+		String[] credentials = splitBasicAuthHeader(request.getHeader("Authorization"));
 		if (credentials == null || credentials.length != 2)
 			return null;
 		User user = userRepository.findById(credentials[0].toLowerCase()).orElse(null);
