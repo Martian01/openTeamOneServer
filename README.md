@@ -211,7 +211,7 @@ If you want to run the service under systemd control in order to be independent 
     [Service]
     Type=simple
     User=root
-    ExecStart=/usr/bin/java -jar /opt/openTeamOneServer-1.0.0-SNAPSHOT.jar
+    ExecStart=/usr/bin/java -Xrs -jar /opt/openTeamOneServer-1.0.0-SNAPSHOT.jar
     Restart=always
     RestartSec=10
 
