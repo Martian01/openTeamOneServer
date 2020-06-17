@@ -2,7 +2,7 @@ package com.opencommunity.openTeamOneServer.data;
 
 import com.opencommunity.openTeamOneServer.util.BCrypt;
 import com.opencommunity.openTeamOneServer.util.JsonUtil;
-import com.opencommunity.openTeamOneServer.util.Util;
+import com.opencommunity.openTeamOneServer.util.RestLib;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,7 +31,7 @@ public class User {
 	}
 
 	public User(String userId, String password, String personId, boolean hasUserRole, boolean hasAdminRole) {
-		this.userId = userId == null || userId.length() == 0 ? Util.getRandomString(8) : userId.toLowerCase();
+		this.userId = userId == null || userId.length() == 0 ? RestLib.getRandomString(8) : userId.toLowerCase();
 		setPassword(password);
 		this.personId = personId;
 		this.hasUserRole = hasUserRole;
@@ -40,7 +40,7 @@ public class User {
 
 	public User(JSONObject item) throws JSONException {
 		userId = JsonUtil.getString(item, "userId");
-		userId = userId == null || userId.length() == 0 ? Util.getRandomString(8) : userId.toLowerCase();
+		userId = userId == null || userId.length() == 0 ? RestLib.getRandomString(8) : userId.toLowerCase();
 		// accept unencrypted password or password hash
 		String password = JsonUtil.getString(item, "password");
 		if (password != null)

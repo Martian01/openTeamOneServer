@@ -4,13 +4,11 @@ import com.opencommunity.openTeamOneServer.data.Session;
 import com.opencommunity.openTeamOneServer.data.User;
 import com.opencommunity.openTeamOneServer.persistence.TenantParameterRepository;
 import com.opencommunity.openTeamOneServer.persistence.UserRepository;
-import com.opencommunity.openTeamOneServer.util.Util;
+import com.opencommunity.openTeamOneServer.util.RestLib;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,13 +23,15 @@ public class RootApi {
 	private TenantParameterRepository tenantParameterRepository;
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private RestLib restLib;
 
 	@RequestMapping(method = RequestMethod.GET, value = "/sap/sports/pe/api/messaging/versions")
 	public ResponseEntity<String> versions(HttpServletRequest request) throws JSONException {
-		Session session = Util.getSession(request);
-		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // fallback to Basic Auth
+		Session session = restLib.getSession(request);
+		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
-			return Util.httpStaleSessionResponse(request);
+			return restLib.httpStaleSessionResponse(request);
 		//
 		JSONObject teamOneAndroid = new JSONObject();
 		teamOneAndroid.put("required", 1);
@@ -45,19 +45,19 @@ public class RootApi {
 		body.put("versions", versions);
 		body.put("clients", clients);
 		//
-		return Util.httpOkResponse(body);
+		return restLib.httpOkResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/sap/sports/fnd/db/services/public/xs/token.xsjs")
 	public ResponseEntity<String> fndToken(HttpServletRequest request) {
-		return Util.httpCsrfResponse;
+		return restLib.httpCsrfResponse;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = {"", "/", "/admin", "/admin/"})
 	public ResponseEntity<String> root(HttpServletRequest request) {
-		Session session = Util.getSession(request);
-		User user = Util.getSessionUser(session, userRepository);
-		return Util.httpForwardResponse(request, tenantParameterRepository, user, null);
+		Session session = restLib.getSession(request);
+		User user = restLib.getSessionUser(session, userRepository);
+		return restLib.httpForwardResponse(request, tenantParameterRepository, user, null);
 	}
 
 }

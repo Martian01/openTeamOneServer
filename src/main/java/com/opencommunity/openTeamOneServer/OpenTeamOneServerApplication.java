@@ -1,6 +1,7 @@
 package com.opencommunity.openTeamOneServer;
 
 import com.opencommunity.openTeamOneServer.util.ContentService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,13 +21,15 @@ public class OpenTeamOneServerApplication implements WebMvcConfigurer {
 		SpringApplication.run(OpenTeamOneServerApplication.class, args);
 	}
 
+	@Autowired
+	public ContentService contentService;
+
 	@Bean
 	public CommandLineRunner loadContent() {
 		return new CommandLineRunner() {
 			@Override
 			public void run(String... args) throws Exception {
-				//ContentService.loadModelData();
-				System.out.println("\n" + ContentService.getSummary().toString(4) + "\n");
+				System.out.println("\n" + contentService.getSummary().toString(4) + "\n");
 			}
 		};
 	}

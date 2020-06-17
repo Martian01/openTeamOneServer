@@ -1,8 +1,8 @@
 package com.opencommunity.openTeamOneServer.data;
 
 import com.opencommunity.openTeamOneServer.util.JsonUtil;
+import com.opencommunity.openTeamOneServer.util.RestLib;
 import com.opencommunity.openTeamOneServer.util.TimeUtil;
-import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,7 +37,7 @@ public class Message {
 	}
 
 	public Message(String messageId, String clientMessageId, String roomId, String senderPersonId, long postedAt, String text, boolean isDeleted, long updatedAt) {
-		this.messageId =  messageId == null || messageId.length() == 0 ? Util.getUuid() : messageId;
+		this.messageId =  messageId == null || messageId.length() == 0 ? RestLib.getUuid() : messageId;
 		this.clientMessageId = clientMessageId;
 		this.roomId = roomId;
 		this.senderPersonId = senderPersonId;
@@ -58,7 +58,7 @@ public class Message {
 		updatedAt = JsonUtil.getIsoDate(item, "updatedAt");
 		//
 		if (messageId == null || messageId.length() == 0)
-			messageId = Util.getUuid();
+			messageId = RestLib.getUuid();
 	}
 
 	public JSONObject toJson() throws JSONException {

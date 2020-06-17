@@ -1,7 +1,7 @@
 package com.opencommunity.openTeamOneServer.data;
 
 import com.opencommunity.openTeamOneServer.util.JsonUtil;
-import com.opencommunity.openTeamOneServer.util.Util;
+import com.opencommunity.openTeamOneServer.util.RestLib;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,7 +30,7 @@ public class Person {
 	}
 
 	public Person(String personId, String lastName, String firstName, String nickName, String pictureId) {
-		this.personId = personId == null || personId.length() == 0 ? Util.getUuid() : personId;
+		this.personId = personId == null || personId.length() == 0 ? RestLib.getUuid() : personId;
 		this.lastName = lastName;
 		this.firstName = firstName;
 		this.nickName = nickName;
@@ -45,7 +45,7 @@ public class Person {
 		pictureId = JsonUtil.getString(item, "pictureId");
 		//
 		if (personId == null || personId.length() == 0)
-			personId = Util.getUuid();
+			personId = RestLib.getUuid();
 	}
 
 	public JSONObject toJson() throws JSONException {

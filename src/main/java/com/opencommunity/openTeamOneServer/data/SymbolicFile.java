@@ -1,7 +1,7 @@
 package com.opencommunity.openTeamOneServer.data;
 
 import com.opencommunity.openTeamOneServer.util.JsonUtil;
-import com.opencommunity.openTeamOneServer.util.Util;
+import com.opencommunity.openTeamOneServer.util.RestLib;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,7 +36,7 @@ public class SymbolicFile {
 	}
 
 	public SymbolicFile(String fileId, String mimeType, String text, String referenceId, int position, String directory) {
-		this.fileId = fileId == null ? Util.getUuid() : fileId;
+		this.fileId = fileId == null ? RestLib.getUuid() : fileId;
 		this.mimeType = mimeType;
 		this.text = text;
 		this.referenceId = referenceId;
@@ -53,7 +53,7 @@ public class SymbolicFile {
 		directory = JsonUtil.getString(item, "directory");
 		//
 		if (fileId == null || fileId.length() == 0)
-			fileId = Util.getUuid();
+			fileId = RestLib.getUuid();
 	}
 
 	public JSONObject toJson() throws JSONException {

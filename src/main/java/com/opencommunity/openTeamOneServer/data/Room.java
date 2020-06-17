@@ -1,8 +1,8 @@
 package com.opencommunity.openTeamOneServer.data;
 
 import com.opencommunity.openTeamOneServer.util.JsonUtil;
+import com.opencommunity.openTeamOneServer.util.RestLib;
 import com.opencommunity.openTeamOneServer.util.TimeUtil;
-import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,7 +33,7 @@ public class Room {
 	}
 
 	public Room(String roomId, String name, String shortName, String roomType, String pictureId, long changedAt) {
-		this.roomId = roomId == null || roomId.length() == 0 ? Util.getUuid() : roomId;
+		this.roomId = roomId == null || roomId.length() == 0 ? RestLib.getUuid() : roomId;
 		this.name = name;
 		this.shortName = shortName;
 		this.roomType = roomType;
@@ -50,7 +50,7 @@ public class Room {
 		changedAt = JsonUtil.getIsoDate(item, "changedAt");
 		//
 		if (roomId == null || roomId.length() == 0)
-			roomId = Util.getUuid();
+			roomId = RestLib.getUuid();
 	}
 
 	public JSONObject toJson() throws JSONException {

@@ -8,8 +8,8 @@ import com.opencommunity.openTeamOneServer.persistence.PersonRepository;
 import com.opencommunity.openTeamOneServer.persistence.TenantParameterRepository;
 import com.opencommunity.openTeamOneServer.persistence.UserRepository;
 import com.opencommunity.openTeamOneServer.util.ContentService;
+import com.opencommunity.openTeamOneServer.util.RestLib;
 import com.opencommunity.openTeamOneServer.util.StreamUtil;
-import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +35,10 @@ public class ServiceUiApi {
 	private UserRepository userRepository;
 	@Autowired
 	private PersonRepository personRepository;
+	@Autowired
+	private ContentService contentService;
+	@Autowired
+	private RestLib restLib;
 
 	/* Services with UI control (forwarding responses) */
 
@@ -42,7 +46,7 @@ public class ServiceUiApi {
 	public ResponseEntity<String> login(HttpServletRequest request, @RequestBody String requestBody) throws JSONException {
 		Session session = null;
 		User user = null;
-		Map<String, String> formData = Util.splitQueryString(requestBody);
+		Map<String, String> formData = restLib.splitQueryString(requestBody);
 		String userId = formData.get("username");
 		String password = formData.get("password");
 		String forward = formData.get("forward");
@@ -54,92 +58,92 @@ public class ServiceUiApi {
 		}
 		//
 		return ResponseEntity.status(HttpStatus.SEE_OTHER)
-				.header("Location", forward == null ? Util.getDefaultTarget(request, tenantParameterRepository, session == null ? null : user) : forward)
-				.header("Set-Cookie", Util.getSessionCookie(session == null ? null : session.sessionId))
+				.header("Location", forward == null ? restLib.getDefaultTarget(request, tenantParameterRepository, session == null ? null : user) : forward)
+				.header("Set-Cookie", restLib.getSessionCookie(session == null ? null : session.sessionId))
 				.contentType(MediaType.TEXT_PLAIN)
 				.body(null);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/logout")
 	public ResponseEntity<String> logout(HttpServletRequest request, @RequestBody String requestBody) throws JSONException {
-		Map<String, String> formData = Util.splitQueryString(requestBody);
+		Map<String, String> formData = restLib.splitQueryString(requestBody);
 		String forward = formData.get("forward");
 		//
-		String sessionId = Util.getSessionId(request);
+		String sessionId = restLib.getSessionId(request);
 		if (sessionId != null)
 			Session.invalidateSession(sessionId);
 		//
 		return ResponseEntity.status(HttpStatus.SEE_OTHER)
-				.header("Location", forward == null ? Util.getDefaultTarget(request, tenantParameterRepository, null) : forward)
-				.header("Set-Cookie", Util.getSessionCookie(null))
+				.header("Location", forward == null ? restLib.getDefaultTarget(request, tenantParameterRepository, null) : forward)
+				.header("Set-Cookie", restLib.getSessionCookie(null))
 				.contentType(MediaType.TEXT_PLAIN)
 				.body(null);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/snapshot/save")
 	public ResponseEntity<String> snapshotSave(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
-		Session session = Util.getSession(request);
-		User user = Util.getSessionAdmin(session, userRepository);
+		Session session = restLib.getSession(request);
+		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse;
+			return restLib.httpUnauthorizedResponse;
 		//
-		Map<String, String> formData = Util.splitQueryString(requestBody);
+		Map<String, String> formData = restLib.splitQueryString(requestBody);
 		String filename = formData.get("filename");
 		String forward = formData.get("forward");
 		if (filename == null)
-			return Util.httpBadRequestResponse;
+			return restLib.httpBadRequestResponse;
 		File file = StreamUtil.getFile(tenantParameterRepository, SymbolicFile.DIRECTORY_SNAPSHOTS, filename);
 		if (file == null)
-			return Util.httpInternalErrorResponse;
-		JSONObject jsonContent = ContentService.exportToJson();
+			return restLib.httpInternalErrorResponse;
+		JSONObject jsonContent = contentService.exportToJson();
 		String stringContent = jsonContent.toString();
 		StreamUtil.writeFile(stringContent.getBytes("UTF-8"), file);
 		//
-		return Util.httpForwardResponse(request, tenantParameterRepository, user, forward);
+		return restLib.httpForwardResponse(request, tenantParameterRepository, user, forward);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/snapshot/load")
 	public ResponseEntity<String> snapshotLoad(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
-		Session session = Util.getSession(request);
-		User user = Util.getSessionAdmin(session, userRepository);
+		Session session = restLib.getSession(request);
+		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse;
+			return restLib.httpUnauthorizedResponse;
 		//
-		Map<String, String> formData = Util.splitQueryString(requestBody);
+		Map<String, String> formData = restLib.splitQueryString(requestBody);
 		String filename = formData.get("filename");
 		boolean includeConfiguration = "on".equals(formData.get("config"));
 		String forward = formData.get("forward");
 		if (filename == null)
-			return Util.httpBadRequestResponse;
+			return restLib.httpBadRequestResponse;
 		File file = StreamUtil.getFile(tenantParameterRepository, SymbolicFile.DIRECTORY_SNAPSHOTS, filename);
 		if (file == null)
-			return Util.httpInternalErrorResponse;
+			return restLib.httpInternalErrorResponse;
 		if (!file.canRead())
-			return Util.httpNotFoundResponse;
+			return restLib.httpNotFoundResponse;
 		String stringContent = new String(StreamUtil.readFile(file), "UTF-8");
 		JSONObject jsonContent = new JSONObject(stringContent);
-		ContentService.importFromJson(jsonContent, true, includeConfiguration, user.userId);
+		contentService.importFromJson(jsonContent, true, includeConfiguration, user.userId);
 		//
-		return Util.httpForwardResponse(request, tenantParameterRepository, user, forward);
+		return restLib.httpForwardResponse(request, tenantParameterRepository, user, forward);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/tenant/parameter")
 	public ResponseEntity<String> tenantParameter(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
-		Session session = Util.getSession(request);
-		User user = Util.getSessionAdmin(session, userRepository);
+		Session session = restLib.getSession(request);
+		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
-			return Util.httpUnauthorizedResponse;
+			return restLib.httpUnauthorizedResponse;
 		//
-		Map<String, String> formData = Util.splitQueryString(requestBody);
+		Map<String, String> formData = restLib.splitQueryString(requestBody);
 		String key = formData.get("name");
 		String value = formData.get("value");
 		String forward = formData.get("forward");
 		if (key == null || value == null)
-			return Util.httpBadRequestResponse;
+			return restLib.httpBadRequestResponse;
 		TenantParameter tp = new TenantParameter(key, value);
 		tenantParameterRepository.save(tp);
 		//
-		return Util.httpForwardResponse(request, tenantParameterRepository, user, forward);
+		return restLib.httpForwardResponse(request, tenantParameterRepository, user, forward);
 	}
 
 }

@@ -6,8 +6,8 @@ import com.opencommunity.openTeamOneServer.data.User;
 import com.opencommunity.openTeamOneServer.persistence.SymbolicFileRepository;
 import com.opencommunity.openTeamOneServer.persistence.TenantParameterRepository;
 import com.opencommunity.openTeamOneServer.persistence.UserRepository;
+import com.opencommunity.openTeamOneServer.util.RestLib;
 import com.opencommunity.openTeamOneServer.util.StreamUtil;
-import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +36,8 @@ public class MediaApi {
 	private UserRepository userRepository;
 	@Autowired
 	private SymbolicFileRepository symbolicFileRepository;
+	@Autowired
+	private RestLib restLib;
 
 	/* API implementation */
 
@@ -62,64 +64,64 @@ public class MediaApi {
 	/* helper functions */
 
 	private ResponseEntity<Resource> handleFileRequest(HttpServletRequest request, String fileId) throws Exception {
-		Session session = Util.getSession(request);
-		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // fallback to Basic Auth
+		Session session = restLib.getSession(request);
+		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
-			return Util.httpUnauthorizedResourceResponse;
+			return restLib.httpUnauthorizedResourceResponse;
 		//
 		SymbolicFile symbolicFile = symbolicFileRepository.findById(fileId).orElse(null);
 		if (symbolicFile == null)
-			return Util.httpNotFoundResourceResponse;
+			return restLib.httpNotFoundResourceResponse;
 		return sendSymbolicFile(symbolicFile);
 	}
 
 	private ResponseEntity<Resource> handleTokenRequest(HttpServletRequest request, String token) throws Exception {
 		SymbolicFile symbolicFile = symbolicFileRepository.findById(token).orElse(null); // TODO: proper token handling
 		if (symbolicFile == null)
-			return Util.httpNotFoundResourceResponse;
+			return restLib.httpNotFoundResourceResponse;
 		if (!symbolicFile.mimeType.startsWith("video/"))
-			return Util.httpBadRequestResourceResponse;
+			return restLib.httpBadRequestResourceResponse;
 		return sendSymbolicFile(symbolicFile);
 	}
 
 	private ResponseEntity<Resource> sendSymbolicFile(SymbolicFile symbolicFile) throws Exception {
 		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
 		if (file == null)
-			return Util.httpInternalErrorResourceResponse;
+			return restLib.httpInternalErrorResourceResponse;
 		if (!file.canRead()) {
-			return Util.httpNotFoundResourceResponse;
+			return restLib.httpNotFoundResourceResponse;
 		}
 		//
 		byte[] targetUriBytes = StreamUtil.readFile(file);
 		//
 		if ("application/vnd.sap.sports.link".equals(symbolicFile.mimeType)) { // Special treatment for compatibility
 			String targetUri = new String(targetUriBytes, StandardCharsets.UTF_8);
-			return Util.httpForwardResourceResponse(targetUri);
+			return restLib.httpForwardResourceResponse(targetUri);
 		}
 		Resource body = new ByteArrayResource(targetUriBytes);
-		return Util.httpResourceResponse(body, MediaType.parseMediaType(symbolicFile.mimeType));
+		return restLib.httpResourceResponse(body, MediaType.parseMediaType(symbolicFile.mimeType));
 	}
 
 	private ResponseEntity<String> handleFileDetailsRequest(HttpServletRequest request, String fileId) throws Exception {
-		Session session = Util.getSession(request);
-		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // fallback to Basic Auth
+		Session session = restLib.getSession(request);
+		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
-			return Util.httpUnauthorizedResponse;
+			return restLib.httpUnauthorizedResponse;
 		//
 		SymbolicFile symbolicFile = symbolicFileRepository.findById(fileId).orElse(null);
 		if (symbolicFile == null)
-			return Util.httpNotFoundResponse;
+			return restLib.httpNotFoundResponse;
 		if (!symbolicFile.mimeType.startsWith("video/"))
-			return Util.httpBadRequestResponse;
+			return restLib.httpBadRequestResponse;
 		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
 		if (file == null)
-			return Util.httpInternalErrorResponse;
+			return restLib.httpInternalErrorResponse;
 		if (!file.canRead()) {
-			return Util.httpNotFoundResponse;
+			return restLib.httpNotFoundResponse;
 		}
 		//
 		JSONObject tempUrl = new JSONObject();
-		tempUrl.put("url", Util.getServerUrl(request) + "/sap/sports/fnd/api/media/v1/token/" + symbolicFile.fileId); // TODO: proper token handling
+		tempUrl.put("url", restLib.getServerUrl(request) + "/sap/sports/fnd/api/media/v1/token/" + symbolicFile.fileId); // TODO: proper token handling
 		tempUrl.put("validUntil", "2659-12-31T23:59:59.999Z"); // 640 years ought to be enough for anybody
 		JSONObject source = new JSONObject();
 		source.put("sourceName", symbolicFile.fileId);
@@ -151,7 +153,7 @@ public class MediaApi {
 		body.put("fileId", symbolicFile.fileId);
 		body.put("details", details);
 		//
-		return Util.httpOkResponse(body);
+		return restLib.httpOkResponse(body);
 	}
 
 }

@@ -6,41 +6,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.Iterator;
 
-@Service
+@Component
 public class ContentService {
-
-	private static ContentService instance = null;
-
-	/* public services */
-
-	public static JSONObject exportToJson() throws JSONException {
-		if (instance != null)
-			return instance._exportToJson();
-		return null;
-	}
-
-	public static JSONObject getSummary() throws JSONException {
-		if (instance != null)
-			return instance._getSummary();
-		return null;
-	}
-
-	public static void importFromJson(JSONObject jsonObject, boolean delete, boolean includeConfiguration, String protectedUserId) throws JSONException {
-		if (instance != null)
-			instance._importFromJson(jsonObject, delete, includeConfiguration, protectedUserId);
-	}
-
-	public static void deleteAll(boolean includeConfiguration, String protectedUserId) throws JSONException {
-		if (instance != null)
-			instance._deleteAll(includeConfiguration, protectedUserId);
-	}
-
-	/* instance methods and properties */
 
 	@Autowired
 	private TenantParameterRepository tpr;
@@ -61,12 +34,13 @@ public class ContentService {
 	@Autowired
 	private SubscriptionRepository sr;
 
-	public ContentService() {
-		instance = this;
+	@Bean
+	public RestLib getRestlib() {
+		return new RestLib();
 	}
 
 	@PostConstruct
-	private void init() {
+	public void init() {
 		if (!tpr.findById("tenantName").isPresent())
 			tpr.save(new TenantParameter("tenantName", "Open Team One"));
 		if (!tpr.findById("tenantPictureId").isPresent())
@@ -86,7 +60,7 @@ public class ContentService {
 			ur.save(new User("admin", "admin", null, false, true));
 	}
 
-	private JSONObject _getSummary() throws JSONException {
+	public JSONObject getSummary() throws JSONException {
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("tenantParameters", tpr.count());
 		jsonObject.put("users", ur.count());
@@ -100,7 +74,7 @@ public class ContentService {
 		return jsonObject;
 	}
 
-	private JSONObject _exportToJson() throws JSONException {
+	public JSONObject exportToJson() throws JSONException {
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("tenantParameters", TenantParameter.toJsonArray(tpr.findAll()));
 		jsonObject.put("users", User.toJsonArray(ur.findAll(), true));
@@ -114,7 +88,7 @@ public class ContentService {
 		return jsonObject;
 	}
 
-	private void _importFromJson(JSONObject jsonObject, boolean delete, boolean includeConfiguration, String protectedUserId) throws JSONException {
+	public void importFromJson(JSONObject jsonObject, boolean delete, boolean includeConfiguration, String protectedUserId) throws JSONException {
 		JSONArray item;
 		item = JsonUtil.getJSONArray(jsonObject, "tenantParameters");
 		if (item != null && includeConfiguration) {
@@ -182,7 +156,7 @@ public class ContentService {
 		}
 	}
 
-	private void _deleteAll(boolean includeConfiguration, String protectedUserId) {
+	public void deleteAll(boolean includeConfiguration, String protectedUserId) {
 		if (includeConfiguration)
 			tpr.deleteAll();
 		if (protectedUserId != null)

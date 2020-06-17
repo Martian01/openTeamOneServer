@@ -8,7 +8,7 @@ import com.opencommunity.openTeamOneServer.persistence.PersonRepository;
 import com.opencommunity.openTeamOneServer.persistence.TenantParameterRepository;
 import com.opencommunity.openTeamOneServer.persistence.UserRepository;
 import com.opencommunity.openTeamOneServer.util.JsonUtil;
-import com.opencommunity.openTeamOneServer.util.Util;
+import com.opencommunity.openTeamOneServer.util.RestLib;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,13 +29,15 @@ public class ScoutingApi {
 	private UserRepository userRepository;
 	@Autowired
 	private PersonRepository personRepository;
+	@Autowired
+	private RestLib restLib;
 
 	@RequestMapping(method = RequestMethod.GET, value = "/sap/sports/sct/api/mobile/versions")
 	public ResponseEntity<String> versions(HttpServletRequest request) throws JSONException {
-		Session session = Util.getSession(request);
-		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // fallback to Basic Auth
+		Session session = restLib.getSession(request);
+		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
-			return Util.httpStaleSessionResponse(request);
+			return restLib.httpStaleSessionResponse(request);
 		//
 		JSONObject teamOneAndroid = new JSONObject();
 		teamOneAndroid.put("required", 146);
@@ -49,15 +51,15 @@ public class ScoutingApi {
 		body.put("versions", versions);
 		body.put("clients", clients);
 		//
-		return Util.httpOkResponse(body);
+		return restLib.httpOkResponse(body);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/sap/sports/sct/api/mobile/v1/service/rest/me")
 	public ResponseEntity<String> me(HttpServletRequest request) throws JSONException {
-		Session session = Util.getSession(request);
-		User user = session == null ? Util.getBasicAuthContact(request, userRepository) : Util.getSessionContact(session, userRepository); // fallback to Basic Auth
+		Session session = restLib.getSession(request);
+		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
-			return Util.httpStaleSessionResponse(request);
+			return restLib.httpStaleSessionResponse(request);
 		//
 		JSONObject body = new JSONObject();
 		Person me = personRepository.findById(user.personId).orElse(null);
@@ -75,7 +77,7 @@ public class ScoutingApi {
 			body.put("tenant", tenant);
 		}
 		//
-		return Util.httpOkResponse(body);
+		return restLib.httpOkResponse(body);
 	}
 
 	private JSONObject personToJson(Person person) throws JSONException {

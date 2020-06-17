@@ -1,8 +1,8 @@
 package com.opencommunity.openTeamOneServer.data;
 
 import com.opencommunity.openTeamOneServer.util.JsonUtil;
+import com.opencommunity.openTeamOneServer.util.RestLib;
 import com.opencommunity.openTeamOneServer.util.TimeUtil;
-import com.opencommunity.openTeamOneServer.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,7 +21,7 @@ public class Session {
 	public long lastAccessTime;
 
 	public Session(String userId, boolean iosMode) {
-		sessionId = Util.getUuid();
+		sessionId = RestLib.getUuid();
 		if (iosMode)
 			sessionId += IOS_MARKER;
 		this.userId = userId;
@@ -36,7 +36,7 @@ public class Session {
 		lastAccessTime = JsonUtil.getIsoDate(item, "lastAccessTime");
 		//
 		if (sessionId == null || sessionId.length() == 0)
-			sessionId = Util.getUuid();
+			sessionId = RestLib.getUuid();
 	}
 
 	public JSONObject toJson() throws JSONException {

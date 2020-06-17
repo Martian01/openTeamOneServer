@@ -8,9 +8,8 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -20,21 +19,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-@Service
+@Component
 public class Notification {
-
-	private static Notification instance;
-
-	public Notification() {
-		instance = this;
-	}
-
-	@PostConstruct
-	private void init() { }
-
-	public static void pushToSubscribedDevices(Message message) {
-		instance._pushToSubscribedDevices(message);
-	}
 
 	private static final String SQL_QUERY =
 			"select s.target_type, s.app_id, s.device_token, s.client_account_id, u.person_id from subscription s " +
@@ -62,7 +48,7 @@ public class Notification {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
-	public void _pushToSubscribedDevices(Message message) {
+	public void pushToSubscribedDevices(Message message) {
 		TenantParameter tp = tenantParameterRepository.findById("nhubUrl").orElse(null);
 		final String nhubUrl = tp == null ? null : tp.value;
 		tp = tenantParameterRepository.findById("nhubAuthHeader").orElse(null);
@@ -132,7 +118,7 @@ public class Notification {
 								devices.put(device);
 							}
 						}
-						_sendToNotificationHub(nhubUrl + endPoint, nhubAuthHeader, root.toString());
+						sendToNotificationHub(nhubUrl + endPoint, nhubAuthHeader, root.toString());
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -197,7 +183,7 @@ public class Notification {
 		}.run();
 	}
 
-	private void _sendToNotificationHub(String endPointUrl, String authHeader, String jsonBody) throws Exception {
+	private void sendToNotificationHub(String endPointUrl, String authHeader, String jsonBody) throws Exception {
 		URL url = new URL(endPointUrl);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		try {
