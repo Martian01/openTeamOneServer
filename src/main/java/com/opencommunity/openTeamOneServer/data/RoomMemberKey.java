@@ -7,7 +7,7 @@ public class RoomMemberKey implements Serializable {
 	private static final long serialVersionUID = -1L;
 
 	public String roomId;
-	public String personId;
+	public Integer personId;
 
 	@Override
 	public boolean equals(Object o) {

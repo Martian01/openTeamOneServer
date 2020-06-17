@@ -15,8 +15,8 @@ import java.util.ArrayList;
 @Entity
 public class Person {
 	@Id
-	@Column(length = 32)
-	public String personId;
+	@Column
+	public Integer personId;
 	@Column(length = 50)
 	public String lastName;
 	@Column(length = 50)
@@ -29,8 +29,8 @@ public class Person {
 	public Person() {
 	}
 
-	public Person(String personId, String lastName, String firstName, String nickName, String pictureId) {
-		this.personId = personId == null || personId.length() == 0 ? RestLib.getUuid() : personId;
+	public Person(Integer personId, String lastName, String firstName, String nickName, String pictureId) {
+		this.personId = personId == null ? RestLib.getRandomInt() : personId;
 		this.lastName = lastName;
 		this.firstName = firstName;
 		this.nickName = nickName;
@@ -38,14 +38,13 @@ public class Person {
 	}
 
 	public Person(JSONObject item) throws JSONException {
-		personId = JsonUtil.getString(item, "personId");
+		personId = JsonUtil.getInteger(item, "personId");
+		if (personId == null)
+			personId = RestLib.getRandomInt();
 		lastName = JsonUtil.getString(item, "lastName");
 		firstName = JsonUtil.getString(item, "firstName");
 		nickName = JsonUtil.getString(item, "nickName");
 		pictureId = JsonUtil.getString(item, "pictureId");
-		//
-		if (personId == null || personId.length() == 0)
-			personId = RestLib.getUuid();
 	}
 
 	public JSONObject toJson() throws JSONException {
@@ -74,11 +73,11 @@ public class Person {
 		return array;
 	}
 
-	public String getPersonId() {
+	public Integer getPersonId() {
 		return personId;
 	}
 
-	public void setPersonId(String personId) {
+	public void setPersonId(Integer personId) {
 		this.personId = personId;
 	}
 

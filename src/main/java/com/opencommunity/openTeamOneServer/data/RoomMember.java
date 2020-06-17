@@ -19,20 +19,20 @@ public class RoomMember {
 	@Column(length = 32)
 	public String roomId;
 	@Id
-	@Column(length = 32)
-	public String personId;
+	@Column
+	public Integer personId;
 
 	public RoomMember() {
 	}
 
-	public RoomMember(String roomId, String personId) {
+	public RoomMember(String roomId, Integer personId) {
 		this.roomId = roomId;
 		this.personId = personId;
 	}
 
 	public RoomMember(JSONObject item) throws JSONException {
 		roomId = JsonUtil.getString(item, "roomId");
-		personId = JsonUtil.getString(item, "personId");
+		personId = JsonUtil.getInteger(item, "personId");
 	}
 
 	public JSONObject toJson() throws JSONException {
@@ -66,11 +66,11 @@ public class RoomMember {
 		this.roomId = roomId;
 	}
 
-	public String getPersonId() {
+	public Integer getPersonId() {
 		return personId;
 	}
 
-	public void setPersonId(String personId) {
+	public void setPersonId(Integer personId) {
 		this.personId = personId;
 	}
 

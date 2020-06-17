@@ -6,7 +6,11 @@ import org.json.JSONObject;
 
 public class JsonUtil {
 
-	public static int getInt(JSONObject item, String key, int defaultValue) throws JSONException {
+	public static Integer getInteger(JSONObject item, String key) throws JSONException {
+		return getInteger(item, key, null);
+	}
+
+	public static Integer getInteger(JSONObject item, String key, Integer defaultValue) throws JSONException {
 		return item == null || item.isNull(key) ? defaultValue : item.getInt(key);
 	}
 

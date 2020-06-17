@@ -219,7 +219,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/person/{personId}")
-	public ResponseEntity<String> personGet(HttpServletRequest request, @PathVariable String personId) throws Exception {
+	public ResponseEntity<String> personGet(HttpServletRequest request, @PathVariable Integer personId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
@@ -233,7 +233,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/person/{personId}")
-	public ResponseEntity<String> personDelete(HttpServletRequest request, @PathVariable String personId) throws Exception {
+	public ResponseEntity<String> personDelete(HttpServletRequest request, @PathVariable Integer personId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
@@ -331,7 +331,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/member/{roomId}/{personId}")
-	public ResponseEntity<String> roomMemberGet(HttpServletRequest request, @PathVariable String roomId, @PathVariable String personId) throws Exception {
+	public ResponseEntity<String> roomMemberGet(HttpServletRequest request, @PathVariable String roomId, @PathVariable Integer personId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
@@ -345,7 +345,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/member/{roomId}/{personId}")
-	public ResponseEntity<String> roomMemberDelete(HttpServletRequest request, @PathVariable String roomId, @PathVariable String personId) throws Exception {
+	public ResponseEntity<String> roomMemberDelete(HttpServletRequest request, @PathVariable String roomId, @PathVariable Integer personId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
@@ -445,7 +445,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/confirmation/{messageId}/{personId}")
-	public ResponseEntity<String> viewedConfirmationGet(HttpServletRequest request, @PathVariable String messageId, @PathVariable String personId) throws Exception {
+	public ResponseEntity<String> viewedConfirmationGet(HttpServletRequest request, @PathVariable String messageId, @PathVariable Integer personId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
@@ -459,7 +459,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/confirmation/{messageId}/{personId}")
-	public ResponseEntity<String> viewedConfirmationDelete(HttpServletRequest request, @PathVariable String messageId, @PathVariable String personId) throws Exception {
+	public ResponseEntity<String> viewedConfirmationDelete(HttpServletRequest request, @PathVariable String messageId, @PathVariable Integer personId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
@@ -732,7 +732,7 @@ public class ServiceApi {
 		Person person;
 		if (user.personId == null) {
 			person = new Person();
-			user.personId = person.personId = RestLib.getUuid();
+			user.personId = person.personId = RestLib.getRandomInt();
 			userRepository.save(user);
 		} else {
 			person = personRepository.findById(user.personId).orElse(null);

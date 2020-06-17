@@ -3,300 +3,300 @@
     {
       "lastName": "Tank",
       "firstName": "Thomas",
-      "pictureId": "profile1",
+      "pictureId": "4000",
       "nickName": "Tom",
-      "personId": "BF374732F28544F6849BA8A551ED8B47"
+      "personId": "1000"
     },
     {
       "lastName": "Smith",
       "firstName": "Peter",
-      "pictureId": "profile2",
-      "personId": "94FB692997F241728389C83808F48F8F"
+      "pictureId": "4001",
+      "personId": "1001"
     },
     {
       "lastName": "Potter",
       "firstName": "Harry",
-      "pictureId": "profile3",
-      "personId": "D4CE6AE67DFA449DBC013E646639513A"
+      "pictureId": "4002",
+      "personId": "1002"
     }
   ],
   "rooms": [
     {
-      "pictureId": "room1",
+      "pictureId": "3000",
       "name": "Team Room",
       "changedAt": "2017-10-20T10:23:34.670Z",
       "shortName": "TR",
-      "roomId": "0E2D61D6D51A407AB645FA2E63C5891C",
+      "roomId": "2000",
       "roomType": "group"
     },
     {
-      "pictureId": "room2",
+      "pictureId": "3001",
       "name": "General",
       "changedAt": "2017-10-20T10:21:54.670Z",
       "shortName": "GN",
-      "roomId": "00E7EF8682A7401E87B6CD6388B02E01",
+      "roomId": "2001",
       "roomType": "group"
     },
     {
       "name": "PM",
       "changedAt": "2017-10-20T10:20:14.670Z",
       "shortName": "PM",
-      "roomId": "055312B9A8D84C0AA6492B4894FFF533",
+      "roomId": "2002",
       "roomType": "private"
     }
   ],
   "files": [
     {
-      "fileId": "tenant",
+      "fileId": "5000",
       "directory": "profiles",
-      "mimeType": "image/jpeg",
+      "mimeType": "image/jpg",
       "position": 0
     },
     {
-      "fileId": "profile1",
+      "fileId": "4000",
       "directory": "profiles",
-      "mimeType": "image/jpeg",
+      "mimeType": "image/jpg",
       "position": 0
     },
     {
-      "fileId": "profile2",
+      "fileId": "4001",
       "directory": "profiles",
-      "mimeType": "image/jpeg",
+      "mimeType": "image/jpg",
       "position": 0
     },
     {
-      "fileId": "profile3",
+      "fileId": "4002",
       "directory": "profiles",
-      "mimeType": "image/jpeg",
+      "mimeType": "image/jpg",
       "position": 0
     },
     {
-      "fileId": "room1",
+      "fileId": "3000",
       "directory": "profiles",
-      "mimeType": "image/jpeg",
+      "mimeType": "image/jpg",
       "position": 0
     },
     {
-      "fileId": "room2",
+      "fileId": "3001",
       "directory": "profiles",
-      "mimeType": "image/jpeg",
+      "mimeType": "image/jpg",
       "position": 0
     },
     {
-      "referenceId": "9547464AD01B421E9A1F061985CB1B51",
-      "fileId": "sailing1",
+      "referenceId": "9002",
+      "fileId": "6000",
       "directory": "attachments",
-      "mimeType": "image/jpeg",
+      "mimeType": "image/jpg",
       "position": 0
     }
   ],
   "messages": [
     {
-      "senderPersonId": "BF374732F28544F6849BA8A551ED8B47",
+      "senderPersonId": "1000",
       "postedAt": "2017-10-20T10:16:54.670Z",
       "isDeleted": false,
-      "messageId": "5B2AAD6DA6244B09AB5A193F945CE4BC",
+      "messageId": "9000",
       "text": "Hello, this is my first message",
-      "roomId": "0E2D61D6D51A407AB645FA2E63C5891C",
+      "roomId": "2000",
       "clientMessageId": "cm1",
       "updatedAt": "2017-10-20T10:16:54.670Z"
     },
     {
-      "senderPersonId": "D4CE6AE67DFA449DBC013E646639513A",
+      "senderPersonId": "1002",
       "postedAt": "2017-10-20T10:23:34.670Z",
       "isDeleted": false,
-      "messageId": "5E6B2167380F404DA4078513DF1D9BAC",
+      "messageId": "9001",
       "text": "Welcome! 😊",
-      "roomId": "0E2D61D6D51A407AB645FA2E63C5891C",
+      "roomId": "2000",
       "clientMessageId": "cm2",
       "updatedAt": "2017-10-20T10:23:34.670Z"
     },
     {
-      "senderPersonId": "94FB692997F241728389C83808F48F8F",
+      "senderPersonId": "1001",
       "postedAt": "2017-10-20T10:20:14.670Z",
       "isDeleted": false,
-      "messageId": "9547464AD01B421E9A1F061985CB1B51",
+      "messageId": "9002",
       "text": "Can you see my picture?",
-      "roomId": "00E7EF8682A7401E87B6CD6388B02E01",
+      "roomId": "2001",
       "clientMessageId": "cm3",
       "updatedAt": "2017-10-20T10:20:14.670Z"
     },
     {
-      "senderPersonId": "BF374732F28544F6849BA8A551ED8B47",
+      "senderPersonId": "1000",
       "postedAt": "2017-10-20T10:21:54.670Z",
       "isDeleted": false,
-      "messageId": "FB8E30E632B14F8989423F1B2C1B5466",
+      "messageId": "9003",
       "text": "Yeah, brilliant shot! 👍",
-      "roomId": "00E7EF8682A7401E87B6CD6388B02E01",
+      "roomId": "2001",
       "clientMessageId": "cm4",
       "updatedAt": "2017-10-20T10:21:54.670Z"
     },
     {
-      "senderPersonId": "BF374732F28544F6849BA8A551ED8B47",
+      "senderPersonId": "1000",
       "postedAt": "2017-10-20T10:15:14.670Z",
       "isDeleted": false,
-      "messageId": "24A592EFB735420194AC8B620237CABB",
+      "messageId": "9004",
       "text": "Hi Peter",
-      "roomId": "055312B9A8D84C0AA6492B4894FFF533",
+      "roomId": "2002",
       "clientMessageId": "cm5",
       "updatedAt": "2017-10-20T10:15:14.670Z"
     },
     {
-      "senderPersonId": "94FB692997F241728389C83808F48F8F",
+      "senderPersonId": "1001",
       "postedAt": "2017-10-20T10:20:14.670Z",
       "isDeleted": false,
-      "messageId": "5F841B354BE64890A0E8F5196553877B",
+      "messageId": "9005",
       "text": "Hey Tom, everything allright?",
-      "roomId": "055312B9A8D84C0AA6492B4894FFF533",
+      "roomId": "2002",
       "clientMessageId": "cm6",
       "updatedAt": "2017-10-20T10:20:14.670Z"
     }
   ],
   "roomMembers": [
     {
-      "personId": "94FB692997F241728389C83808F48F8F",
-      "roomId": "00E7EF8682A7401E87B6CD6388B02E01"
+      "personId": "1001",
+      "roomId": "2001"
     },
     {
-      "personId": "94FB692997F241728389C83808F48F8F",
-      "roomId": "055312B9A8D84C0AA6492B4894FFF533"
+      "personId": "1001",
+      "roomId": "2002"
     },
     {
-      "personId": "94FB692997F241728389C83808F48F8F",
-      "roomId": "0E2D61D6D51A407AB645FA2E63C5891C"
+      "personId": "1001",
+      "roomId": "2000"
     },
     {
-      "personId": "BF374732F28544F6849BA8A551ED8B47",
-      "roomId": "00E7EF8682A7401E87B6CD6388B02E01"
+      "personId": "1000",
+      "roomId": "2001"
     },
     {
-      "personId": "BF374732F28544F6849BA8A551ED8B47",
-      "roomId": "055312B9A8D84C0AA6492B4894FFF533"
+      "personId": "1000",
+      "roomId": "2002"
     },
     {
-      "personId": "BF374732F28544F6849BA8A551ED8B47",
-      "roomId": "0E2D61D6D51A407AB645FA2E63C5891C"
+      "personId": "1000",
+      "roomId": "2000"
     },
     {
-      "personId": "D4CE6AE67DFA449DBC013E646639513A",
-      "roomId": "00E7EF8682A7401E87B6CD6388B02E01"
+      "personId": "1002",
+      "roomId": "2001"
     },
     {
-      "personId": "D4CE6AE67DFA449DBC013E646639513A",
-      "roomId": "0E2D61D6D51A407AB645FA2E63C5891C"
+      "personId": "1002",
+      "roomId": "2000"
     }
   ],
   "viewedConfirmations": [
     {
       "messagePostedAt": "2017-10-20T10:16:54.670Z",
-      "messageId": "5B2AAD6DA6244B09AB5A193F945CE4BC",
-      "personId": "BF374732F28544F6849BA8A551ED8B47",
+      "messageId": "9000",
+      "personId": "1000",
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "0E2D61D6D51A407AB645FA2E63C5891C"
+      "roomId": "2000"
     },
     {
       "messagePostedAt": "2017-10-20T10:16:54.670Z",
-      "messageId": "5B2AAD6DA6244B09AB5A193F945CE4BC",
-      "personId": "94FB692997F241728389C83808F48F8F",
+      "messageId": "9000",
+      "personId": "1001",
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "0E2D61D6D51A407AB645FA2E63C5891C"
+      "roomId": "2000"
     },
     {
       "messagePostedAt": "2017-10-20T10:16:54.670Z",
-      "messageId": "5B2AAD6DA6244B09AB5A193F945CE4BC",
-      "personId": "D4CE6AE67DFA449DBC013E646639513A",
+      "messageId": "9000",
+      "personId": "1002",
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "0E2D61D6D51A407AB645FA2E63C5891C"
+      "roomId": "2000"
     },
     {
       "messagePostedAt": "2017-10-20T10:23:34.670Z",
-      "messageId": "5E6B2167380F404DA4078513DF1D9BAC",
-      "personId": "BF374732F28544F6849BA8A551ED8B47",
+      "messageId": "9001",
+      "personId": "1000",
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "0E2D61D6D51A407AB645FA2E63C5891C"
+      "roomId": "2000"
     },
     {
       "messagePostedAt": "2017-10-20T10:23:34.670Z",
-      "messageId": "5E6B2167380F404DA4078513DF1D9BAC",
-      "personId": "D4CE6AE67DFA449DBC013E646639513A",
+      "messageId": "9001",
+      "personId": "1002",
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "0E2D61D6D51A407AB645FA2E63C5891C"
+      "roomId": "2000"
     },
     {
       "messagePostedAt": "2017-10-20T10:20:14.670Z",
-      "messageId": "9547464AD01B421E9A1F061985CB1B51",
-      "personId": "BF374732F28544F6849BA8A551ED8B47",
+      "messageId": "9002",
+      "personId": "1000",
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "00E7EF8682A7401E87B6CD6388B02E01"
+      "roomId": "2001"
     },
     {
       "messagePostedAt": "2017-10-20T10:20:14.670Z",
-      "messageId": "9547464AD01B421E9A1F061985CB1B51",
-      "personId": "94FB692997F241728389C83808F48F8F",
+      "messageId": "9002",
+      "personId": "1001",
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "00E7EF8682A7401E87B6CD6388B02E01"
+      "roomId": "2001"
     },
     {
       "messagePostedAt": "2017-10-20T10:20:14.670Z",
-      "messageId": "9547464AD01B421E9A1F061985CB1B51",
-      "personId": "D4CE6AE67DFA449DBC013E646639513A",
+      "messageId": "9002",
+      "personId": "1002",
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "00E7EF8682A7401E87B6CD6388B02E01"
+      "roomId": "2001"
     },
     {
       "messagePostedAt": "2017-10-20T10:21:54.670Z",
-      "messageId": "FB8E30E632B14F8989423F1B2C1B5466",
-      "personId": "BF374732F28544F6849BA8A551ED8B47",
+      "messageId": "9003",
+      "personId": "1000",
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "00E7EF8682A7401E87B6CD6388B02E01"
+      "roomId": "2001"
     },
     {
       "messagePostedAt": "2017-10-20T10:21:54.670Z",
-      "messageId": "FB8E30E632B14F8989423F1B2C1B5466",
-      "personId": "94FB692997F241728389C83808F48F8F",
+      "messageId": "9003",
+      "personId": "1001",
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "00E7EF8682A7401E87B6CD6388B02E01"
+      "roomId": "2001"
     },
     {
       "messagePostedAt": "2017-10-20T10:15:14.670Z",
-      "messageId": "24A592EFB735420194AC8B620237CABB",
-      "personId": "BF374732F28544F6849BA8A551ED8B47",
+      "messageId": "9004",
+      "personId": "1000",
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "055312B9A8D84C0AA6492B4894FFF533"
+      "roomId": "2002"
     },
     {
       "messagePostedAt": "2017-10-20T10:15:14.670Z",
-      "messageId": "24A592EFB735420194AC8B620237CABB",
-      "personId": "94FB692997F241728389C83808F48F8F",
+      "messageId": "9004",
+      "personId": "1001",
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "055312B9A8D84C0AA6492B4894FFF533"
+      "roomId": "2002"
     },
     {
       "messagePostedAt": "2017-10-20T10:20:14.670Z",
-      "messageId": "5F841B354BE64890A0E8F5196553877B",
-      "personId": "94FB692997F241728389C83808F48F8F",
+      "messageId": "9005",
+      "personId": "1001",
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "055312B9A8D84C0AA6492B4894FFF533"
+      "roomId": "2002"
     }
   ],
   "users": [
     {
       "hasAdminRole": false,
-      "personId": "BF374732F28544F6849BA8A551ED8B47",
+      "personId": "1000",
       "hasUserRole": true,
       "userId": "player01",
       "password": "pass"
     },
     {
       "hasAdminRole": false,
-      "personId": "94FB692997F241728389C83808F48F8F",
+      "personId": "1001",
       "hasUserRole": true,
       "userId": "player02",
       "password": "pass"
     },
     {
       "hasAdminRole": false,
-      "personId": "D4CE6AE67DFA449DBC013E646639513A",
+      "personId": "1002",
       "hasUserRole": true,
       "userId": "player03",
       "password": "pass"

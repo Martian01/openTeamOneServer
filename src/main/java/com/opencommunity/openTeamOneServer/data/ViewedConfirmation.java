@@ -20,8 +20,8 @@ public class ViewedConfirmation {
 	@Column(length = 32)
 	public String messageId;
 	@Id
-	@Column(length = 32)
-	public String personId;
+	@Column
+	public Integer personId;
 	@Column(length = 32)
 	public String roomId;
 	@Column
@@ -32,7 +32,7 @@ public class ViewedConfirmation {
 	public ViewedConfirmation() {
 	}
 
-	public ViewedConfirmation(String messageId, String personId, String roomId, long messagePostedAt, long confirmedAt) {
+	public ViewedConfirmation(String messageId, Integer personId, String roomId, long messagePostedAt, long confirmedAt) {
 		this.messageId = messageId;
 		this.personId = personId;
 		this.roomId = roomId;
@@ -42,7 +42,7 @@ public class ViewedConfirmation {
 
 	public ViewedConfirmation(JSONObject item) throws JSONException {
 		messageId = JsonUtil.getString(item, "messageId");
-		personId = JsonUtil.getString(item, "personId");
+		personId = JsonUtil.getInteger(item, "personId");
 		roomId = JsonUtil.getString(item, "roomId");
 		messagePostedAt = JsonUtil.getIsoDate(item, "messagePostedAt");
 		confirmedAt = JsonUtil.getIsoDate(item, "confirmedAt");
@@ -82,11 +82,11 @@ public class ViewedConfirmation {
 		this.messageId = messageId;
 	}
 
-	public String getPersonId() {
+	public Integer getPersonId() {
 		return personId;
 	}
 
-	public void setPersonId(String personId) {
+	public void setPersonId(Integer personId) {
 		this.personId = personId;
 	}
 

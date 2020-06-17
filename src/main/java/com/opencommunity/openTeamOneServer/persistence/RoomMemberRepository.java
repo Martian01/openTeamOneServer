@@ -8,11 +8,11 @@ public interface RoomMemberRepository extends CrudRepository<RoomMember, RoomMem
 	// for members
 	Iterable<RoomMember> findByRoomId(String roomId);
 	// for rooms
-	Iterable<RoomMember> findByPersonId(String personId);
+	Iterable<RoomMember> findByPersonId(Integer personId);
 	// full key
-	RoomMember findTopByRoomIdAndPersonId(String roomId, String personId);
+	RoomMember findTopByRoomIdAndPersonId(String roomId, Integer personId);
 	// for private rooms
-	RoomMember findTopByRoomIdAndPersonIdNot(String roomId, String personId);
+	RoomMember findTopByRoomIdAndPersonIdNot(String roomId, Integer personId);
 	// for specific membership (validation)
-	long countByRoomIdAndPersonId(String roomId, String personId);
+	long countByRoomIdAndPersonId(String roomId, Integer personId);
 }

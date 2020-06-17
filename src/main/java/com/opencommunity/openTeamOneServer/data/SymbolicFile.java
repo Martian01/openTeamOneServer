@@ -28,7 +28,7 @@ public class SymbolicFile {
 	@Column(length = 32)
 	public String referenceId;
 	@Column
-	public int position;
+	public Integer position;
 	@Column(length = 20)
 	public String directory;
 
@@ -49,7 +49,7 @@ public class SymbolicFile {
 		mimeType = JsonUtil.getString(item, "mimeType");
 		text = JsonUtil.getString(item, "text");
 		referenceId = JsonUtil.getString(item, "referenceId");
-		position = JsonUtil.getInt(item, "position", 0);
+		position = JsonUtil.getInteger(item, "position", 0);
 		directory = JsonUtil.getString(item, "directory");
 		//
 		if (fileId == null || fileId.length() == 0)
@@ -115,11 +115,11 @@ public class SymbolicFile {
 		this.referenceId = referenceId;
 	}
 
-	public int getPosition() {
+	public Integer getPosition() {
 		return position;
 	}
 
-	public void setPosition(int position) {
+	public void setPosition(Integer position) {
 		this.position = position;
 	}
 

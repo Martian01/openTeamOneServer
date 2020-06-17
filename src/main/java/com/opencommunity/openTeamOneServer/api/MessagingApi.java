@@ -124,7 +124,7 @@ public class MessagingApi {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/person/{personId}")
-	public ResponseEntity<String> person(HttpServletRequest request, @PathVariable String personId) throws JSONException {
+	public ResponseEntity<String> person(HttpServletRequest request, @PathVariable Integer personId) throws JSONException {
 		Session session = restLib.getSession(request);
 		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
@@ -150,7 +150,7 @@ public class MessagingApi {
 			return restLib.httpStaleSessionResponse(request);
 		//
 		JSONObject body = new JSONObject();
-		Set<String> contactIds = getContactIds();
+		Set<Integer> contactIds = getContactIds();
 		Iterable<Person> persons = personRepository.findAll();
 		JSONArray contactsJson = new JSONArray();
 		for (Person person : persons)
@@ -166,7 +166,7 @@ public class MessagingApi {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/contact/{contactId}/roomId")
-	public ResponseEntity<String> contactRoomId(HttpServletRequest request, @PathVariable String contactId) throws JSONException {
+	public ResponseEntity<String> contactRoomId(HttpServletRequest request, @PathVariable Integer contactId) throws JSONException {
 		Session session = restLib.getSession(request);
 		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
@@ -495,30 +495,30 @@ public class MessagingApi {
 
 	/* helper functions */
 
-	private boolean isContact(String personId) {
+	private boolean isContact(Integer personId) {
 		return personId != null && userRepository.countByPersonIdAndHasUserRoleTrue(personId) > 0;
 	}
 
-	private boolean isRoomMember(String roomId, String personId) {
+	private boolean isRoomMember(String roomId, Integer personId) {
 		return roomId != null && personId != null && roomMemberRepository.countByRoomIdAndPersonId(roomId, personId) > 0;
 	}
 
-	private Set<String> getContactIds() {
+	private Set<Integer> getContactIds() {
 		Iterable<User> users = userRepository.findByPersonIdNotNullAndHasUserRoleTrue();
-		Set<String> contactIds = new HashSet<>();
+		Set<Integer> contactIds = new HashSet<>();
 		for (User user : users)
 			contactIds.add(user.personId);
 		return contactIds;
 	}
 
-	private String getPrivateRoomId(String personId1, String personId2) {
+	private String getPrivateRoomId(Integer personId1, Integer personId2) {
 		if (personId1 == null || personId2 == null || personId1.equals(personId2))
 			return null;
 		Set<String> roomIds = new HashSet<>();
 		Iterable<Room> rooms = roomRepository.findByRoomType("private");
 		for (Room room : rooms) {
 			Iterable<RoomMember> roomMembers = roomMemberRepository.findByRoomId(room.roomId);
-			Set<String> set = new HashSet<>();
+			Set<Integer> set = new HashSet<>();
 			for (RoomMember roomMember : roomMembers)
 				set.add(roomMember.personId);
 			if (set.contains(personId1) && set.contains(personId2) && set.size() == 2)
@@ -527,7 +527,7 @@ public class MessagingApi {
 		return roomIds.size() == 1 ? roomIds.iterator().next() : null;
 	}
 
-	private String createPrivateRoom(String personId1, String personId2) {
+	private String createPrivateRoom(Integer personId1, Integer personId2) {
 		String privateRoomId;
 		synchronized(Room.class) {
 			privateRoomId = getPrivateRoomId(personId1, personId2);
@@ -543,7 +543,7 @@ public class MessagingApi {
 		return privateRoomId;
 	}
 
-	private Long getWatermark(String personId, String roomId) {
+	private Long getWatermark(Integer personId, String roomId) {
 		ViewedConfirmation viewedConfirmation = viewedConfirmationRepository.findTopByPersonIdAndRoomIdOrderByMessagePostedAtDesc(personId, roomId);
 		return viewedConfirmation == null ? null : viewedConfirmation.messagePostedAt;
 	}
@@ -650,7 +650,7 @@ public class MessagingApi {
 
 	/* the following JSON formats are complex and include data from outside the actual entity parsed */
 
-	private JSONObject messageToJson(Message message, String personId, Iterable<SymbolicFile> symbolicFiles) throws JSONException {
+	private JSONObject messageToJson(Message message, Integer personId, Iterable<SymbolicFile> symbolicFiles) throws JSONException {
 		if (message == null)
 			return null;
 		JSONObject messageContent = new JSONObject();
@@ -680,13 +680,13 @@ public class MessagingApi {
 		return item;
 	}
 
-	private JSONObject messageToJson(Message message, String personId) throws JSONException {
+	private JSONObject messageToJson(Message message, Integer personId) throws JSONException {
 		if (message == null)
 			return null;
 		return messageToJson(message, personId, symbolicFileRepository.findByReferenceIdOrderByPositionAsc(message.messageId));
 	}
 
-	private JSONArray messagesToJsonArray(Iterable<Message> messages, String personId) throws JSONException {
+	private JSONArray messagesToJsonArray(Iterable<Message> messages, Integer personId) throws JSONException {
 		JSONArray array = new JSONArray();
 		for (Message message : messages)
 			array.put(messageToJson(message, personId));
@@ -697,7 +697,7 @@ public class MessagingApi {
 		return str == null || str.length() <= n ? str : str.substring(0, n);
 	}
 
-	private String[] getPrivateRoomNames(String roomId, String personId) {
+	private String[] getPrivateRoomNames(String roomId, Integer personId) {
 		String roomName = null;
 		String shortRoomName = null;
 		RoomMember partnerMember = roomMemberRepository.findTopByRoomIdAndPersonIdNot(roomId, personId);
@@ -714,7 +714,7 @@ public class MessagingApi {
 		return new String[] {roomName, shortRoomName};
 	}
 
-	private JSONObject roomToJson(Room room, JSONArray currentMemberIds, String personId) throws JSONException {
+	private JSONObject roomToJson(Room room, JSONArray currentMemberIds, Integer personId) throws JSONException {
 		if (room == null)
 			return null;
 		boolean isPrivateRoom = "private".equals(room.roomType);
@@ -743,7 +743,7 @@ public class MessagingApi {
 		return item;
 	}
 
-	private JSONArray roomsToJsonArray(Iterable<Room> rooms, Iterable<RoomMember> roomMembers, String personId) throws JSONException {
+	private JSONArray roomsToJsonArray(Iterable<Room> rooms, Iterable<RoomMember> roomMembers, Integer personId) throws JSONException {
 		// set up two helper maps
 		Set<String> userRooms = new HashSet<>();
 		Map<String, JSONArray> membersMap = new HashMap<>();

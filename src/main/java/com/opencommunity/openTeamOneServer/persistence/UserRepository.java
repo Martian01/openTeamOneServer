@@ -5,7 +5,7 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface UserRepository extends CrudRepository<User, String> {
 	// for contacts
-	long countByPersonIdAndHasUserRoleTrue(String personId);
+	long countByPersonIdAndHasUserRoleTrue(Integer personId);
 	Iterable<User> findByPersonIdNotNullAndHasUserRoleTrue();
 	// for initialisation
 	long countByHasAdminRoleTrue();

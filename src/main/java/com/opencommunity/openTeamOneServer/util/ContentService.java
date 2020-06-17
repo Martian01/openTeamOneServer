@@ -34,11 +34,6 @@ public class ContentService {
 	@Autowired
 	private SubscriptionRepository sr;
 
-	@Bean
-	public RestLib getRestlib() {
-		return new RestLib();
-	}
-
 	@PostConstruct
 	public void init() {
 		if (!tpr.findById("tenantName").isPresent())

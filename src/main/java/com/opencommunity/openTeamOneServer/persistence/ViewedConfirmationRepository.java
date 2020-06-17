@@ -8,11 +8,11 @@ public interface ViewedConfirmationRepository extends CrudRepository<ViewedConfi
 	// for message confirmations
 	Iterable<ViewedConfirmation> findByMessageId(String messageId);
 	// for viewedCount (simple version)
-	long countByMessageIdAndPersonIdNot(String messageId, String personId);
+	long countByMessageIdAndPersonIdNot(String messageId, Integer personId);
 	// for badgeCount etc.
-	ViewedConfirmation findTopByPersonIdAndRoomIdOrderByMessagePostedAtDesc(String personId, String roomId);
+	ViewedConfirmation findTopByPersonIdAndRoomIdOrderByMessagePostedAtDesc(Integer personId, String roomId);
 	// for viewedAt etc.
-	ViewedConfirmation findTopByMessageIdAndPersonId(String messageId, String personId);
+	ViewedConfirmation findTopByMessageIdAndPersonId(String messageId, Integer personId);
 	// for debugging
-	Iterable<ViewedConfirmation> findByPersonId(String personId);
+	Iterable<ViewedConfirmation> findByPersonId(Integer personId);
 }

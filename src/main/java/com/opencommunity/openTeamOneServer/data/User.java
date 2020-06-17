@@ -16,12 +16,12 @@ import java.util.ArrayList;
 @Entity
 public class User {
 	@Id
-	@Column(length = 32)
+	@Column(length = 16)
 	public String userId;
 	@Column(length = 200)
 	public String passwordHash;
-	@Column(length = 32)
-	public String personId;
+	@Column
+	public Integer personId;
 	@Column
 	public boolean hasUserRole;
 	@Column
@@ -30,8 +30,8 @@ public class User {
 	public User() {
 	}
 
-	public User(String userId, String password, String personId, boolean hasUserRole, boolean hasAdminRole) {
-		this.userId = userId == null || userId.length() == 0 ? RestLib.getRandomString(8) : userId.toLowerCase();
+	public User(String userId, String password, Integer personId, boolean hasUserRole, boolean hasAdminRole) {
+		this.userId = userId == null || userId.length() == 0 ? Integer.toString(RestLib.getRandomInt()) : userId.toLowerCase();
 		setPassword(password);
 		this.personId = personId;
 		this.hasUserRole = hasUserRole;
@@ -40,14 +40,14 @@ public class User {
 
 	public User(JSONObject item) throws JSONException {
 		userId = JsonUtil.getString(item, "userId");
-		userId = userId == null || userId.length() == 0 ? RestLib.getRandomString(8) : userId.toLowerCase();
+		userId = userId == null || userId.length() == 0 ? Integer.toString(RestLib.getRandomInt()) : userId.toLowerCase();
 		// accept unencrypted password or password hash
 		String password = JsonUtil.getString(item, "password");
 		if (password != null)
 			setPassword(password);
 		else
 			passwordHash = JsonUtil.getString(item, "passwordHash");
-		personId = JsonUtil.getString(item, "personId");
+		personId = JsonUtil.getInteger(item, "personId");
 		hasUserRole = JsonUtil.getBoolean(item, "hasUserRole");
 		hasAdminRole = JsonUtil.getBoolean(item, "hasAdminRole");
 	}
@@ -95,11 +95,11 @@ public class User {
 		this.passwordHash = passwordHash;
 	}
 
-	public String getPersonId() {
+	public Integer getPersonId() {
 		return personId;
 	}
 
-	public void setPersonId(String personId) {
+	public void setPersonId(Integer personId) {
 		this.personId = personId;
 	}
 
