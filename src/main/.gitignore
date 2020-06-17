@@ -1,0 +1,6 @@
+# ignore everything in the directory
+/*
+# except the following
+!/.gitignore
+!/java/
+!/resources/
