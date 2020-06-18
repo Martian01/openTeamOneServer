@@ -48,12 +48,12 @@ public class Message {
 	}
 
 	public Message(JSONObject item) throws JSONException {
-		messageId = JsonUtil.getIntegerString(item, "messageId");
+		messageId = JsonUtil.getInteger(item, "messageId");
 		if (messageId == null)
 			messageId = RestLib.getRandomInt();
 		clientMessageId = JsonUtil.getString(item, "clientMessageId");
-		roomId = JsonUtil.getIntegerString(item, "roomId");
-		senderPersonId = JsonUtil.getIntegerString(item, "senderPersonId");
+		roomId = JsonUtil.getInteger(item, "roomId");
+		senderPersonId = JsonUtil.getInteger(item, "senderPersonId");
 		postedAt = JsonUtil.getIsoDate(item, "postedAt");
 		text = JsonUtil.getString(item, "text");
 		isDeleted = JsonUtil.getBoolean(item, "isDeleted");

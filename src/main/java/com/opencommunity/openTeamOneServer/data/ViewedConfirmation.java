@@ -41,9 +41,9 @@ public class ViewedConfirmation {
 	}
 
 	public ViewedConfirmation(JSONObject item) throws JSONException {
-		messageId = JsonUtil.getIntegerString(item, "messageId");
-		personId = JsonUtil.getIntegerString(item, "personId");
-		roomId = JsonUtil.getIntegerString(item, "roomId");
+		messageId = JsonUtil.getInteger(item, "messageId");
+		personId = JsonUtil.getInteger(item, "personId");
+		roomId = JsonUtil.getInteger(item, "roomId");
 		messagePostedAt = JsonUtil.getIsoDate(item, "messagePostedAt");
 		confirmedAt = JsonUtil.getIsoDate(item, "confirmedAt");
 	}

@@ -6,12 +6,20 @@ import org.json.JSONObject;
 
 public class JsonUtil {
 
-	public static Integer getIntegerString(JSONObject item, String key) throws JSONException {
+/*	public static Integer getIntegerString(JSONObject item, String key) throws JSONException {
 		return getIntegerString(item, key, null);
 	}
 
 	public static Integer getIntegerString(JSONObject item, String key, Integer defaultValue) throws JSONException {
 		return item == null || item.isNull(key) ? defaultValue : Integer.parseInt(item.getString(key));
+	}*/
+
+	public static Integer getInteger(JSONObject item, String key) throws JSONException {
+		return getInteger(item, key, null);
+	}
+
+	public static Integer getInteger(JSONObject item, String key, Integer defaultValue) throws JSONException {
+		return item == null || item.isNull(key) ? defaultValue : (Integer) item.getInt(key); // cast required to prevent unboxing of defaultValue
 	}
 
 	public static int getInt(JSONObject item, String key, int defaultValue) throws JSONException {

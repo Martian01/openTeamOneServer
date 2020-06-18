@@ -42,13 +42,13 @@ public class Room {
 	}
 
 	public Room(JSONObject item) throws JSONException {
-		roomId = JsonUtil.getIntegerString(item, "roomId");
+		roomId = JsonUtil.getInteger(item, "roomId");
 		if (roomId == null)
 			roomId = RestLib.getRandomInt();
 		name = JsonUtil.getString(item, "name");
 		shortName = JsonUtil.getString(item, "shortName");
 		roomType = JsonUtil.getString(item, "roomType");
-		pictureId = JsonUtil.getIntegerString(item, "pictureId");
+		pictureId = JsonUtil.getInteger(item, "pictureId");
 		changedAt = JsonUtil.getIsoDate(item, "changedAt");
 	}
 

@@ -3,88 +3,88 @@
     {
       "lastName": "Tank",
       "firstName": "Thomas",
-      "pictureId": "4000",
       "nickName": "Tom",
-      "personId": "1000"
+      "personId": 1000,
+      "pictureId": 4000
     },
     {
       "lastName": "Smith",
       "firstName": "Peter",
-      "pictureId": "4001",
-      "personId": "1001"
+      "personId": 1001,
+      "pictureId": 4001
     },
     {
       "lastName": "Potter",
       "firstName": "Harry",
-      "pictureId": "4002",
-      "personId": "1002"
+      "personId": 1002,
+      "pictureId": 4002
     }
   ],
   "rooms": [
     {
-      "pictureId": "3000",
       "name": "Team Room",
       "changedAt": "2017-10-20T10:23:34.670Z",
       "shortName": "TR",
-      "roomId": "2000",
-      "roomType": "group"
+      "roomId": 2000,
+      "roomType": "group",
+      "pictureId": 3000
     },
     {
-      "pictureId": "3001",
       "name": "General",
       "changedAt": "2017-10-20T10:21:54.670Z",
       "shortName": "GN",
-      "roomId": "2001",
-      "roomType": "group"
+      "roomId": 2001,
+      "roomType": "group",
+      "pictureId": 3001
     },
     {
       "name": "PM",
       "changedAt": "2017-10-20T10:20:14.670Z",
       "shortName": "PM",
-      "roomId": "2002",
+      "roomId": 2002,
       "roomType": "private"
     }
   ],
   "files": [
     {
-      "fileId": "5000",
+      "fileId": 5000,
       "directory": "profiles",
       "mimeType": "image/jpg",
       "position": 0
     },
     {
-      "fileId": "4000",
+      "fileId": 4000,
       "directory": "profiles",
       "mimeType": "image/jpg",
       "position": 0
     },
     {
-      "fileId": "4001",
+      "fileId": 4001,
       "directory": "profiles",
       "mimeType": "image/jpg",
       "position": 0
     },
     {
-      "fileId": "4002",
+      "fileId": 4002,
       "directory": "profiles",
       "mimeType": "image/jpg",
       "position": 0
     },
     {
-      "fileId": "3000",
+      "fileId": 3000,
       "directory": "profiles",
       "mimeType": "image/jpg",
       "position": 0
     },
     {
-      "fileId": "3001",
+      "fileId": 3001,
       "directory": "profiles",
       "mimeType": "image/jpg",
       "position": 0
     },
     {
-      "referenceId": "9002",
-      "fileId": "6000",
+      "referenceId": 9002,
+      "fileId": 6000,
       "directory": "attachments",
       "mimeType": "image/jpg",
       "position": 0
@@ -92,211 +92,211 @@
   ],
   "messages": [
     {
-      "senderPersonId": "1000",
+      "senderPersonId": 1000,
       "postedAt": "2017-10-20T10:16:54.670Z",
       "isDeleted": false,
-      "messageId": "9000",
+      "messageId": 9000,
       "text": "Hello, this is my first message",
-      "roomId": "2000",
+      "roomId": 2000,
       "clientMessageId": "cm1",
       "updatedAt": "2017-10-20T10:16:54.670Z"
     },
     {
-      "senderPersonId": "1002",
+      "senderPersonId": 1002,
       "postedAt": "2017-10-20T10:23:34.670Z",
       "isDeleted": false,
-      "messageId": "9001",
+      "messageId": 9001,
       "text": "Welcome! 😊",
-      "roomId": "2000",
+      "roomId": 2000,
       "clientMessageId": "cm2",
       "updatedAt": "2017-10-20T10:23:34.670Z"
     },
     {
-      "senderPersonId": "1001",
+      "senderPersonId": 1001,
       "postedAt": "2017-10-20T10:20:14.670Z",
       "isDeleted": false,
-      "messageId": "9002",
+      "messageId": 9002,
       "text": "Can you see my picture?",
-      "roomId": "2001",
+      "roomId": 2001,
       "clientMessageId": "cm3",
       "updatedAt": "2017-10-20T10:20:14.670Z"
     },
     {
-      "senderPersonId": "1000",
+      "senderPersonId": 1000,
       "postedAt": "2017-10-20T10:21:54.670Z",
       "isDeleted": false,
-      "messageId": "9003",
+      "messageId": 9003,
       "text": "Yeah, brilliant shot! 👍",
-      "roomId": "2001",
+      "roomId": 2001,
       "clientMessageId": "cm4",
       "updatedAt": "2017-10-20T10:21:54.670Z"
     },
     {
-      "senderPersonId": "1000",
+      "senderPersonId": 1000,
       "postedAt": "2017-10-20T10:15:14.670Z",
       "isDeleted": false,
-      "messageId": "9004",
+      "messageId": 9004,
       "text": "Hi Peter",
-      "roomId": "2002",
+      "roomId": 2002,
       "clientMessageId": "cm5",
       "updatedAt": "2017-10-20T10:15:14.670Z"
     },
     {
-      "senderPersonId": "1001",
+      "senderPersonId": 1001,
       "postedAt": "2017-10-20T10:20:14.670Z",
       "isDeleted": false,
-      "messageId": "9005",
+      "messageId": 9005,
       "text": "Hey Tom, everything allright?",
-      "roomId": "2002",
+      "roomId": 2002,
       "clientMessageId": "cm6",
       "updatedAt": "2017-10-20T10:20:14.670Z"
     }
   ],
   "roomMembers": [
     {
-      "personId": "1001",
-      "roomId": "2001"
+      "personId": 1001,
+      "roomId": 2001
     },
     {
-      "personId": "1001",
-      "roomId": "2002"
+      "personId": 1001,
+      "roomId": 2002
     },
     {
-      "personId": "1001",
-      "roomId": "2000"
+      "personId": 1001,
+      "roomId": 2000
     },
     {
-      "personId": "1000",
-      "roomId": "2001"
+      "personId": 1000,
+      "roomId": 2001
     },
     {
-      "personId": "1000",
-      "roomId": "2002"
+      "personId": 1000,
+      "roomId": 2002
     },
     {
-      "personId": "1000",
-      "roomId": "2000"
+      "personId": 1000,
+      "roomId": 2000
     },
     {
-      "personId": "1002",
-      "roomId": "2001"
+      "personId": 1002,
+      "roomId": 2001
     },
     {
-      "personId": "1002",
-      "roomId": "2000"
+      "personId": 1002,
+      "roomId": 2000
     }
   ],
   "viewedConfirmations": [
     {
       "messagePostedAt": "2017-10-20T10:16:54.670Z",
-      "messageId": "9000",
-      "personId": "1000",
+      "messageId": 9000,
+      "personId": 1000,
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "2000"
+      "roomId": 2000
     },
     {
       "messagePostedAt": "2017-10-20T10:16:54.670Z",
-      "messageId": "9000",
-      "personId": "1001",
+      "messageId": 9000,
+      "personId": 1001,
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "2000"
+      "roomId": 2000
     },
     {
       "messagePostedAt": "2017-10-20T10:16:54.670Z",
-      "messageId": "9000",
-      "personId": "1002",
+      "messageId": 9000,
+      "personId": 1002,
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "2000"
+      "roomId": 2000
     },
     {
       "messagePostedAt": "2017-10-20T10:23:34.670Z",
-      "messageId": "9001",
-      "personId": "1000",
+      "messageId": 9001,
+      "personId": 1000,
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "2000"
+      "roomId": 2000
     },
     {
       "messagePostedAt": "2017-10-20T10:23:34.670Z",
-      "messageId": "9001",
-      "personId": "1002",
+      "messageId": 9001,
+      "personId": 1002,
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "2000"
+      "roomId": 2000
     },
     {
       "messagePostedAt": "2017-10-20T10:20:14.670Z",
-      "messageId": "9002",
-      "personId": "1000",
+      "messageId": 9002,
+      "personId": 1000,
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "2001"
+      "roomId": 2001
     },
     {
       "messagePostedAt": "2017-10-20T10:20:14.670Z",
-      "messageId": "9002",
-      "personId": "1001",
+      "messageId": 9002,
+      "personId": 1001,
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "2001"
+      "roomId": 2001
     },
     {
       "messagePostedAt": "2017-10-20T10:20:14.670Z",
-      "messageId": "9002",
-      "personId": "1002",
+      "messageId": 9002,
+      "personId": 1002,
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "2001"
+      "roomId": 2001
     },
     {
       "messagePostedAt": "2017-10-20T10:21:54.670Z",
-      "messageId": "9003",
-      "personId": "1000",
+      "messageId": 9003,
+      "personId": 1000,
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "2001"
+      "roomId": 2001
     },
     {
       "messagePostedAt": "2017-10-20T10:21:54.670Z",
-      "messageId": "9003",
-      "personId": "1001",
+      "messageId": 9003,
+      "personId": 1001,
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "2001"
+      "roomId": 2001
     },
     {
       "messagePostedAt": "2017-10-20T10:15:14.670Z",
-      "messageId": "9004",
-      "personId": "1000",
+      "messageId": 9004,
+      "personId": 1000,
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "2002"
+      "roomId": 2002
     },
     {
       "messagePostedAt": "2017-10-20T10:15:14.670Z",
-      "messageId": "9004",
-      "personId": "1001",
+      "messageId": 9004,
+      "personId": 1001,
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "2002"
+      "roomId": 2002
     },
     {
       "messagePostedAt": "2017-10-20T10:20:14.670Z",
-      "messageId": "9005",
-      "personId": "1001",
+      "messageId": 9005,
+      "personId": 1001,
       "confirmedAt": "2017-10-20T10:25:14.670Z",
-      "roomId": "2002"
+      "roomId": 2002
     }
   ],
   "users": [
     {
       "hasAdminRole": false,
-      "personId": "1000",
+      "personId": 1000,
       "hasUserRole": true,
       "userId": "player01",
       "password": "pass"
     },
     {
       "hasAdminRole": false,
-      "personId": "1001",
+      "personId": 1001,
       "hasUserRole": true,
       "userId": "player02",
       "password": "pass"
     },
     {
       "hasAdminRole": false,
-      "personId": "1002",
+      "personId": 1002,
       "hasUserRole": true,
       "userId": "player03",
       "password": "pass"

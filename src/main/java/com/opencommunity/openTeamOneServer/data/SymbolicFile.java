@@ -45,12 +45,12 @@ public class SymbolicFile {
 	}
 
 	public SymbolicFile(JSONObject item) throws JSONException {
-		fileId = JsonUtil.getIntegerString(item, "fileId");
+		fileId = JsonUtil.getInteger(item, "fileId");
 		if (fileId == null)
 			fileId = RestLib.getRandomInt();
 		mimeType = JsonUtil.getString(item, "mimeType");
 		text = JsonUtil.getString(item, "text");
-		referenceId = JsonUtil.getIntegerString(item, "referenceId");
+		referenceId = JsonUtil.getInteger(item, "referenceId");
 		position = JsonUtil.getInt(item, "position", 0);
 		directory = JsonUtil.getString(item, "directory");
 	}

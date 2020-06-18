@@ -38,13 +38,13 @@ public class Person {
 	}
 
 	public Person(JSONObject item) throws JSONException {
-		personId = JsonUtil.getIntegerString(item, "personId");
+		personId = JsonUtil.getInteger(item, "personId");
 		if (personId == null)
 			personId = RestLib.getRandomInt();
 		lastName = JsonUtil.getString(item, "lastName");
 		firstName = JsonUtil.getString(item, "firstName");
 		nickName = JsonUtil.getString(item, "nickName");
-		pictureId = JsonUtil.getIntegerString(item, "pictureId");
+		pictureId = JsonUtil.getInteger(item, "pictureId");
 	}
 
 	public JSONObject toJson() throws JSONException {

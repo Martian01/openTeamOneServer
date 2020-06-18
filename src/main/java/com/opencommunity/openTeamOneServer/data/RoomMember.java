@@ -31,8 +31,8 @@ public class RoomMember {
 	}
 
 	public RoomMember(JSONObject item) throws JSONException {
-		roomId = JsonUtil.getIntegerString(item, "roomId");
-		personId = JsonUtil.getIntegerString(item, "personId");
+		roomId = JsonUtil.getInteger(item, "roomId");
+		personId = JsonUtil.getInteger(item, "personId");
 	}
 
 	public JSONObject toJson() throws JSONException {
