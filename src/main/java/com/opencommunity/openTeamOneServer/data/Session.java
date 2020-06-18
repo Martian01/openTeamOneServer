@@ -21,7 +21,7 @@ public class Session {
 	public long lastAccessTime;
 
 	public Session(String userId, boolean iosMode) {
-		sessionId = RestLib.getUuid();
+		sessionId = Integer.toHexString(RestLib.getRandomInt());
 		if (iosMode)
 			sessionId += IOS_MARKER;
 		this.userId = userId;
@@ -36,7 +36,7 @@ public class Session {
 		lastAccessTime = JsonUtil.getIsoDate(item, "lastAccessTime");
 		//
 		if (sessionId == null || sessionId.length() == 0)
-			sessionId = RestLib.getUuid();
+			sessionId = Integer.toHexString(RestLib.getRandomInt());
 	}
 
 	public JSONObject toJson() throws JSONException {

@@ -49,44 +49,44 @@
     {
       "fileId": 5000,
       "directory": "profiles",
-      "mimeType": "image/jpg",
+      "mimeType": "image/jpeg",
       "position": 0
     },
     {
       "fileId": 4000,
       "directory": "profiles",
-      "mimeType": "image/jpg",
+      "mimeType": "image/jpeg",
       "position": 0
     },
     {
       "fileId": 4001,
       "directory": "profiles",
-      "mimeType": "image/jpg",
+      "mimeType": "image/jpeg",
       "position": 0
     },
     {
       "fileId": 4002,
       "directory": "profiles",
-      "mimeType": "image/jpg",
+      "mimeType": "image/jpeg",
       "position": 0
     },
     {
       "fileId": 3000,
       "directory": "profiles",
-      "mimeType": "image/jpg",
+      "mimeType": "image/jpeg",
       "position": 0
     },
     {
       "fileId": 3001,
       "directory": "profiles",
-      "mimeType": "image/jpg",
+      "mimeType": "image/jpeg",
       "position": 0
     },
     {
       "referenceId": 9002,
       "fileId": 6000,
       "directory": "attachments",
-      "mimeType": "image/jpg",
+      "mimeType": "image/jpeg",
       "position": 0
     }
   ],
@@ -98,7 +98,7 @@
       "messageId": 9000,
       "text": "Hello, this is my first message",
       "roomId": 2000,
-      "clientMessageId": "cm1",
+      "clientMessageId": "cm0",
       "updatedAt": "2017-10-20T10:16:54.670Z"
     },
     {
@@ -108,7 +108,7 @@
       "messageId": 9001,
       "text": "Welcome! 😊",
       "roomId": 2000,
-      "clientMessageId": "cm2",
+      "clientMessageId": "cm1",
       "updatedAt": "2017-10-20T10:23:34.670Z"
     },
     {
@@ -118,7 +118,7 @@
       "messageId": 9002,
       "text": "Can you see my picture?",
       "roomId": 2001,
-      "clientMessageId": "cm3",
+      "clientMessageId": "cm2",
       "updatedAt": "2017-10-20T10:20:14.670Z"
     },
     {
@@ -128,7 +128,7 @@
       "messageId": 9003,
       "text": "Yeah, brilliant shot! 👍",
       "roomId": 2001,
-      "clientMessageId": "cm4",
+      "clientMessageId": "cm3",
       "updatedAt": "2017-10-20T10:21:54.670Z"
     },
     {
@@ -138,7 +138,7 @@
       "messageId": 9004,
       "text": "Hi Peter",
       "roomId": 2002,
-      "clientMessageId": "cm5",
+      "clientMessageId": "cm4",
       "updatedAt": "2017-10-20T10:15:14.670Z"
     },
     {
@@ -148,7 +148,7 @@
       "messageId": 9005,
       "text": "Hey Tom, everything allright?",
       "roomId": 2002,
-      "clientMessageId": "cm6",
+      "clientMessageId": "cm5",
       "updatedAt": "2017-10-20T10:20:14.670Z"
     }
   ],

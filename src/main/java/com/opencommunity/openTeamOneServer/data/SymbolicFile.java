@@ -21,15 +21,15 @@ public class SymbolicFile {
 	@Id
 	@Column
 	public Integer fileId;
-	@Column(length = 100)
+	@Column(length = 32)
 	public String mimeType;
-	@Column(length = 200)
+	@Column(length = 128)
 	public String text;
 	@Column
 	public Integer referenceId;
 	@Column
 	public Integer position;
-	@Column(length = 20)
+	@Column(length = 16)
 	public String directory;
 
 	public SymbolicFile() {
@@ -51,7 +51,7 @@ public class SymbolicFile {
 		mimeType = JsonUtil.getString(item, "mimeType");
 		text = JsonUtil.getString(item, "text");
 		referenceId = JsonUtil.getInteger(item, "referenceId");
-		position = JsonUtil.getInt(item, "position", 0);
+		position = JsonUtil.getInteger(item, "position");
 		directory = JsonUtil.getString(item, "directory");
 	}
 

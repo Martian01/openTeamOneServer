@@ -52,7 +52,7 @@ public class StreamUtil {
 	}
 
 	public static File getDataDirectory(TenantParameterRepository tpr, String subdirectory) {
-		TenantParameter tp = tpr.findById("dataDirectory").orElse(null);
+		TenantParameter tp = tpr.findTopByName("dataDirectory");
 		if (tp == null)
 			return null;
 		File directory = new File(tp.value);

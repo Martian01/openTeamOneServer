@@ -17,17 +17,27 @@ import java.util.ArrayList;
 public class Subscription {
 
 	@Id
-	@Column(length = 32)
+	@Column
+	public Integer targetTypeHash;
+	@Id
+	@Column
+	public Integer appIdHash;
+	@Id
+	@Column
+	public Integer deviceTokenHash;
+	@Id
+	@Column
+	public Integer userIdHash;
+
+	@Column(length = 16)
 	public String targetType;
-	@Id
-	@Column(length = 128)
+	@Column(length = 32)
 	public String appId;
-	@Id
 	@Column(length = 200)
 	public String deviceToken;
-	@Id
-	@Column(length = 32)
+	@Column(length = 16)
 	public String userId;
+
 	@Column(length = 5)
 	public String language;
 	@Column(length = 100)
@@ -53,6 +63,39 @@ public class Subscription {
 	public Subscription() {
 	}
 
+	public Subscription(
+			String targetType,
+			String appId,
+			String deviceToken,
+			String userId,
+			String language,
+			String clientAccountId,
+			boolean userConsent,
+			boolean isActive,
+			long changedAt,
+			String deviceId,
+			String deviceType,
+			String osVersion,
+			String encryption,
+			String appVersion
+	) {
+		this.targetType = targetType;
+		this.appId = appId;
+		this.deviceToken = deviceToken;
+		this.userId = userId;
+		this.language = language;
+		this.clientAccountId = clientAccountId;
+		this.userConsent = userConsent;
+		this.isActive = isActive;
+		this.changedAt = changedAt;
+		this.deviceId = deviceId;
+		this.deviceType = deviceType;
+		this.osVersion = osVersion;
+		this.encryption = encryption;
+		this.appVersion = appVersion;
+		normalize();
+	}
+
 	public Subscription(JSONObject item) throws JSONException {
 		targetType = JsonUtil.getString(item, "targetType");
 		appId = JsonUtil.getString(item, "appId");
@@ -68,6 +111,14 @@ public class Subscription {
 		osVersion = JsonUtil.getString(item, "osVersion");
 		encryption = JsonUtil.getString(item, "encryption");
 		appVersion = JsonUtil.getString(item, "appVersion");
+		normalize();
+	}
+
+	public void normalize() {
+		if (targetType != null) targetTypeHash = targetType.hashCode();
+		if (appId != null) appIdHash = appId.hashCode();
+		if (deviceToken != null) deviceTokenHash = deviceToken.hashCode();
+		if (userId != null) userIdHash = userId.hashCode();
 	}
 
 	public JSONObject toJson() throws JSONException {
@@ -103,6 +154,38 @@ public class Subscription {
 		for (Subscription subscription : subscriptionLogs)
 			array.put(subscription.toJson());
 		return array;
+	}
+
+	public Integer getTargetTypeHash() {
+		return targetTypeHash;
+	}
+
+	public void setTargetTypeHash(Integer targetTypeHash) {
+		this.targetTypeHash = targetTypeHash;
+	}
+
+	public Integer getAppIdHash() {
+		return appIdHash;
+	}
+
+	public void setAppIdHash(Integer appIdHash) {
+		this.appIdHash = appIdHash;
+	}
+
+	public Integer getDeviceTokenHash() {
+		return deviceTokenHash;
+	}
+
+	public void setDeviceTokenHash(Integer deviceTokenHash) {
+		this.deviceTokenHash = deviceTokenHash;
+	}
+
+	public Integer getUserIdHash() {
+		return userIdHash;
+	}
+
+	public void setUserIdHash(Integer userIdHash) {
+		this.userIdHash = userIdHash;
 	}
 
 	public String getTargetType() {

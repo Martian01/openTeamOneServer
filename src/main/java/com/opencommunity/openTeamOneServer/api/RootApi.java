@@ -29,7 +29,7 @@ public class RootApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/sap/sports/pe/api/messaging/versions")
 	public ResponseEntity<String> versions(HttpServletRequest request) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -56,8 +56,8 @@ public class RootApi {
 	@RequestMapping(method = RequestMethod.GET, value = {"", "/", "/admin", "/admin/"})
 	public ResponseEntity<String> root(HttpServletRequest request) {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionUser(session, userRepository);
-		return restLib.httpForwardResponse(request, tenantParameterRepository, user, null);
+		User user = restLib.getSessionUser(session);
+		return restLib.httpForwardResponse(request, user, null);
 	}
 
 }

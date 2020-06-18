@@ -46,7 +46,7 @@ public class SessionApi {
 		if (userId == null || password == null)
 			return restLib.httpForbiddenSessionResponse;
 		userId = userId.toLowerCase();
-		User user = userRepository.findById(userId).orElse(null);
+		User user = userRepository.findTopByUserId(userId);
 		if (user == null)
 			return restLib.httpForbiddenSessionResponse;
 		if (user.hasUserRole && user.personId != null) {
@@ -67,7 +67,7 @@ public class SessionApi {
 		if (userId == null || passwordNew == null)
 			return restLib.httpForbiddenSessionResponse;
 		userId = userId.toLowerCase();
-		User user = userRepository.findById(userId).orElse(null);
+		User user = userRepository.findTopByUserId(userId);
 		if (user == null)
 			return restLib.httpForbiddenSessionResponse;
 		boolean passwordOldConfirmed = false;
@@ -76,7 +76,7 @@ public class SessionApi {
 			if (oldSessionId != null) {
 				Session oldSession = Session.getSession(oldSessionId);
 				if (oldSession != null) {
-					User oldSessionUser = userRepository.findById(oldSession.userId).orElse(null);
+					User oldSessionUser = userRepository.findTopByUserId(oldSession.userId);
 					if (oldSessionUser != null)
 						passwordOldConfirmed = userId.equals(oldSession.userId);
 				}

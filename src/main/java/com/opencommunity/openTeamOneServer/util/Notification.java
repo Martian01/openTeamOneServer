@@ -49,9 +49,9 @@ public class Notification {
 	private JdbcTemplate jdbcTemplate;
 
 	public void pushToSubscribedDevices(Message message) {
-		TenantParameter tp = tenantParameterRepository.findById("nhubUrl").orElse(null);
+		TenantParameter tp = tenantParameterRepository.findTopByName("nhubUrl");
 		final String nhubUrl = tp == null ? null : tp.value;
-		tp = tenantParameterRepository.findById("nhubAuthHeader").orElse(null);
+		tp = tenantParameterRepository.findTopByName("nhubAuthHeader");
 		final String nhubAuthHeader = tp == null ? null : tp.value;
 		if (nhubUrl == null || nhubAuthHeader == null)
 			return;
@@ -60,7 +60,7 @@ public class Notification {
 			@Override
 			public void run() {
 				try {
-					TenantParameter tp = tenantParameterRepository.findById("horizonDays").orElse(null);
+					TenantParameter tp = tenantParameterRepository.findTopByName("horizonDays");
 					Long horizonDays = tp == null ? null : Long.getLong(tp.value);
 					Long subscriptionHorizon = horizonDays == null ? 0L : System.currentTimeMillis() - horizonDays * MILLIS_PER_DAY;
 					List<Recipient> recipients = jdbcTemplate.query(

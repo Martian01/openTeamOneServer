@@ -6,10 +6,17 @@ public class SubscriptionKey implements Serializable {
 
 	private static final long serialVersionUID = -1L;
 
-	public String targetType;
-	public String appId;
-	public String deviceToken;
-	public String userId;
+	public Integer targetTypeHash;
+	public Integer appIdHash;
+	public Integer deviceTokenHash;
+	public Integer userIdHash;
+
+	public SubscriptionKey(String targetType, String appId, String deviceToken, String userId) {
+		if (targetType != null) targetTypeHash = targetType.hashCode();
+		if (appId != null) appIdHash = appId.hashCode();
+		if (deviceToken != null) deviceTokenHash = deviceToken.hashCode();
+		if (userId != null) userIdHash = userId.hashCode();
+	}
 
 	@Override
 	public boolean equals(Object o) {
@@ -19,18 +26,18 @@ public class SubscriptionKey implements Serializable {
 		SubscriptionKey that = (SubscriptionKey) o;
 
 		return
-			targetType.equals(that.targetType) &&
-			appId.equals(that.appId) &&
-			deviceToken.equals(that.deviceToken) &&
-			userId.equals(that.userId);
+			targetTypeHash.equals(that.targetTypeHash) &&
+			appIdHash.equals(that.appIdHash) &&
+			deviceTokenHash.equals(that.deviceTokenHash) &&
+			userIdHash.equals(that.userIdHash);
 	}
 
 	@Override
 	public int hashCode() {
-		int result = targetType.hashCode();
-		result = 31 * result + appId.hashCode();
-		result = 31 * result + deviceToken.hashCode();
-		result = 31 * result + userId.hashCode();
+		int result = targetTypeHash.hashCode();
+		result = 31 * result + appIdHash.hashCode();
+		result = 31 * result + deviceTokenHash.hashCode();
+		result = 31 * result + userIdHash.hashCode();
 		return result;
 	}
 }

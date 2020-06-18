@@ -6,7 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -36,19 +35,19 @@ public class ContentService {
 
 	@PostConstruct
 	public void init() {
-		if (!tpr.findById("tenantName").isPresent())
+		if (tpr.findTopByName("tenantName") == null)
 			tpr.save(new TenantParameter("tenantName", "Open Team One"));
-		if (!tpr.findById("tenantPictureId").isPresent())
+		if (tpr.findTopByName("tenantPictureId") == null)
 			tpr.save(new TenantParameter("tenantPictureId", "tenant"));
-		if (!tpr.findById("startPageNoLogon").isPresent())
+		if (tpr.findTopByName("startPageNoLogon") == null)
 			tpr.save(new TenantParameter("startPageNoLogon", "/default/index.html"));
-		if (!tpr.findById("startPageLogon").isPresent())
+		if (tpr.findTopByName("startPageLogon") == null)
 			tpr.save(new TenantParameter("startPageLogon", "/default/index.html"));
-		if (!tpr.findById("startPageAdmin").isPresent())
+		if (tpr.findTopByName("startPageAdmin") == null)
 			tpr.save(new TenantParameter("startPageAdmin", "/default/admin/index.html"));
-		if (!tpr.findById("startPageUser").isPresent())
+		if (tpr.findTopByName("startPageUser") == null)
 			tpr.save(new TenantParameter("startPageUser", "/default/user/index.html"));
-		if (!tpr.findById("dataDirectory").isPresent())
+		if (tpr.findTopByName("dataDirectory") == null)
 			tpr.save(new TenantParameter("dataDirectory", "/tmp"));
 		//
 		if (ur.countByHasAdminRoleTrue() == 0)

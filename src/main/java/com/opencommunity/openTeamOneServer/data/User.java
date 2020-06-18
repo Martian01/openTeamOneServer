@@ -12,10 +12,13 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.util.ArrayList;
 
-
 @Entity
 public class User {
+
 	@Id
+	@Column
+	public Integer userIdHash;
+
 	@Column(length = 16)
 	public String userId;
 	@Column(length = 200)
@@ -36,6 +39,7 @@ public class User {
 		this.personId = personId;
 		this.hasUserRole = hasUserRole;
 		this.hasAdminRole = hasAdminRole;
+		normalize();
 	}
 
 	public User(JSONObject item) throws JSONException {
@@ -50,6 +54,11 @@ public class User {
 		personId = JsonUtil.getInteger(item, "personId");
 		hasUserRole = JsonUtil.getBoolean(item, "hasUserRole");
 		hasAdminRole = JsonUtil.getBoolean(item, "hasAdminRole");
+		normalize();
+	}
+
+	public void normalize() {
+		if (userId != null) userIdHash = userId.hashCode();
 	}
 
 	public JSONObject toJson(boolean withPasswordHash) throws JSONException {
@@ -77,6 +86,14 @@ public class User {
 		for (User user : users)
 			array.put(user.toJson(withPasswordHash));
 		return array;
+	}
+
+	public Integer getUserIdHash() {
+		return userIdHash;
+	}
+
+	public void setUserIdHash(Integer userIdHash) {
+		this.userIdHash = userIdHash;
 	}
 
 	public String getUserId() {

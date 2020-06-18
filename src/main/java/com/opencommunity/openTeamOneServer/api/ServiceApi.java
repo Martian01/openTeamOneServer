@@ -61,7 +61,7 @@ public class ServiceApi {
 			item.put("startTime", TimeUtil.toIsoDateString(session.startTime));
 			item.put("lastAccessTime", TimeUtil.toIsoDateString(session.lastAccessTime));
 			body.put("session", item);
-			User user = session.userId == null ? null : userRepository.findById(session.userId).orElse(null);
+			User user = session.userId == null ? null : userRepository.findTopByUserId(session.userId);
 			if (user != null) {
 				item = new JSONObject();
 				item.put("userId", user.userId);
@@ -72,7 +72,7 @@ public class ServiceApi {
 				if (person != null)
 					body.put("person", person.toJson());
 				if (user.hasAdminRole) {
-					TenantParameter tp = tenantParameterRepository.findById("dataDirectory").orElse(null);
+					TenantParameter tp = tenantParameterRepository.findTopByName("dataDirectory");
 					if (tp != null && tp.value != null)
 						body.put("dataDirectory", tp.value);
 				}
@@ -87,7 +87,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/parameters")
 	public ResponseEntity<String> parametersGet(HttpServletRequest request) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -97,11 +97,11 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/parameter/{parameterId}")
 	public ResponseEntity<String> parameterGet(HttpServletRequest request, @PathVariable String parameterId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
-		TenantParameter parameter = parameterId == null ? null : tenantParameterRepository.findById(parameterId).orElse(null);
+		TenantParameter parameter = parameterId == null ? null : tenantParameterRepository.findTopByName(parameterId);
 		if (parameter == null)
 			return restLib.httpNotFoundResponse;
 		//
@@ -111,11 +111,11 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/parameter/{parameterId}")
 	public ResponseEntity<String> parameterDelete(HttpServletRequest request, @PathVariable String parameterId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
-		TenantParameter parameter = parameterId == null ? null : tenantParameterRepository.findById(parameterId).orElse(null);
+		TenantParameter parameter = parameterId == null ? null : tenantParameterRepository.findTopByName(parameterId);
 		if (parameter == null)
 			return restLib.httpGoneResponse;
 		tenantParameterRepository.delete(parameter);
@@ -126,7 +126,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/parameter")
 	public ResponseEntity<String> parameterPost(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -143,7 +143,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/users")
 	public ResponseEntity<String> usersGet(HttpServletRequest request) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -153,11 +153,11 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/user/{userId}")
 	public ResponseEntity<String> userGet(HttpServletRequest request, @PathVariable String userId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
-		User targetUser = userId == null ? null : userRepository.findById(userId).orElse(null);
+		User targetUser = userId == null ? null : userRepository.findTopByUserId(userId);
 		if (targetUser == null)
 			return restLib.httpNotFoundResponse;
 		//
@@ -167,11 +167,11 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/user/{userId}")
 	public ResponseEntity<String> userDelete(HttpServletRequest request, @PathVariable String userId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
-		User targetUser = userId == null ? null : userRepository.findById(userId).orElse(null);
+		User targetUser = userId == null ? null : userRepository.findTopByUserId(userId);
 		if (targetUser == null)
 			return restLib.httpGoneResponse;
 		// it is not allowed to delete the logon user
@@ -185,7 +185,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/user")
 	public ResponseEntity<String> userPost(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -197,7 +197,7 @@ public class ServiceApi {
 			return restLib.httpForbiddenResponse;
 		// if password was not provided, try and re-use existing password
 		if (targetUser.passwordHash == null) {
-			User oldUser = userRepository.findById(targetUser.userId).orElse(null);
+			User oldUser = userRepository.findTopByUserId(targetUser.userId);
 			if (oldUser != null)
 				targetUser.passwordHash = oldUser.passwordHash;
 		}
@@ -211,7 +211,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/persons")
 	public ResponseEntity<String> personsGet(HttpServletRequest request) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -221,7 +221,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/person/{personId}")
 	public ResponseEntity<String> personGet(HttpServletRequest request, @PathVariable Integer personId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -235,7 +235,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/person/{personId}")
 	public ResponseEntity<String> personDelete(HttpServletRequest request, @PathVariable Integer personId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -250,7 +250,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/person")
 	public ResponseEntity<String> personPost(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -267,7 +267,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/rooms")
 	public ResponseEntity<String> roomsGet(HttpServletRequest request) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -277,7 +277,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}")
 	public ResponseEntity<String> roomGet(HttpServletRequest request, @PathVariable Integer roomId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -291,7 +291,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/room/{roomId}")
 	public ResponseEntity<String> roomDelete(HttpServletRequest request, @PathVariable Integer roomId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -306,7 +306,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/room")
 	public ResponseEntity<String> roomPost(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -323,7 +323,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/members")
 	public ResponseEntity<String> roomMembersGet(HttpServletRequest request) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -333,7 +333,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/member/{roomId}/{personId}")
 	public ResponseEntity<String> roomMemberGet(HttpServletRequest request, @PathVariable Integer roomId, @PathVariable Integer personId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -347,7 +347,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/member/{roomId}/{personId}")
 	public ResponseEntity<String> roomMemberDelete(HttpServletRequest request, @PathVariable Integer roomId, @PathVariable Integer personId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -362,7 +362,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/member")
 	public ResponseEntity<String> roomMemberPost(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -381,7 +381,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/messages")
 	public ResponseEntity<String> messagesGet(HttpServletRequest request) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -391,7 +391,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/message/{messageId}")
 	public ResponseEntity<String> messageGet(HttpServletRequest request, @PathVariable Integer messageId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -405,7 +405,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/message/{messageId}")
 	public ResponseEntity<String> messageDelete(HttpServletRequest request, @PathVariable Integer messageId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -420,7 +420,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/message")
 	public ResponseEntity<String> messagePost(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -437,7 +437,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/confirmations")
 	public ResponseEntity<String> viewedConfirmationsGet(HttpServletRequest request) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -447,7 +447,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/confirmation/{messageId}/{personId}")
 	public ResponseEntity<String> viewedConfirmationGet(HttpServletRequest request, @PathVariable Integer messageId, @PathVariable Integer personId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -461,7 +461,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/confirmation/{messageId}/{personId}")
 	public ResponseEntity<String> viewedConfirmationDelete(HttpServletRequest request, @PathVariable Integer messageId, @PathVariable Integer personId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -476,7 +476,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/confirmation")
 	public ResponseEntity<String> viewedConfirmationPost(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -495,7 +495,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/subscriptions")
 	public ResponseEntity<String> subscriptionsGet(HttpServletRequest request) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -505,13 +505,14 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/subscription/{targetType}/{appId}/{deviceToken}/{userId}")
 	public ResponseEntity<String> subscriptionGet(HttpServletRequest request, @PathVariable String targetType, @PathVariable String appId, @PathVariable String deviceToken, @PathVariable String userId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
-		if (!user.userId.equals(userId))
-			return restLib.httpForbiddenResponse;
-		Subscription subscription = targetType == null || appId == null || deviceToken == null || userId == null ? null : subscriptionRepository.findTopByTargetTypeAndAppIdAndDeviceTokenAndUserId(targetType, appId, deviceToken, userId);
+		if (targetType == null || appId == null || deviceToken == null || userId == null)
+			return restLib.httpBadRequestResponse;
+		SubscriptionKey subscriptionkey = new SubscriptionKey(targetType, appId, deviceToken, userId);
+		Subscription subscription =  subscriptionRepository.findById(subscriptionkey).orElse(null);
 		if (subscription == null)
 			return restLib.httpNotFoundResponse;
 		//
@@ -521,11 +522,14 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/subscription/{targetType}/{appId}/{deviceToken}/{userId}")
 	public ResponseEntity<String> subscriptionDelete(HttpServletRequest request, @PathVariable String targetType, @PathVariable String appId, @PathVariable String deviceToken, @PathVariable String userId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
-		Subscription subscription = targetType == null || appId == null || deviceToken == null || userId == null ? null : subscriptionRepository.findTopByTargetTypeAndAppIdAndDeviceTokenAndUserId(targetType, appId, deviceToken, userId);
+		if (targetType == null || appId == null || deviceToken == null || userId == null)
+			return restLib.httpBadRequestResponse;
+		SubscriptionKey subscriptionkey = new SubscriptionKey(targetType, appId, deviceToken, userId);
+		Subscription subscription =  subscriptionRepository.findById(subscriptionkey).orElse(null);
 		if (subscription == null)
 			return restLib.httpGoneResponse;
 		subscriptionRepository.delete(subscription);
@@ -536,7 +540,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/subscription")
 	public ResponseEntity<String> subscriptionPost(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -555,7 +559,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/files")
 	public ResponseEntity<String> symbolicFilesGet(HttpServletRequest request) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -565,7 +569,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/file/{fileId}")
 	public ResponseEntity<String> symbolicFileGet(HttpServletRequest request, @PathVariable Integer fileId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -579,7 +583,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/file/{fileId}/content")
 	public ResponseEntity<Resource> symbolicFileContentGet(HttpServletRequest request, @PathVariable Integer fileId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResourceResponse;
 		//
@@ -599,7 +603,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/file/{fileId}")
 	public ResponseEntity<String> symbolicFileDelete(HttpServletRequest request, @PathVariable Integer fileId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -616,7 +620,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.PUT, value = "/file")
 	public ResponseEntity<String> personPut(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -632,7 +636,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/file")
 	public ResponseEntity<String> symbolicFilePost(MultipartHttpServletRequest multipartRequest) throws Exception {
 		Session session = restLib.getSession(multipartRequest);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -663,7 +667,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/sessions")
 	public ResponseEntity<String> sessionsGet(HttpServletRequest request) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -673,7 +677,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/session/{sessionId}")
 	public ResponseEntity<String> sessionGet(HttpServletRequest request, @PathVariable String sessionId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -687,7 +691,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/session/{sessionId}")
 	public ResponseEntity<String> sessionDelete(HttpServletRequest request, @PathVariable String sessionId) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -705,7 +709,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/session")
 	public ResponseEntity<String> sessionPost(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -725,7 +729,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/self/picture")
 	public ResponseEntity<String> selfPicturePost(MultipartHttpServletRequest multipartRequest) throws Exception {
 		Session session = restLib.getSession(multipartRequest);
-		User user = restLib.getSessionUser(session, userRepository);
+		User user = restLib.getSessionUser(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -778,7 +782,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/self/person")
 	public ResponseEntity<String> selfDataPost(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionUser(session, userRepository);
+		User user = restLib.getSessionUser(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -805,7 +809,7 @@ public class ServiceApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/self/password")
 	public ResponseEntity<String> selfPasswordPost(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionUser(session, userRepository);
+		User user = restLib.getSessionUser(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//

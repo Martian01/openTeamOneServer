@@ -7,6 +7,7 @@ import com.opencommunity.openTeamOneServer.persistence.TenantParameterRepository
 import com.opencommunity.openTeamOneServer.persistence.UserRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,32 +20,30 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
 public class RestLib {
 
-	/* Misc */
+	/* Static Methods */
 
 	public static boolean equal(Object x, Object y) {
 		return (x == null && y == null) || (x != null && x.equals(y));
 	}
 
-	public static String getUuid() {
-		return UUID.randomUUID().toString().replace("-", "").toUpperCase();
-	}
-
-	public static String getRandomString(int length) {
-		return UUID.randomUUID().toString().replace("-", "").substring(0, length).toLowerCase();
-	}
-
-	private static Random randomGenerator = new Random();
+	private static final Random randomGenerator = new Random();
 
 	public static int getRandomInt() {
 		return randomGenerator.nextInt();
 	}
+
+	/* Bean Methods */
+
+	@Autowired
+	private TenantParameterRepository tenantParameterRepository;
+	@Autowired
+	private UserRepository userRepository;
 
 	public Map<String, String> splitQueryString(String queryString) {
 		Map<String, String> map = new HashMap<>();
@@ -87,18 +86,18 @@ public class RestLib {
 		return null;
 	}
 
-	public User getBasicAuthUser(HttpServletRequest request, UserRepository userRepository) {
+	public User getBasicAuthUser(HttpServletRequest request) {
 		String[] credentials = splitBasicAuthHeader(request.getHeader("Authorization"));
 		if (credentials == null || credentials.length != 2)
 			return null;
-		User user = userRepository.findById(credentials[0].toLowerCase()).orElse(null);
+		User user = userRepository.findTopByUserId(credentials[0].toLowerCase());
 		if (user == null)
 			return null;
 		return user.matches(credentials[1]) ? user : null;
 	}
 
-	public User getBasicAuthContact(HttpServletRequest request, UserRepository userRepository) {
-		User user = getBasicAuthUser(request, userRepository);
+	public User getBasicAuthContact(HttpServletRequest request) {
+		User user = getBasicAuthUser(request);
 		return user == null || user.personId == null || !user.hasUserRole ? null : user;
 	}
 
@@ -130,17 +129,17 @@ public class RestLib {
 		return m.find() ? m.group(1) : "";
 	}
 
-	public User getSessionUser(Session session, UserRepository userRepository) {
-		return session == null ? null : userRepository.findById(session.userId).orElse(null);
+	public User getSessionUser(Session session) {
+		return session == null ? null : userRepository.findTopByUserId(session.userId);
 	}
 
-	public User getSessionContact(Session session, UserRepository userRepository) {
-		User user = getSessionUser(session, userRepository);
+	public User getSessionContact(Session session) {
+		User user = getSessionUser(session);
 		return user == null || user.personId == null || !user.hasUserRole ? null : user;
 	}
 
-	public User getSessionAdmin(Session session, UserRepository userRepository) {
-		User user = getSessionUser(session, userRepository);
+	public User getSessionAdmin(Session session) {
+		User user = getSessionUser(session);
 		return user == null || !user.hasAdminRole ? null : user;
 	}
 
@@ -226,15 +225,15 @@ public class RestLib {
 				.body(null);
 	}
 
-	public ResponseEntity<String> httpForwardResponse(HttpServletRequest request, TenantParameterRepository tpr, User user, String targetUri) {
+	public ResponseEntity<String> httpForwardResponse(HttpServletRequest request, User user, String targetUri) {
 		if (targetUri == null)
-			targetUri = getDefaultTarget(request, tpr, user);
+			targetUri = getDefaultTarget(request, user);
 		return httpForwardResponse(targetUri);
 	}
 
-	public String getDefaultTarget(HttpServletRequest request, TenantParameterRepository tpr, User user) {
+	public String getDefaultTarget(HttpServletRequest request, User user) {
 		String parameter = user == null ? "startPageNoLogon" : (user.hasAdminRole ? "startPageAdmin" : (user.hasUserRole ? "startPageUser" : "startPageLogon"));
-		TenantParameter tp = tpr.findById(parameter).orElse(null);
+		TenantParameter tp = tenantParameterRepository.findTopByName(parameter);
 		return getServerUrl(request) + (tp == null ? "/default/index.html" : tp.value);
 	}
 

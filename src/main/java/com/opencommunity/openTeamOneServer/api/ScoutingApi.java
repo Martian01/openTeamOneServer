@@ -35,7 +35,7 @@ public class ScoutingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/sap/sports/sct/api/mobile/versions")
 	public ResponseEntity<String> versions(HttpServletRequest request) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -57,14 +57,14 @@ public class ScoutingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/sap/sports/sct/api/mobile/v1/service/rest/me")
 	public ResponseEntity<String> me(HttpServletRequest request) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
 		JSONObject body = new JSONObject();
 		Person me = personRepository.findById(user.personId).orElse(null);
-		TenantParameter tpName = tenantParameterRepository.findById("tenantName").orElse(null);
-		TenantParameter tpPictureId = tenantParameterRepository.findById("tenantPictureId").orElse(null);
+		TenantParameter tpName = tenantParameterRepository.findTopByName("tenantName");
+		TenantParameter tpPictureId = tenantParameterRepository.findTopByName("tenantPictureId");
 		//
 		if (me != null)
 			body.put("loginPerson", personToJson(me));

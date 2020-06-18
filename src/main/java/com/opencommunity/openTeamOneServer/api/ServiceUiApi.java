@@ -52,13 +52,13 @@ public class ServiceUiApi {
 		String forward = formData.get("forward");
 		if (userId != null) {
 			userId = userId.toLowerCase();
-			user = userRepository.findById(userId).orElse(null);
+			user = userRepository.findTopByUserId(userId);
 			if (user != null && user.matches(password))
 				session = Session.newSession(userId, false);
 		}
 		//
 		return ResponseEntity.status(HttpStatus.SEE_OTHER)
-				.header("Location", forward == null ? restLib.getDefaultTarget(request, tenantParameterRepository, session == null ? null : user) : forward)
+				.header("Location", forward == null ? restLib.getDefaultTarget(request, session == null ? null : user) : forward)
 				.header("Set-Cookie", restLib.getSessionCookie(session == null ? null : session.sessionId))
 				.contentType(MediaType.TEXT_PLAIN)
 				.body(null);
@@ -74,7 +74,7 @@ public class ServiceUiApi {
 			Session.invalidateSession(sessionId);
 		//
 		return ResponseEntity.status(HttpStatus.SEE_OTHER)
-				.header("Location", forward == null ? restLib.getDefaultTarget(request, tenantParameterRepository, null) : forward)
+				.header("Location", forward == null ? restLib.getDefaultTarget(request, null) : forward)
 				.header("Set-Cookie", restLib.getSessionCookie(null))
 				.contentType(MediaType.TEXT_PLAIN)
 				.body(null);
@@ -83,7 +83,7 @@ public class ServiceUiApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/snapshot/save")
 	public ResponseEntity<String> snapshotSave(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -99,13 +99,13 @@ public class ServiceUiApi {
 		String stringContent = jsonContent.toString();
 		StreamUtil.writeFile(stringContent.getBytes("UTF-8"), file);
 		//
-		return restLib.httpForwardResponse(request, tenantParameterRepository, user, forward);
+		return restLib.httpForwardResponse(request, user, forward);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/snapshot/load")
 	public ResponseEntity<String> snapshotLoad(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -124,13 +124,13 @@ public class ServiceUiApi {
 		JSONObject jsonContent = new JSONObject(stringContent);
 		contentService.importFromJson(jsonContent, true, includeConfiguration, user.userId);
 		//
-		return restLib.httpForwardResponse(request, tenantParameterRepository, user, forward);
+		return restLib.httpForwardResponse(request, user, forward);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/tenant/parameter")
 	public ResponseEntity<String> tenantParameter(HttpServletRequest request, @RequestBody String requestBody) throws Exception {
 		Session session = restLib.getSession(request);
-		User user = restLib.getSessionAdmin(session, userRepository);
+		User user = restLib.getSessionAdmin(session);
 		if (user == null)
 			return restLib.httpUnauthorizedResponse;
 		//
@@ -143,7 +143,7 @@ public class ServiceUiApi {
 		TenantParameter tp = new TenantParameter(key, value);
 		tenantParameterRepository.save(tp);
 		//
-		return restLib.httpForwardResponse(request, tenantParameterRepository, user, forward);
+		return restLib.httpForwardResponse(request, user, forward);
 	}
 
 }

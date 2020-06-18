@@ -22,9 +22,9 @@ public class JsonUtil {
 		return item == null || item.isNull(key) ? defaultValue : (Integer) item.getInt(key); // cast required to prevent unboxing of defaultValue
 	}
 
-	public static int getInt(JSONObject item, String key, int defaultValue) throws JSONException {
+/*	public static int getInt(JSONObject item, String key, int defaultValue) throws JSONException {
 		return item == null || item.isNull(key) ? defaultValue : item.getInt(key);
-	}
+	}*/
 
 	public static boolean getBoolean(JSONObject item, String key) throws JSONException {
 		return getBoolean(item, key, false);
@@ -80,7 +80,7 @@ public class JsonUtil {
 			item.put(key, value);
 	}
 
-	/*public static void put(JSONArray item, int value) throws JSONException {
+/*  public static void put(JSONArray item, int value) throws JSONException {
 		if (item != null)
 			item.put(value);
 	}*/

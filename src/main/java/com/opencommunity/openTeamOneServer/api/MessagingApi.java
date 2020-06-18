@@ -54,7 +54,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/device/subscription")
 	public ResponseEntity<String> deviceSubscription(HttpServletRequest request, @RequestBody String input) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -70,7 +70,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/device/subscription")
 	public ResponseEntity<String> deviceSubscriptionDelete(HttpServletRequest request, @RequestBody String input) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -79,7 +79,7 @@ public class MessagingApi {
 		SubscriptionKey key = getSubscriptionKey(new JSONObject(input), user.userId);
 		if (key == null)
 			return restLib.httpBadRequestResponse;
-		Subscription subscription = subscriptionRepository.findTopByTargetTypeAndAppIdAndDeviceTokenAndUserId(key.targetType, key.appId, key.deviceToken, key.userId);
+		Subscription subscription = subscriptionRepository.findById(key).orElse(null);
 		if (subscription != null) {
 			subscription.isActive = false;
 			subscription.changedAt = System.currentTimeMillis();
@@ -91,14 +91,14 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/me")
 	public ResponseEntity<String> me(HttpServletRequest request) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
 		JSONObject body = new JSONObject();
 		Person me = personRepository.findById(user.personId).orElse(null);
-		TenantParameter tpName = tenantParameterRepository.findById("tenantName").orElse(null);
-		TenantParameter tpPictureId = tenantParameterRepository.findById("tenantPictureId").orElse(null);
+		TenantParameter tpName = tenantParameterRepository.findTopByName("tenantName");
+		TenantParameter tpPictureId = tenantParameterRepository.findTopByName("tenantPictureId");
 		// new structure, used by Android app
 		if (me != null)
 			body.put("loginPerson", personToJson(me));
@@ -126,7 +126,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/person/{personId}")
 	public ResponseEntity<String> person(HttpServletRequest request, @PathVariable Integer personId) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -145,7 +145,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/contacts")
 	public ResponseEntity<String> contacts(HttpServletRequest request) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -168,7 +168,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/contact/{contactId}/roomId")
 	public ResponseEntity<String> contactRoomId(HttpServletRequest request, @PathVariable Integer contactId) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -187,7 +187,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/rooms")
 	public ResponseEntity<String> rooms(HttpServletRequest request) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -202,7 +202,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/members")
 	public ResponseEntity<String> roomMembers(HttpServletRequest request, @PathVariable Integer roomId) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -219,7 +219,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/messagesSince")
 	public ResponseEntity<String> roomMessagesSince(HttpServletRequest request, @PathVariable Integer roomId, @RequestParam(required = false) Long since, @RequestParam(required = false) Long notBefore) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -249,7 +249,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/messagesUntil")
 	public ResponseEntity<String> roomMessagesUntil(HttpServletRequest request, @PathVariable Integer roomId, @RequestParam(required = false) Integer count, @RequestParam(required = false) Long until) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -275,7 +275,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/message")
 	public ResponseEntity<String> roomMessage(MultipartHttpServletRequest multipartRequest, @PathVariable Integer roomId) throws Exception {
 		Session session = restLib.getSession(multipartRequest);
-		User user = session == null ? restLib.getBasicAuthContact(multipartRequest, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(multipartRequest) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(multipartRequest);
 		//
@@ -335,7 +335,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/viewedConfirmation")
 	public ResponseEntity<String> roomViewedConfirmation(HttpServletRequest request, @PathVariable Integer roomId, @RequestParam(required = false) Long until) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -369,7 +369,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/message/{messageId}/confirmations")
 	public ResponseEntity<String> messageConfirmations(HttpServletRequest request, @PathVariable Integer messageId) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -389,7 +389,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.DELETE, value = "/message/{messageId}")
 	public ResponseEntity<String> messageDelete(HttpServletRequest request, @PathVariable Integer messageId) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -421,7 +421,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.POST, value = "/messages/viewedConfirmation")
 	public ResponseEntity<String> messagesViewedConfirmation(HttpServletRequest request, @RequestBody String input) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -446,7 +446,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/messagesSince")
 	public ResponseEntity<String> messagesSince(HttpServletRequest request, @RequestParam(required = false) Long since, @RequestParam(required = false) Long notBefore) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -473,7 +473,7 @@ public class MessagingApi {
 	@RequestMapping(method = RequestMethod.GET, value = "/messagesUntil")
 	public ResponseEntity<String> messagesUntil(HttpServletRequest request, @RequestParam(required = false) Integer count, @RequestParam(required = false) Long until) throws JSONException {
 		Session session = restLib.getSession(request);
-		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
+		User user = session == null ? restLib.getBasicAuthContact(request) : restLib.getSessionContact(session); // fallback to Basic Auth
 		if (user == null)
 			return restLib.httpStaleSessionResponse(request);
 		//
@@ -824,36 +824,38 @@ public class MessagingApi {
 	}
 
 	private Subscription getSubscription(JSONObject item, String userId) throws JSONException {
-		if (item == null)
-			return null;
-		Subscription subscription = new Subscription();
-		subscription.targetType = JsonUtil.getString(item, "targetType");
-		subscription.appId = JsonUtil.getString(item, "appId");
-		subscription.deviceToken = JsonUtil.getString(item, "deviceToken");
-		subscription.userId = userId;
-		subscription.language = JsonUtil.getString(item, "language");
-		subscription.clientAccountId = JsonUtil.getString(item, "clientAccountId");
-		subscription.userConsent = JsonUtil.getBoolean(item, "userConsent", Boolean.FALSE);
-		subscription.isActive = JsonUtil.getBoolean(item, "isActive", Boolean.TRUE);
-		subscription.changedAt = System.currentTimeMillis();
+		String targetType = JsonUtil.getString(item, "targetType");
+		String appId = JsonUtil.getString(item, "appId");
+		String deviceToken = JsonUtil.getString(item, "deviceToken");
 		JSONObject stats = JsonUtil.getJSONObject(item, "stats");
-		subscription.deviceId = JsonUtil.getString(stats, "deviceId");
-		subscription.deviceType = JsonUtil.getString(stats, "deviceType");
-		subscription.osVersion = JsonUtil.getString(stats, "osVersion");
-		subscription.encryption = JsonUtil.getString(stats, "encryption");
-		subscription.appVersion = JsonUtil.getString(stats, "appVersion");
-		return subscription;
+		return targetType == null || appId == null || deviceToken == null || userId == null ? null : new Subscription(
+				targetType,
+				appId,
+				deviceToken,
+				userId,
+				JsonUtil.getString(item, "language"),
+				JsonUtil.getString(item, "clientAccountId"),
+				JsonUtil.getBoolean(item, "userConsent", false),
+				JsonUtil.getBoolean(item, "isActive", true),
+				System.currentTimeMillis(),
+				JsonUtil.getString(stats, "deviceId"),
+				JsonUtil.getString(stats, "deviceType"),
+				JsonUtil.getString(stats, "osVersion"),
+				JsonUtil.getString(stats, "encryption"),
+				JsonUtil.getString(stats, "appVersion")
+		);
 	}
 
 	private SubscriptionKey getSubscriptionKey(JSONObject item, String userId) throws JSONException {
-		if (item == null)
-			return null;
-		SubscriptionKey subscriptionKey = new SubscriptionKey();
-		subscriptionKey.targetType = JsonUtil.getString(item, "targetType");
-		subscriptionKey.appId = JsonUtil.getString(item, "appId");
-		subscriptionKey.deviceToken = JsonUtil.getString(item, "deviceToken");
-		subscriptionKey.userId = userId;
-		return subscriptionKey;
+		String targetType = JsonUtil.getString(item, "targetType");
+		String appId = JsonUtil.getString(item, "appId");
+		String deviceToken = JsonUtil.getString(item, "deviceToken");
+		return targetType == null || appId == null || deviceToken == null || userId == null ? null : new SubscriptionKey(
+				targetType,
+				appId,
+				deviceToken,
+				userId
+		);
 	}
 
 }

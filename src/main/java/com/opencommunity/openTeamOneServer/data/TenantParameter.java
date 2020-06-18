@@ -10,13 +10,16 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.util.ArrayList;
 
-
 @Entity
 public class TenantParameter {
+
 	@Id
+	@Column
+	public Integer nameHash;
+
 	@Column(length = 16)
 	public String name;
-	@Column(length = 100)
+	@Column(length = 64)
 	public String value;
 
 	public TenantParameter() {
@@ -25,11 +28,17 @@ public class TenantParameter {
 	public TenantParameter(String name, String value) {
 		this.name = name;
 		this.value = value;
+		normalize();
 	}
 
 	public TenantParameter(JSONObject item) throws JSONException {
 		name = JsonUtil.getString(item, "name");
 		value = JsonUtil.getString(item, "value");
+		normalize();
+	}
+
+	public void normalize() {
+		if (name != null) nameHash = name.hashCode();
 	}
 
 	public JSONObject toJson() throws JSONException {
@@ -53,6 +62,14 @@ public class TenantParameter {
 		for (TenantParameter tenantParameter : tenantParameters)
 			array.put(tenantParameter.toJson());
 		return array;
+	}
+
+	public Integer getNameHash() {
+		return nameHash;
+	}
+
+	public void setNameHash(Integer nameHash) {
+		this.nameHash = nameHash;
 	}
 
 	public String getName() {

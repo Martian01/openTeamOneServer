@@ -3,7 +3,8 @@ package com.opencommunity.openTeamOneServer.persistence;
 import com.opencommunity.openTeamOneServer.data.User;
 import org.springframework.data.repository.CrudRepository;
 
-public interface UserRepository extends CrudRepository<User, String> {
+public interface UserRepository extends CrudRepository<User, Integer> {
+	User findTopByUserId(String userId);
 	// for contacts
 	long countByPersonIdAndHasUserRoleTrue(Integer personId);
 	Iterable<User> findByPersonIdNotNullAndHasUserRoleTrue();
