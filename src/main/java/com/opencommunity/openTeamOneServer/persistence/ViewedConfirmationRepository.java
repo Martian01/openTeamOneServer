@@ -10,7 +10,7 @@ public interface ViewedConfirmationRepository extends CrudRepository<ViewedConfi
 	// for viewedCount (simple version)
 	long countByMessageIdAndPersonIdNot(String messageId, Integer personId);
 	// for badgeCount etc.
-	ViewedConfirmation findTopByPersonIdAndRoomIdOrderByMessagePostedAtDesc(Integer personId, String roomId);
+	ViewedConfirmation findTopByPersonIdAndRoomIdOrderByMessagePostedAtDesc(Integer personId, Integer roomId);
 	// for viewedAt etc.
 	ViewedConfirmation findTopByMessageIdAndPersonId(String messageId, Integer personId);
 	// for debugging

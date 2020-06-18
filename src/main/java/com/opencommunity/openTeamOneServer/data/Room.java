@@ -16,8 +16,8 @@ import java.util.ArrayList;
 public class Room {
 
 	@Id
-	@Column(length = 32)
-	public String roomId;
+	@Column
+	public Integer roomId;
 	@Column(length = 50)
 	public String name;
 	@Column(length = 4)
@@ -32,8 +32,8 @@ public class Room {
 	public Room() {
 	}
 
-	public Room(String roomId, String name, String shortName, String roomType, String pictureId, long changedAt) {
-		this.roomId = roomId == null || roomId.length() == 0 ? RestLib.getUuid() : roomId;
+	public Room(Integer roomId, String name, String shortName, String roomType, String pictureId, long changedAt) {
+		this.roomId = roomId == null ? RestLib.getRandomInt() : roomId;
 		this.name = name;
 		this.shortName = shortName;
 		this.roomType = roomType;
@@ -42,15 +42,14 @@ public class Room {
 	}
 
 	public Room(JSONObject item) throws JSONException {
-		roomId = JsonUtil.getString(item, "roomId");
+		roomId = JsonUtil.getIntegerString(item, "roomId");
+		if (roomId == null)
+			roomId = RestLib.getRandomInt();
 		name = JsonUtil.getString(item, "name");
 		shortName = JsonUtil.getString(item, "shortName");
 		roomType = JsonUtil.getString(item, "roomType");
 		pictureId = JsonUtil.getString(item, "pictureId");
 		changedAt = JsonUtil.getIsoDate(item, "changedAt");
-		//
-		if (roomId == null || roomId.length() == 0)
-			roomId = RestLib.getUuid();
 	}
 
 	public JSONObject toJson() throws JSONException {
@@ -80,11 +79,11 @@ public class Room {
 		return array;
 	}
 
-	public String getRoomId() {
+	public Integer getRoomId() {
 		return roomId;
 	}
 
-	public void setRoomId(String roomId) {
+	public void setRoomId(Integer roomId) {
 		this.roomId = roomId;
 	}
 

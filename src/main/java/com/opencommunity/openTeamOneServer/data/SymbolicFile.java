@@ -49,7 +49,7 @@ public class SymbolicFile {
 		mimeType = JsonUtil.getString(item, "mimeType");
 		text = JsonUtil.getString(item, "text");
 		referenceId = JsonUtil.getString(item, "referenceId");
-		position = JsonUtil.getInteger(item, "position", 0);
+		position = JsonUtil.getInt(item, "position", 0);
 		directory = JsonUtil.getString(item, "directory");
 		//
 		if (fileId == null || fileId.length() == 0)

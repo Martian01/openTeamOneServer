@@ -6,11 +6,15 @@ import org.json.JSONObject;
 
 public class JsonUtil {
 
-	public static Integer getInteger(JSONObject item, String key) throws JSONException {
-		return getInteger(item, key, null);
+	public static Integer getIntegerString(JSONObject item, String key) throws JSONException {
+		return getIntegerString(item, key, null);
 	}
 
-	public static Integer getInteger(JSONObject item, String key, Integer defaultValue) throws JSONException {
+	public static Integer getIntegerString(JSONObject item, String key, Integer defaultValue) throws JSONException {
+		return item == null || item.isNull(key) ? defaultValue : Integer.parseInt(item.getString(key));
+	}
+
+	public static int getInt(JSONObject item, String key, int defaultValue) throws JSONException {
 		return item == null || item.isNull(key) ? defaultValue : item.getInt(key);
 	}
 
@@ -41,11 +45,6 @@ public class JsonUtil {
 	public static long getIsoDate(JSONObject item, String key) throws JSONException {
 		String date = item == null || item.isNull(key) ? null : item.getString(key);
 			return TimeUtil.parseIsoDateTimeToMillis(date);
-	}
-
-	public static void put(JSONObject item, String key, int value) throws JSONException {
-		if (item != null && key != null)
-			item.put(key, value);
 	}
 
 	public static void put(JSONObject item, String key, boolean value) throws JSONException {
@@ -91,6 +90,13 @@ public class JsonUtil {
 	public static void put(JSONArray item, JSONArray value) throws JSONException {
 		if (item != null && value != null && value.length() > 0)
 			item.put(value);
+	}
+
+	// exports Integer 123 as JSON String "123"
+
+	public static void putString(JSONObject item, String key, Integer value) throws JSONException {
+		if (item != null && key != null && value != null)
+			item.put(key, value.toString());
 	}
 
 }

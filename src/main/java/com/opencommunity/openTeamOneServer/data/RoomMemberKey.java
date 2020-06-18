@@ -6,7 +6,7 @@ public class RoomMemberKey implements Serializable {
 
 	private static final long serialVersionUID = -1L;
 
-	public String roomId;
+	public Integer roomId;
 	public Integer personId;
 
 	@Override

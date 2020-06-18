@@ -14,7 +14,7 @@ import java.util.ArrayList;
 @Entity
 public class TenantParameter {
 	@Id
-	@Column(length = 20)
+	@Column(length = 16)
 	public String name;
 	@Column(length = 100)
 	public String value;

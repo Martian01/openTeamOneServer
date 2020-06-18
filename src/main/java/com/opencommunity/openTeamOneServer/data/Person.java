@@ -38,7 +38,7 @@ public class Person {
 	}
 
 	public Person(JSONObject item) throws JSONException {
-		personId = JsonUtil.getInteger(item, "personId");
+		personId = JsonUtil.getIntegerString(item, "personId");
 		if (personId == null)
 			personId = RestLib.getRandomInt();
 		lastName = JsonUtil.getString(item, "lastName");

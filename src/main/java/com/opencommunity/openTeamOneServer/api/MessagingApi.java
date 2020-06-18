@@ -135,7 +135,7 @@ public class MessagingApi {
 		if (person != null) {
 			JSONObject item = personToJson(person);
 			item.put("isContact", isContact(personId));
-			JsonUtil.put(item, "privateRoomId", getPrivateRoomId(personId, user.personId));
+			JsonUtil.putString(item, "privateRoomId", getPrivateRoomId(personId, user.personId));
 			body.put("person", item);
 		}
 		//
@@ -157,7 +157,7 @@ public class MessagingApi {
 			if (contactIds.contains(person.personId)) {
 				JSONObject item = personToJson(person);
 				item.put("isContact", true);
-				JsonUtil.put(item, "privateRoomId", getPrivateRoomId(person.personId, user.personId));
+				JsonUtil.putString(item, "privateRoomId", getPrivateRoomId(person.personId, user.personId));
 				contactsJson.put(item);
 			}
 		body.put("contacts", contactsJson);
@@ -176,7 +176,7 @@ public class MessagingApi {
 		Person person = contactId == null || !getContactIds().contains(contactId) ? null : personRepository.findById(contactId).orElse(null);
 		if (person == null || person.personId.equals(user.personId))
 			return restLib.httpNotFoundResponse;
-		String privateRoomId = getPrivateRoomId(contactId, user.personId);
+		Integer privateRoomId = getPrivateRoomId(contactId, user.personId);
 		if (privateRoomId == null)
 			privateRoomId = createPrivateRoom(person.personId, user.personId); // create the room on-the-fly
 		body.put("roomId", privateRoomId);
@@ -200,7 +200,7 @@ public class MessagingApi {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/members")
-	public ResponseEntity<String> roomMembers(HttpServletRequest request, @PathVariable String roomId) throws JSONException {
+	public ResponseEntity<String> roomMembers(HttpServletRequest request, @PathVariable Integer roomId) throws JSONException {
 		Session session = restLib.getSession(request);
 		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
@@ -217,7 +217,7 @@ public class MessagingApi {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/messagesSince")
-	public ResponseEntity<String> roomMessagesSince(HttpServletRequest request, @PathVariable String roomId, @RequestParam(required = false) Long since, @RequestParam(required = false) Long notBefore) throws JSONException {
+	public ResponseEntity<String> roomMessagesSince(HttpServletRequest request, @PathVariable Integer roomId, @RequestParam(required = false) Long since, @RequestParam(required = false) Long notBefore) throws JSONException {
 		Session session = restLib.getSession(request);
 		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
@@ -247,7 +247,7 @@ public class MessagingApi {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}/messagesUntil")
-	public ResponseEntity<String> roomMessagesUntil(HttpServletRequest request, @PathVariable String roomId, @RequestParam(required = false) Integer count, @RequestParam(required = false) Long until) throws JSONException {
+	public ResponseEntity<String> roomMessagesUntil(HttpServletRequest request, @PathVariable Integer roomId, @RequestParam(required = false) Integer count, @RequestParam(required = false) Long until) throws JSONException {
 		Session session = restLib.getSession(request);
 		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
@@ -273,7 +273,7 @@ public class MessagingApi {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/message")
-	public ResponseEntity<String> roomMessage(MultipartHttpServletRequest multipartRequest, @PathVariable String roomId) throws Exception {
+	public ResponseEntity<String> roomMessage(MultipartHttpServletRequest multipartRequest, @PathVariable Integer roomId) throws Exception {
 		Session session = restLib.getSession(multipartRequest);
 		User user = session == null ? restLib.getBasicAuthContact(multipartRequest, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
@@ -333,7 +333,7 @@ public class MessagingApi {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/room/{roomId}/viewedConfirmation")
-	public ResponseEntity<String> roomViewedConfirmation(HttpServletRequest request, @PathVariable String roomId, @RequestParam(required = false) Long until) throws JSONException {
+	public ResponseEntity<String> roomViewedConfirmation(HttpServletRequest request, @PathVariable Integer roomId, @RequestParam(required = false) Long until) throws JSONException {
 		Session session = restLib.getSession(request);
 		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
@@ -499,7 +499,7 @@ public class MessagingApi {
 		return personId != null && userRepository.countByPersonIdAndHasUserRoleTrue(personId) > 0;
 	}
 
-	private boolean isRoomMember(String roomId, Integer personId) {
+	private boolean isRoomMember(Integer roomId, Integer personId) {
 		return roomId != null && personId != null && roomMemberRepository.countByRoomIdAndPersonId(roomId, personId) > 0;
 	}
 
@@ -511,10 +511,10 @@ public class MessagingApi {
 		return contactIds;
 	}
 
-	private String getPrivateRoomId(Integer personId1, Integer personId2) {
+	private Integer getPrivateRoomId(Integer personId1, Integer personId2) {
 		if (personId1 == null || personId2 == null || personId1.equals(personId2))
 			return null;
-		Set<String> roomIds = new HashSet<>();
+		Set<Integer> roomIds = new HashSet<>();
 		Iterable<Room> rooms = roomRepository.findByRoomType("private");
 		for (Room room : rooms) {
 			Iterable<RoomMember> roomMembers = roomMemberRepository.findByRoomId(room.roomId);
@@ -527,8 +527,8 @@ public class MessagingApi {
 		return roomIds.size() == 1 ? roomIds.iterator().next() : null;
 	}
 
-	private String createPrivateRoom(Integer personId1, Integer personId2) {
-		String privateRoomId;
+	private Integer createPrivateRoom(Integer personId1, Integer personId2) {
+		Integer privateRoomId;
 		synchronized(Room.class) {
 			privateRoomId = getPrivateRoomId(personId1, personId2);
 			if (privateRoomId == null) {
@@ -543,12 +543,12 @@ public class MessagingApi {
 		return privateRoomId;
 	}
 
-	private Long getWatermark(Integer personId, String roomId) {
+	private Long getWatermark(Integer personId, Integer roomId) {
 		ViewedConfirmation viewedConfirmation = viewedConfirmationRepository.findTopByPersonIdAndRoomIdOrderByMessagePostedAtDesc(personId, roomId);
 		return viewedConfirmation == null ? null : viewedConfirmation.messagePostedAt;
 	}
 
-	private Iterable<Message> getRoomMessagesByPage(String roomId, int count, Long until) {
+	private Iterable<Message> getRoomMessagesByPage(Integer roomId, int count, Long until) {
 		if (count > 0) {
 			Page<Message> page;
 			Pageable pageable = PageRequest.of(0, count);
@@ -697,7 +697,7 @@ public class MessagingApi {
 		return str == null || str.length() <= n ? str : str.substring(0, n);
 	}
 
-	private String[] getPrivateRoomNames(String roomId, Integer personId) {
+	private String[] getPrivateRoomNames(Integer roomId, Integer personId) {
 		String roomName = null;
 		String shortRoomName = null;
 		RoomMember partnerMember = roomMemberRepository.findTopByRoomIdAndPersonIdNot(roomId, personId);
@@ -745,8 +745,8 @@ public class MessagingApi {
 
 	private JSONArray roomsToJsonArray(Iterable<Room> rooms, Iterable<RoomMember> roomMembers, Integer personId) throws JSONException {
 		// set up two helper maps
-		Set<String> userRooms = new HashSet<>();
-		Map<String, JSONArray> membersMap = new HashMap<>();
+		Set<Integer> userRooms = new HashSet<>();
+		Map<Integer, JSONArray> membersMap = new HashMap<>();
 		for (RoomMember roomMember : roomMembers) {
 			if (personId.equals(roomMember.personId))
 				userRooms.add(roomMember.roomId);

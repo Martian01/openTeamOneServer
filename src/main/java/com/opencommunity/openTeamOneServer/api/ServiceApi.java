@@ -275,7 +275,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/room/{roomId}")
-	public ResponseEntity<String> roomGet(HttpServletRequest request, @PathVariable String roomId) throws Exception {
+	public ResponseEntity<String> roomGet(HttpServletRequest request, @PathVariable Integer roomId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
@@ -289,7 +289,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/room/{roomId}")
-	public ResponseEntity<String> roomDelete(HttpServletRequest request, @PathVariable String roomId) throws Exception {
+	public ResponseEntity<String> roomDelete(HttpServletRequest request, @PathVariable Integer roomId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
@@ -331,7 +331,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/member/{roomId}/{personId}")
-	public ResponseEntity<String> roomMemberGet(HttpServletRequest request, @PathVariable String roomId, @PathVariable Integer personId) throws Exception {
+	public ResponseEntity<String> roomMemberGet(HttpServletRequest request, @PathVariable Integer roomId, @PathVariable Integer personId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
@@ -345,7 +345,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/member/{roomId}/{personId}")
-	public ResponseEntity<String> roomMemberDelete(HttpServletRequest request, @PathVariable String roomId, @PathVariable Integer personId) throws Exception {
+	public ResponseEntity<String> roomMemberDelete(HttpServletRequest request, @PathVariable Integer roomId, @PathVariable Integer personId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)

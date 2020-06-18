@@ -47,7 +47,7 @@ public class User {
 			setPassword(password);
 		else
 			passwordHash = JsonUtil.getString(item, "passwordHash");
-		personId = JsonUtil.getInteger(item, "personId");
+		personId = JsonUtil.getIntegerString(item, "personId");
 		hasUserRole = JsonUtil.getBoolean(item, "hasUserRole");
 		hasAdminRole = JsonUtil.getBoolean(item, "hasAdminRole");
 	}

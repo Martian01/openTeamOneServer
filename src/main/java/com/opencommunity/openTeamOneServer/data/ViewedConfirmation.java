@@ -22,8 +22,8 @@ public class ViewedConfirmation {
 	@Id
 	@Column
 	public Integer personId;
-	@Column(length = 32)
-	public String roomId;
+	@Column
+	public Integer roomId;
 	@Column
 	public long messagePostedAt;
 	@Column
@@ -32,7 +32,7 @@ public class ViewedConfirmation {
 	public ViewedConfirmation() {
 	}
 
-	public ViewedConfirmation(String messageId, Integer personId, String roomId, long messagePostedAt, long confirmedAt) {
+	public ViewedConfirmation(String messageId, Integer personId, Integer roomId, long messagePostedAt, long confirmedAt) {
 		this.messageId = messageId;
 		this.personId = personId;
 		this.roomId = roomId;
@@ -42,8 +42,8 @@ public class ViewedConfirmation {
 
 	public ViewedConfirmation(JSONObject item) throws JSONException {
 		messageId = JsonUtil.getString(item, "messageId");
-		personId = JsonUtil.getInteger(item, "personId");
-		roomId = JsonUtil.getString(item, "roomId");
+		personId = JsonUtil.getIntegerString(item, "personId");
+		roomId = JsonUtil.getIntegerString(item, "roomId");
 		messagePostedAt = JsonUtil.getIsoDate(item, "messagePostedAt");
 		confirmedAt = JsonUtil.getIsoDate(item, "confirmedAt");
 	}
@@ -90,11 +90,11 @@ public class ViewedConfirmation {
 		this.personId = personId;
 	}
 
-	public String getRoomId() {
+	public Integer getRoomId() {
 		return roomId;
 	}
 
-	public void setRoomId(String roomId) {
+	public void setRoomId(Integer roomId) {
 		this.roomId = roomId;
 	}
 

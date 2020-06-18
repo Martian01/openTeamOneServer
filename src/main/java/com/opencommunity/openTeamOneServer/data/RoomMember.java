@@ -16,8 +16,8 @@ import java.util.ArrayList;
 public class RoomMember {
 
 	@Id
-	@Column(length = 32)
-	public String roomId;
+	@Column
+	public Integer roomId;
 	@Id
 	@Column
 	public Integer personId;
@@ -25,14 +25,14 @@ public class RoomMember {
 	public RoomMember() {
 	}
 
-	public RoomMember(String roomId, Integer personId) {
+	public RoomMember(Integer roomId, Integer personId) {
 		this.roomId = roomId;
 		this.personId = personId;
 	}
 
 	public RoomMember(JSONObject item) throws JSONException {
-		roomId = JsonUtil.getString(item, "roomId");
-		personId = JsonUtil.getInteger(item, "personId");
+		roomId = JsonUtil.getIntegerString(item, "roomId");
+		personId = JsonUtil.getIntegerString(item, "personId");
 	}
 
 	public JSONObject toJson() throws JSONException {
@@ -58,11 +58,11 @@ public class RoomMember {
 		return array;
 	}
 
-	public String getRoomId() {
+	public Integer getRoomId() {
 		return roomId;
 	}
 
-	public void setRoomId(String roomId) {
+	public void setRoomId(Integer roomId) {
 		this.roomId = roomId;
 	}
 

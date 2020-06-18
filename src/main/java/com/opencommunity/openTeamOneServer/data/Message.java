@@ -20,8 +20,8 @@ public class Message {
 	public String messageId;
 	@Column(length = 32)
 	public String clientMessageId;
-	@Column(length = 32)
-	public String roomId;
+	@Column
+	public Integer roomId;
 	@Column
 	public Integer senderPersonId;
 	@Column
@@ -36,7 +36,7 @@ public class Message {
 	public Message() {
 	}
 
-	public Message(String messageId, String clientMessageId, String roomId, Integer senderPersonId, long postedAt, String text, boolean isDeleted, long updatedAt) {
+	public Message(String messageId, String clientMessageId, Integer roomId, Integer senderPersonId, long postedAt, String text, boolean isDeleted, long updatedAt) {
 		this.messageId =  messageId == null || messageId.length() == 0 ? RestLib.getUuid() : messageId;
 		this.clientMessageId = clientMessageId;
 		this.roomId = roomId;
@@ -50,8 +50,8 @@ public class Message {
 	public Message(JSONObject item) throws JSONException {
 		messageId = JsonUtil.getString(item, "messageId");
 		clientMessageId = JsonUtil.getString(item, "clientMessageId");
-		roomId = JsonUtil.getString(item, "roomId");
-		senderPersonId = JsonUtil.getInteger(item, "senderPersonId");
+		roomId = JsonUtil.getIntegerString(item, "roomId");
+		senderPersonId = JsonUtil.getIntegerString(item, "senderPersonId");
 		postedAt = JsonUtil.getIsoDate(item, "postedAt");
 		text = JsonUtil.getString(item, "text");
 		isDeleted = JsonUtil.getBoolean(item, "isDeleted");
@@ -106,11 +106,11 @@ public class Message {
 		this.clientMessageId = clientMessageId;
 	}
 
-	public String getRoomId() {
+	public Integer getRoomId() {
 		return roomId;
 	}
 
-	public void setRoomId(String roomId) {
+	public void setRoomId(Integer roomId) {
 		this.roomId = roomId;
 	}
 
