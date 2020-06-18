@@ -29,8 +29,7 @@ public class Room {
 	@Column
 	public long changedAt;
 
-	public Room() {
-	}
+	public Room() { }
 
 	public Room(Integer roomId, String name, String shortName, String roomType, Integer pictureId, long changedAt) {
 		this.roomId = roomId == null ? RestLib.getRandomInt() : roomId;

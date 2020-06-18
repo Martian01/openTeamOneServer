@@ -11,6 +11,8 @@ public class SubscriptionKey implements Serializable {
 	public Integer deviceTokenHash;
 	public Integer userIdHash;
 
+	public SubscriptionKey() { }
+
 	public SubscriptionKey(String targetType, String appId, String deviceToken, String userId) {
 		if (targetType != null) targetTypeHash = targetType.hashCode();
 		if (appId != null) appIdHash = appId.hashCode();
@@ -22,14 +24,12 @@ public class SubscriptionKey implements Serializable {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (!(o instanceof SubscriptionKey)) return false;
-
-		SubscriptionKey that = (SubscriptionKey) o;
-
+		SubscriptionKey other = (SubscriptionKey) o;
 		return
-			targetTypeHash.equals(that.targetTypeHash) &&
-			appIdHash.equals(that.appIdHash) &&
-			deviceTokenHash.equals(that.deviceTokenHash) &&
-			userIdHash.equals(that.userIdHash);
+			targetTypeHash.equals(other.targetTypeHash) &&
+			appIdHash.equals(other.appIdHash) &&
+			deviceTokenHash.equals(other.deviceTokenHash) &&
+			userIdHash.equals(other.userIdHash);
 	}
 
 	@Override

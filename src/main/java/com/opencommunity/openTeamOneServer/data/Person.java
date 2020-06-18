@@ -26,8 +26,7 @@ public class Person {
 	@Column
 	public Integer pictureId;
 
-	public Person() {
-	}
+	public Person() { }
 
 	public Person(Integer personId, String lastName, String firstName, String nickName, Integer pictureId) {
 		this.personId = personId == null ? RestLib.getRandomInt() : personId;

@@ -83,8 +83,8 @@
       "position": 0
     },
     {
-      "referenceId": 9002,
       "fileId": 6000,
+      "referenceId": 9002,
       "directory": "attachments",
       "mimeType": "image/jpeg",
       "position": 0
@@ -301,5 +301,11 @@
       "userId": "player03",
       "password": "pass"
     }
+  ],
+  "forcedParameters": [
+    {
+      "name": "tenantPictureId",
+      "value": "5000"
+    }
   ]
-}
+ }

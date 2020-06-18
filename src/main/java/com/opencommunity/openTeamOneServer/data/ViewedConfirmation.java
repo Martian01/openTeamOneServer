@@ -29,8 +29,7 @@ public class ViewedConfirmation {
 	@Column
 	public long confirmedAt;
 
-	public ViewedConfirmation() {
-	}
+	public ViewedConfirmation() { }
 
 	public ViewedConfirmation(Integer messageId, Integer personId, Integer roomId, long messagePostedAt, long confirmedAt) {
 		this.messageId = messageId;

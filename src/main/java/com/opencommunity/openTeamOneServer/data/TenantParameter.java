@@ -22,8 +22,7 @@ public class TenantParameter {
 	@Column(length = 64)
 	public String value;
 
-	public TenantParameter() {
-	}
+	public TenantParameter() { }
 
 	public TenantParameter(String name, String value) {
 		this.name = name;

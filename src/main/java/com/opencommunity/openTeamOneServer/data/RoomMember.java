@@ -22,8 +22,7 @@ public class RoomMember {
 	@Column
 	public Integer personId;
 
-	public RoomMember() {
-	}
+	public RoomMember() { }
 
 	public RoomMember(Integer roomId, Integer personId) {
 		this.roomId = roomId;

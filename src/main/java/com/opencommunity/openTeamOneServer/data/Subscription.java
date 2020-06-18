@@ -60,8 +60,7 @@ public class Subscription {
 	@Column(length = 32)
 	public String appVersion;
 
-	public Subscription() {
-	}
+	public Subscription() { }
 
 	public Subscription(
 			String targetType,

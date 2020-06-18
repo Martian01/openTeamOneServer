@@ -37,8 +37,6 @@ public class ContentService {
 	public void init() {
 		if (tpr.findTopByName("tenantName") == null)
 			tpr.save(new TenantParameter("tenantName", "Open Team One"));
-		if (tpr.findTopByName("tenantPictureId") == null)
-			tpr.save(new TenantParameter("tenantPictureId", "tenant"));
 		if (tpr.findTopByName("startPageNoLogon") == null)
 			tpr.save(new TenantParameter("startPageNoLogon", "/default/index.html"));
 		if (tpr.findTopByName("startPageLogon") == null)
@@ -88,6 +86,10 @@ public class ContentService {
 		if (item != null && includeConfiguration) {
 			if (delete)
 				tpr.deleteAll();
+			tpr.saveAll(TenantParameter.fromJsonArray(item));
+		}
+		item = JsonUtil.getJSONArray(jsonObject, "forcedParameters");
+		if (item != null) {
 			tpr.saveAll(TenantParameter.fromJsonArray(item));
 		}
 		item = JsonUtil.getJSONArray(jsonObject, "users");

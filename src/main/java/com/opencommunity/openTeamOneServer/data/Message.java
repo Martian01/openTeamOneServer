@@ -33,8 +33,7 @@ public class Message {
 	@Column
 	public long updatedAt;
 
-	public Message() {
-	}
+	public Message() { }
 
 	public Message(Integer messageId, String clientMessageId, Integer roomId, Integer senderPersonId, long postedAt, String text, boolean isDeleted, long updatedAt) {
 		this.messageId =  messageId == null ? RestLib.getRandomInt() : messageId;

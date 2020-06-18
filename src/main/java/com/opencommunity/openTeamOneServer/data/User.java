@@ -30,8 +30,7 @@ public class User {
 	@Column
 	public boolean hasAdminRole;
 
-	public User() {
-	}
+	public User() { }
 
 	public User(String userId, String password, Integer personId, boolean hasUserRole, boolean hasAdminRole) {
 		this.userId = userId == null || userId.length() == 0 ? Integer.toString(RestLib.getRandomInt()) : userId.toLowerCase();

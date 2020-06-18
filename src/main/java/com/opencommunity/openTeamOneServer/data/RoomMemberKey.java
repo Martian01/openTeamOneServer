@@ -9,14 +9,14 @@ public class RoomMemberKey implements Serializable {
 	public Integer roomId;
 	public Integer personId;
 
+	public RoomMemberKey() { }
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (!(o instanceof RoomMemberKey)) return false;
-
-		RoomMemberKey that = (RoomMemberKey) o;
-
-		return roomId.equals(that.roomId) && personId.equals(that.personId);
+		RoomMemberKey other = (RoomMemberKey) o;
+		return roomId.equals(other.roomId) && personId.equals(other.personId);
 	}
 
 	@Override

@@ -32,8 +32,7 @@ public class SymbolicFile {
 	@Column(length = 16)
 	public String directory;
 
-	public SymbolicFile() {
-	}
+	public SymbolicFile() { }
 
 	public SymbolicFile(Integer fileId, String mimeType, String text, Integer referenceId, int position, String directory) {
 		this.fileId = fileId == null ? RestLib.getRandomInt() : fileId;
