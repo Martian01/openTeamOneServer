@@ -47,6 +47,11 @@ public class JsonUtil {
 			return TimeUtil.parseIsoDateTimeToMillis(date);
 	}
 
+	public static void put(JSONObject item, String key, long value) throws JSONException {
+		if (item != null && key != null)
+			item.put(key, value);
+	}
+
 	public static void put(JSONObject item, String key, boolean value) throws JSONException {
 		if (item != null && key != null)
 			item.put(key, value);
@@ -67,10 +72,10 @@ public class JsonUtil {
 			item.put(key, value);
 	}
 
-	public static void put(JSONArray item, int value) throws JSONException {
+	/*public static void put(JSONArray item, int value) throws JSONException {
 		if (item != null)
 			item.put(value);
-	}
+	}*/
 
 	public static void put(JSONArray item, boolean value) throws JSONException {
 		if (item != null)
@@ -97,6 +102,11 @@ public class JsonUtil {
 	public static void putString(JSONObject item, String key, Integer value) throws JSONException {
 		if (item != null && key != null && value != null)
 			item.put(key, value.toString());
+	}
+
+	public static void putString(JSONArray item, Integer value) throws JSONException {
+		if (item != null && value != null)
+			item.put(value.toString());
 	}
 
 }

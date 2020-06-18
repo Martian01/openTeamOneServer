@@ -305,7 +305,7 @@ public class MessagingApi {
 			for (ProtoSymbolicFile protoSymbolicFile : protoMessage.protoSymbolicFiles) {
 				MultipartFile multipartFile = multipartRequest.getFile(protoSymbolicFile.clientId);
 				protoSymbolicFile.mimeType = multipartFile.getContentType();
-				File file = new File(directory, protoSymbolicFile.fileId);
+				File file = new File(directory, protoSymbolicFile.fileId.toString());
 				StreamUtil.writeFile(multipartFile.getInputStream(), file);
 			}
 		}
@@ -402,7 +402,7 @@ public class MessagingApi {
 		// delete attachments (DB objects and files in the file system)
 		Iterable<SymbolicFile> symbolicFiles = symbolicFileRepository.findByReferenceIdOrderByPositionAsc(messageId);
 		for (SymbolicFile symbolicFile : symbolicFiles) {
-			File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
+			File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId.toString());
 			if (file == null)
 				return restLib.httpInternalErrorResponse;
 			if (file.exists())
@@ -598,11 +598,11 @@ public class MessagingApi {
 		if (person == null)
 			return null;
 		JSONObject item = new JSONObject();
-		item.put("personId", person.personId);
+		JsonUtil.putString(item, "personId", person.personId);
 		JsonUtil.put(item, "lastName", person.lastName);
 		JsonUtil.put(item, "firstName", person.firstName);
 		JsonUtil.put(item, "nickName", person.nickName);
-		JsonUtil.put(item, "pictureId", person.pictureId);
+		JsonUtil.putString(item, "pictureId", person.pictureId);
 		return item;
 	}
 
@@ -610,8 +610,8 @@ public class MessagingApi {
 		if (confirmation == null)
 			return null;
 		JSONObject item = new JSONObject();
-		item.put("personId", confirmation.personId);
-		item.put("viewedAt", TimeUtil.toIsoDateString(confirmation.confirmedAt));
+		JsonUtil.putString(item, "personId", confirmation.personId);
+		JsonUtil.put(item, "viewedAt", TimeUtil.toIsoDateString(confirmation.confirmedAt));
 		return item;
 	}
 
@@ -626,8 +626,8 @@ public class MessagingApi {
 		if (symbolicFile == null)
 			return null;
 		JSONObject sapSportsFile = new JSONObject();
-		sapSportsFile.put("fileId", symbolicFile.fileId);
-		sapSportsFile.put("mimeType", symbolicFile.mimeType);
+		JsonUtil.putString(sapSportsFile, "fileId", symbolicFile.fileId);
+		JsonUtil.put(sapSportsFile, "mimeType", symbolicFile.mimeType);
 		//if (symbolicFile.mimeType != null && symbolicFile.mimeType.startsWith("application/vnd.sap.sports"))
 		//	sapSportsFile.put("details", JSONObject.NULL); // for iOS app
 		JSONObject attachmentContent = new JSONObject();
@@ -636,8 +636,8 @@ public class MessagingApi {
 		JsonUtil.put(attachmentContent, "mimeType", "application/vnd.sap.sports.file");
 		JsonUtil.put(attachmentContent, "sapSportsFile", sapSportsFile);
 		JSONObject item = new JSONObject();
-		item.put("assetId", symbolicFile.fileId);
-		item.put("assetContent", attachmentContent);
+		JsonUtil.putString(item, "assetId", symbolicFile.fileId);
+		JsonUtil.put(item, "assetContent", attachmentContent);
 		return item;
 	}
 
@@ -654,29 +654,29 @@ public class MessagingApi {
 		if (message == null)
 			return null;
 		JSONObject messageContent = new JSONObject();
-		messageContent.put("roomId", message.roomId);
-		messageContent.put("senderPersonId", message.senderPersonId);
-		messageContent.put("postedAt", TimeUtil.toIsoDateString(message.postedAt));
-		messageContent.put("text", message.text);
-		messageContent.put("isOwnMessage", personId.equals(message.senderPersonId));
+		JsonUtil.putString(messageContent, "roomId", message.roomId);
+		JsonUtil.putString(messageContent, "senderPersonId", message.senderPersonId);
+		JsonUtil.put(messageContent, "postedAt", TimeUtil.toIsoDateString(message.postedAt));
+		JsonUtil.put(messageContent, "text", message.text);
+		JsonUtil.put(messageContent, "isOwnMessage", personId.equals(message.senderPersonId));
 		if (symbolicFiles != null)
-			messageContent.put("assets", symbolicFilesToJsonArray(symbolicFiles));
+			JsonUtil.put(messageContent, "assets", symbolicFilesToJsonArray(symbolicFiles));
 		JSONObject messageStatus = new JSONObject();
-		messageStatus.put("isDeleted", message.isDeleted);
-		messageStatus.put("updatedAt", TimeUtil.toIsoDateString(message.updatedAt));
+		JsonUtil.put(messageStatus, "isDeleted", message.isDeleted);
+		JsonUtil.put(messageStatus, "updatedAt", TimeUtil.toIsoDateString(message.updatedAt));
 		JSONObject postedMessageStatus = new JSONObject();
-		postedMessageStatus.put("viewedCount", viewedConfirmationRepository.countByMessageIdAndPersonIdNot(message.messageId, personId));
-		messageStatus.put("postedMessageStatus", postedMessageStatus);
+		JsonUtil.put(postedMessageStatus, "viewedCount", viewedConfirmationRepository.countByMessageIdAndPersonIdNot(message.messageId, personId));
+		JsonUtil.put(messageStatus, "postedMessageStatus", postedMessageStatus);
 		JSONObject receivedMessageStatus = new JSONObject();
 		ViewedConfirmation confirmation = viewedConfirmationRepository.findTopByMessageIdAndPersonId(message.messageId, personId);
 		if (confirmation != null)
 			receivedMessageStatus.put("viewedAt", TimeUtil.toIsoDateString(confirmation.confirmedAt)); // semantics of this field is unclear at best
 		messageStatus.put("receivedMessageStatus", receivedMessageStatus);
 		JSONObject item = new JSONObject();
-		item.put("messageId", message.messageId);
-		item.put("clientMessageId", message.clientMessageId);
-		item.put("messageContent", messageContent);
-		item.put("messageStatus", messageStatus);
+		JsonUtil.putString(item, "messageId", message.messageId);
+		JsonUtil.put(item, "clientMessageId", message.clientMessageId);
+		JsonUtil.put(item, "messageContent", messageContent);
+		JsonUtil.put(item, "messageStatus", messageStatus);
 		return item;
 	}
 
@@ -720,12 +720,12 @@ public class MessagingApi {
 		boolean isPrivateRoom = "private".equals(room.roomType);
 		String[] privateRoomNames = isPrivateRoom ? getPrivateRoomNames(room.roomId, personId) : null;
 		JSONObject roomStatus = new JSONObject();
-		roomStatus.put("dataChangedAt", TimeUtil.toIsoDateString(room.changedAt));
+		JsonUtil.put(roomStatus, "dataChangedAt", TimeUtil.toIsoDateString(room.changedAt));
 		JSONObject roomData = new JSONObject();
 		JsonUtil.put(roomData, "name", isPrivateRoom ? privateRoomNames[0] : room.name);
 		JsonUtil.put(roomData, "shortName", isPrivateRoom ? privateRoomNames[1] : room.shortName);
 		JsonUtil.put(roomData, "roomType", room.roomType);
-		JsonUtil.put(roomData, "pictureId", room.pictureId);
+		JsonUtil.putString(roomData, "pictureId", room.pictureId);
 		JsonUtil.put(roomData, "currentMemberIds", currentMemberIds);
 		JSONObject roomContent = new JSONObject();
 		Long watermark = getWatermark(personId, room.roomId);
@@ -736,10 +736,10 @@ public class MessagingApi {
 		Message latestMessage = messageRepository.findTopByRoomIdAndIsDeletedFalseOrderByPostedAtDesc(room.roomId);
 		JsonUtil.put(roomContent, "latestMessage", messageToJson(latestMessage, personId));
 		JSONObject item = new JSONObject();
-		item.put("roomId", room.roomId);
-		item.put("roomStatus", roomStatus);
-		item.put("roomData", roomData);
-		item.put("roomContent", roomContent);
+		JsonUtil.putString(item, "roomId", room.roomId);
+		JsonUtil.put(item, "roomStatus", roomStatus);
+		JsonUtil.put(item, "roomData", roomData);
+		JsonUtil.put(item, "roomContent", roomContent);
 		return item;
 	}
 
@@ -755,24 +755,24 @@ public class MessagingApi {
 				membersPerRoom = new JSONArray();
 				membersMap.put(roomMember.roomId, membersPerRoom);
 			}
-			membersPerRoom.put(roomMember.personId);
+			JsonUtil.putString(membersPerRoom, roomMember.personId);
 		}
 		// process the rooms
 		JSONArray array = new JSONArray();
 		for (Room room : rooms)
 			if (userRooms.contains(room.roomId))
-				array.put(roomToJson(room, membersMap.get(room.roomId), personId));
+				JsonUtil.put(array, roomToJson(room, membersMap.get(room.roomId), personId));
 		return array;
 	}
 
 	private class ProtoSymbolicFile {
-		String fileId;
+		Integer fileId;
 		String clientId;
 		String text;
 		String mimeType;
 
 		public ProtoSymbolicFile() {
-			fileId = RestLib.getUuid();
+			fileId = RestLib.getRandomInt();
 		}
 	}
 

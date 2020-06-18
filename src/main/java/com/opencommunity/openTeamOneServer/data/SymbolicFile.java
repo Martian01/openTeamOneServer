@@ -19,8 +19,8 @@ public class SymbolicFile {
 	public static final String DIRECTORY_SNAPSHOTS = "snapshots";
 
 	@Id
-	@Column(length = 32)
-	public String fileId;
+	@Column
+	public Integer fileId;
 	@Column(length = 100)
 	public String mimeType;
 	@Column(length = 200)
@@ -35,8 +35,8 @@ public class SymbolicFile {
 	public SymbolicFile() {
 	}
 
-	public SymbolicFile(String fileId, String mimeType, String text, Integer referenceId, int position, String directory) {
-		this.fileId = fileId == null ? RestLib.getUuid() : fileId;
+	public SymbolicFile(Integer fileId, String mimeType, String text, Integer referenceId, int position, String directory) {
+		this.fileId = fileId == null ? RestLib.getRandomInt() : fileId;
 		this.mimeType = mimeType;
 		this.text = text;
 		this.referenceId = referenceId;
@@ -45,15 +45,14 @@ public class SymbolicFile {
 	}
 
 	public SymbolicFile(JSONObject item) throws JSONException {
-		fileId = JsonUtil.getString(item, "fileId");
+		fileId = JsonUtil.getIntegerString(item, "fileId");
+		if (fileId == null)
+			fileId = RestLib.getRandomInt();
 		mimeType = JsonUtil.getString(item, "mimeType");
 		text = JsonUtil.getString(item, "text");
 		referenceId = JsonUtil.getIntegerString(item, "referenceId");
 		position = JsonUtil.getInt(item, "position", 0);
 		directory = JsonUtil.getString(item, "directory");
-		//
-		if (fileId == null || fileId.length() == 0)
-			fileId = RestLib.getUuid();
 	}
 
 	public JSONObject toJson() throws JSONException {
@@ -83,11 +82,11 @@ public class SymbolicFile {
 		return array;
 	}
 
-	public String getFileId() {
+	public Integer getFileId() {
 		return fileId;
 	}
 
-	public void setFileId(String fileId) {
+	public void setFileId(Integer fileId) {
 		this.fileId = fileId;
 	}
 

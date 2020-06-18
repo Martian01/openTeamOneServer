@@ -563,7 +563,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/file/{fileId}")
-	public ResponseEntity<String> symbolicFileGet(HttpServletRequest request, @PathVariable String fileId) throws Exception {
+	public ResponseEntity<String> symbolicFileGet(HttpServletRequest request, @PathVariable Integer fileId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
@@ -577,7 +577,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/file/{fileId}/content")
-	public ResponseEntity<Resource> symbolicFileContentGet(HttpServletRequest request, @PathVariable String fileId) throws Exception {
+	public ResponseEntity<Resource> symbolicFileContentGet(HttpServletRequest request, @PathVariable Integer fileId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
@@ -586,7 +586,7 @@ public class ServiceApi {
 		SymbolicFile symbolicFile = symbolicFileRepository.findById(fileId).orElse(null);
 		if (symbolicFile == null)
 			return restLib.httpNotFoundResourceResponse;
-		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
+		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId.toString());
 		if (file == null)
 			return restLib.httpInternalErrorResourceResponse;
 		if (!file.canRead()) {
@@ -597,7 +597,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/file/{fileId}")
-	public ResponseEntity<String> symbolicFileDelete(HttpServletRequest request, @PathVariable String fileId) throws Exception {
+	public ResponseEntity<String> symbolicFileDelete(HttpServletRequest request, @PathVariable Integer fileId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
@@ -759,7 +759,7 @@ public class ServiceApi {
 		}
 		// save byte stream under new fileId
 		SymbolicFile symbolicFile = new SymbolicFile(null, mimeType, null, null, 0, SymbolicFile.DIRECTORY_PROFILES);
-		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
+		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId.toString());
 		if (file == null) { // unlikely
 			person.pictureId = null;
 			personRepository.save(person);
@@ -794,7 +794,7 @@ public class ServiceApi {
 			Person oldPerson = personRepository.findById(user.personId).orElse(null);
 			if (oldPerson == null)
 				return restLib.httpInternalErrorResponse;
-			if (!restLib.equal(oldPerson.pictureId, person.pictureId))
+			if (!RestLib.equal(oldPerson.pictureId, person.pictureId))
 				return restLib.httpForbiddenResponse;
 		}
 		personRepository.save(person);
@@ -825,7 +825,7 @@ public class ServiceApi {
 	private File deleteFileContent(SymbolicFile symbolicFile) {
 		if (symbolicFile == null)
 			return null;
-		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
+		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId.toString());
 		if (file != null && file.exists())
 			file.delete();
 		return file;

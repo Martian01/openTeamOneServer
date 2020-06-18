@@ -24,15 +24,15 @@ public class Room {
 	public String shortName;
 	@Column(length = 10)
 	public String roomType;
-	@Column(length = 32)
-	public String pictureId;
+	@Column
+	public Integer pictureId;
 	@Column
 	public long changedAt;
 
 	public Room() {
 	}
 
-	public Room(Integer roomId, String name, String shortName, String roomType, String pictureId, long changedAt) {
+	public Room(Integer roomId, String name, String shortName, String roomType, Integer pictureId, long changedAt) {
 		this.roomId = roomId == null ? RestLib.getRandomInt() : roomId;
 		this.name = name;
 		this.shortName = shortName;
@@ -48,7 +48,7 @@ public class Room {
 		name = JsonUtil.getString(item, "name");
 		shortName = JsonUtil.getString(item, "shortName");
 		roomType = JsonUtil.getString(item, "roomType");
-		pictureId = JsonUtil.getString(item, "pictureId");
+		pictureId = JsonUtil.getIntegerString(item, "pictureId");
 		changedAt = JsonUtil.getIsoDate(item, "changedAt");
 	}
 
@@ -111,11 +111,11 @@ public class Room {
 		this.roomType = roomType;
 	}
 
-	public String getPictureId() {
+	public Integer getPictureId() {
 		return pictureId;
 	}
 
-	public void setPictureId(String pictureId) {
+	public void setPictureId(Integer pictureId) {
 		this.pictureId = pictureId;
 	}
 

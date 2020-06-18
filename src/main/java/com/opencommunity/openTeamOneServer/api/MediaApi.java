@@ -42,28 +42,28 @@ public class MediaApi {
 	/* API implementation */
 
 	@RequestMapping(method = RequestMethod.GET, value = "/picture/v1/service/rest/picture/{fileId}")
-	public ResponseEntity<Resource> picture(HttpServletRequest request, @PathVariable String fileId) throws Exception {
+	public ResponseEntity<Resource> picture(HttpServletRequest request, @PathVariable Integer fileId) throws Exception {
 		return handleFileRequest(request, fileId);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{fileId}/content")
-	public ResponseEntity<Resource> mediaFileContent(HttpServletRequest request, @PathVariable String fileId) throws Exception {
+	public ResponseEntity<Resource> mediaFileContent(HttpServletRequest request, @PathVariable Integer fileId) throws Exception {
 		return handleFileRequest(request, fileId);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/token/{fileId}")
-	public ResponseEntity<Resource> mediaTokenContent(HttpServletRequest request, @PathVariable String fileId) throws Exception {
+	public ResponseEntity<Resource> mediaTokenContent(HttpServletRequest request, @PathVariable Integer fileId) throws Exception {
 		return handleTokenRequest(request, fileId);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/media/v1/service/rest/media/file/{fileId}/details")
-	public ResponseEntity<String> mediaFileDetails(HttpServletRequest request, @PathVariable String fileId) throws Exception {
+	public ResponseEntity<String> mediaFileDetails(HttpServletRequest request, @PathVariable Integer fileId) throws Exception {
 		return handleFileDetailsRequest(request, fileId);
 	}
 
 	/* helper functions */
 
-	private ResponseEntity<Resource> handleFileRequest(HttpServletRequest request, String fileId) throws Exception {
+	private ResponseEntity<Resource> handleFileRequest(HttpServletRequest request, Integer fileId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
@@ -75,7 +75,7 @@ public class MediaApi {
 		return sendSymbolicFile(symbolicFile);
 	}
 
-	private ResponseEntity<Resource> handleTokenRequest(HttpServletRequest request, String token) throws Exception {
+	private ResponseEntity<Resource> handleTokenRequest(HttpServletRequest request, Integer token) throws Exception {
 		SymbolicFile symbolicFile = symbolicFileRepository.findById(token).orElse(null); // TODO: proper token handling
 		if (symbolicFile == null)
 			return restLib.httpNotFoundResourceResponse;
@@ -85,7 +85,7 @@ public class MediaApi {
 	}
 
 	private ResponseEntity<Resource> sendSymbolicFile(SymbolicFile symbolicFile) throws Exception {
-		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
+		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId.toString());
 		if (file == null)
 			return restLib.httpInternalErrorResourceResponse;
 		if (!file.canRead()) {
@@ -102,7 +102,7 @@ public class MediaApi {
 		return restLib.httpResourceResponse(body, MediaType.parseMediaType(symbolicFile.mimeType));
 	}
 
-	private ResponseEntity<String> handleFileDetailsRequest(HttpServletRequest request, String fileId) throws Exception {
+	private ResponseEntity<String> handleFileDetailsRequest(HttpServletRequest request, Integer fileId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
@@ -113,7 +113,7 @@ public class MediaApi {
 			return restLib.httpNotFoundResponse;
 		if (!symbolicFile.mimeType.startsWith("video/"))
 			return restLib.httpBadRequestResponse;
-		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId);
+		File file = StreamUtil.getFile(tenantParameterRepository, symbolicFile.directory, symbolicFile.fileId.toString());
 		if (file == null)
 			return restLib.httpInternalErrorResponse;
 		if (!file.canRead()) {

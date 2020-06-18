@@ -23,13 +23,13 @@ public class Person {
 	public String firstName;
 	@Column(length = 50)
 	public String nickName;
-	@Column(length = 32)
-	public String pictureId;
+	@Column
+	public Integer pictureId;
 
 	public Person() {
 	}
 
-	public Person(Integer personId, String lastName, String firstName, String nickName, String pictureId) {
+	public Person(Integer personId, String lastName, String firstName, String nickName, Integer pictureId) {
 		this.personId = personId == null ? RestLib.getRandomInt() : personId;
 		this.lastName = lastName;
 		this.firstName = firstName;
@@ -44,7 +44,7 @@ public class Person {
 		lastName = JsonUtil.getString(item, "lastName");
 		firstName = JsonUtil.getString(item, "firstName");
 		nickName = JsonUtil.getString(item, "nickName");
-		pictureId = JsonUtil.getString(item, "pictureId");
+		pictureId = JsonUtil.getIntegerString(item, "pictureId");
 	}
 
 	public JSONObject toJson() throws JSONException {
@@ -105,11 +105,11 @@ public class Person {
 		this.nickName = nickName;
 	}
 
-	public String getPictureId() {
+	public Integer getPictureId() {
 		return pictureId;
 	}
 
-	public void setPictureId(String pictureId) {
+	public void setPictureId(Integer pictureId) {
 		this.pictureId = pictureId;
 	}
 
