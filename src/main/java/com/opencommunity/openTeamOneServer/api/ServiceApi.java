@@ -389,7 +389,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/message/{messageId}")
-	public ResponseEntity<String> messageGet(HttpServletRequest request, @PathVariable String messageId) throws Exception {
+	public ResponseEntity<String> messageGet(HttpServletRequest request, @PathVariable Integer messageId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
@@ -403,7 +403,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/message/{messageId}")
-	public ResponseEntity<String> messageDelete(HttpServletRequest request, @PathVariable String messageId) throws Exception {
+	public ResponseEntity<String> messageDelete(HttpServletRequest request, @PathVariable Integer messageId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
@@ -445,7 +445,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/confirmation/{messageId}/{personId}")
-	public ResponseEntity<String> viewedConfirmationGet(HttpServletRequest request, @PathVariable String messageId, @PathVariable Integer personId) throws Exception {
+	public ResponseEntity<String> viewedConfirmationGet(HttpServletRequest request, @PathVariable Integer messageId, @PathVariable Integer personId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)
@@ -459,7 +459,7 @@ public class ServiceApi {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/confirmation/{messageId}/{personId}")
-	public ResponseEntity<String> viewedConfirmationDelete(HttpServletRequest request, @PathVariable String messageId, @PathVariable Integer personId) throws Exception {
+	public ResponseEntity<String> viewedConfirmationDelete(HttpServletRequest request, @PathVariable Integer messageId, @PathVariable Integer personId) throws Exception {
 		Session session = restLib.getSession(request);
 		User user = restLib.getSessionAdmin(session, userRepository);
 		if (user == null)

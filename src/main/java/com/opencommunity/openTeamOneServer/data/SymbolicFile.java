@@ -25,8 +25,8 @@ public class SymbolicFile {
 	public String mimeType;
 	@Column(length = 200)
 	public String text;
-	@Column(length = 32)
-	public String referenceId;
+	@Column
+	public Integer referenceId;
 	@Column
 	public Integer position;
 	@Column(length = 20)
@@ -35,7 +35,7 @@ public class SymbolicFile {
 	public SymbolicFile() {
 	}
 
-	public SymbolicFile(String fileId, String mimeType, String text, String referenceId, int position, String directory) {
+	public SymbolicFile(String fileId, String mimeType, String text, Integer referenceId, int position, String directory) {
 		this.fileId = fileId == null ? RestLib.getUuid() : fileId;
 		this.mimeType = mimeType;
 		this.text = text;
@@ -48,7 +48,7 @@ public class SymbolicFile {
 		fileId = JsonUtil.getString(item, "fileId");
 		mimeType = JsonUtil.getString(item, "mimeType");
 		text = JsonUtil.getString(item, "text");
-		referenceId = JsonUtil.getString(item, "referenceId");
+		referenceId = JsonUtil.getIntegerString(item, "referenceId");
 		position = JsonUtil.getInt(item, "position", 0);
 		directory = JsonUtil.getString(item, "directory");
 		//
@@ -107,11 +107,11 @@ public class SymbolicFile {
 		this.text = text;
 	}
 
-	public String getReferenceId() {
+	public Integer getReferenceId() {
 		return referenceId;
 	}
 
-	public void setReferenceId(String referenceId) {
+	public void setReferenceId(Integer referenceId) {
 		this.referenceId = referenceId;
 	}
 

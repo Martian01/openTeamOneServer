@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 
-public interface MessageRepository extends CrudRepository<Message, String> {
+public interface MessageRepository extends CrudRepository<Message, Integer> {
 	// for latest message
 	Message findTopByRoomIdAndIsDeletedFalseOrderByPostedAtDesc(Integer roomId);
 	// for badge count

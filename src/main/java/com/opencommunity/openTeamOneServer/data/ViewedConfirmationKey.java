@@ -6,7 +6,7 @@ public class ViewedConfirmationKey implements Serializable {
 
 	private static final long serialVersionUID = -2L;
 
-	public String messageId;
+	public Integer messageId;
 	public Integer personId;
 
 	@Override

@@ -16,8 +16,8 @@ import java.util.ArrayList;
 public class Message {
 
 	@Id
-	@Column(length = 32)
-	public String messageId;
+	@Column
+	public Integer messageId;
 	@Column(length = 32)
 	public String clientMessageId;
 	@Column
@@ -36,8 +36,8 @@ public class Message {
 	public Message() {
 	}
 
-	public Message(String messageId, String clientMessageId, Integer roomId, Integer senderPersonId, long postedAt, String text, boolean isDeleted, long updatedAt) {
-		this.messageId =  messageId == null || messageId.length() == 0 ? RestLib.getUuid() : messageId;
+	public Message(Integer messageId, String clientMessageId, Integer roomId, Integer senderPersonId, long postedAt, String text, boolean isDeleted, long updatedAt) {
+		this.messageId =  messageId == null ? RestLib.getRandomInt() : messageId;
 		this.clientMessageId = clientMessageId;
 		this.roomId = roomId;
 		this.senderPersonId = senderPersonId;
@@ -48,7 +48,9 @@ public class Message {
 	}
 
 	public Message(JSONObject item) throws JSONException {
-		messageId = JsonUtil.getString(item, "messageId");
+		messageId = JsonUtil.getIntegerString(item, "messageId");
+		if (messageId == null)
+			messageId = RestLib.getRandomInt();
 		clientMessageId = JsonUtil.getString(item, "clientMessageId");
 		roomId = JsonUtil.getIntegerString(item, "roomId");
 		senderPersonId = JsonUtil.getIntegerString(item, "senderPersonId");
@@ -56,9 +58,6 @@ public class Message {
 		text = JsonUtil.getString(item, "text");
 		isDeleted = JsonUtil.getBoolean(item, "isDeleted");
 		updatedAt = JsonUtil.getIsoDate(item, "updatedAt");
-		//
-		if (messageId == null || messageId.length() == 0)
-			messageId = RestLib.getUuid();
 	}
 
 	public JSONObject toJson() throws JSONException {
@@ -90,11 +89,11 @@ public class Message {
 		return array;
 	}
 
-	public String getMessageId() {
+	public Integer getMessageId() {
 		return messageId;
 	}
 
-	public void setMessageId(String messageId) {
+	public void setMessageId(Integer messageId) {
 		this.messageId = messageId;
 	}
 

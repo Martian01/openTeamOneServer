@@ -17,8 +17,8 @@ import java.util.ArrayList;
 public class ViewedConfirmation {
 
 	@Id
-	@Column(length = 32)
-	public String messageId;
+	@Column
+	public Integer messageId;
 	@Id
 	@Column
 	public Integer personId;
@@ -32,7 +32,7 @@ public class ViewedConfirmation {
 	public ViewedConfirmation() {
 	}
 
-	public ViewedConfirmation(String messageId, Integer personId, Integer roomId, long messagePostedAt, long confirmedAt) {
+	public ViewedConfirmation(Integer messageId, Integer personId, Integer roomId, long messagePostedAt, long confirmedAt) {
 		this.messageId = messageId;
 		this.personId = personId;
 		this.roomId = roomId;
@@ -41,7 +41,7 @@ public class ViewedConfirmation {
 	}
 
 	public ViewedConfirmation(JSONObject item) throws JSONException {
-		messageId = JsonUtil.getString(item, "messageId");
+		messageId = JsonUtil.getIntegerString(item, "messageId");
 		personId = JsonUtil.getIntegerString(item, "personId");
 		roomId = JsonUtil.getIntegerString(item, "roomId");
 		messagePostedAt = JsonUtil.getIsoDate(item, "messagePostedAt");
@@ -74,11 +74,11 @@ public class ViewedConfirmation {
 		return array;
 	}
 
-	public String getMessageId() {
+	public Integer getMessageId() {
 		return messageId;
 	}
 
-	public void setMessageId(String messageId) {
+	public void setMessageId(Integer messageId) {
 		this.messageId = messageId;
 	}
 

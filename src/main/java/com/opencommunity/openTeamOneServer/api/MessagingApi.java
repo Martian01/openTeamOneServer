@@ -367,7 +367,7 @@ public class MessagingApi {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/message/{messageId}/confirmations")
-	public ResponseEntity<String> messageConfirmations(HttpServletRequest request, @PathVariable String messageId) throws JSONException {
+	public ResponseEntity<String> messageConfirmations(HttpServletRequest request, @PathVariable Integer messageId) throws JSONException {
 		Session session = restLib.getSession(request);
 		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
@@ -387,7 +387,7 @@ public class MessagingApi {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/message/{messageId}")
-	public ResponseEntity<String> messageDelete(HttpServletRequest request, @PathVariable String messageId) throws JSONException {
+	public ResponseEntity<String> messageDelete(HttpServletRequest request, @PathVariable Integer messageId) throws JSONException {
 		Session session = restLib.getSession(request);
 		User user = session == null ? restLib.getBasicAuthContact(request, userRepository) : restLib.getSessionContact(session, userRepository); // fallback to Basic Auth
 		if (user == null)
@@ -433,7 +433,7 @@ public class MessagingApi {
 			ArrayList<ViewedConfirmation> confirmations = new ArrayList<>();
 			for (int i = 0; i < messageIds.length(); i++)
 				try {
-					Message message = messageRepository.findById(messageIds.getString(i)).orElse(null);
+					Message message = messageRepository.findById(Integer.parseInt(messageIds.getString(i))).orElse(null);
 					if (message != null)
 						confirmations.add(new ViewedConfirmation(message.messageId, user.personId, message.roomId, message.postedAt, now));
 				} catch (Exception ignored) { }
@@ -788,13 +788,13 @@ public class MessagingApi {
 	}
 
 	private class ProtoMessage {
-		String messageId;
+		Integer messageId;
 		String clientId;
 		String text;
 		List<ProtoSymbolicFile> protoSymbolicFiles;
 
 		public ProtoMessage() {
-			messageId = RestLib.getUuid();
+			messageId = RestLib.getRandomInt();
 		}
 	}
 
