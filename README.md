@@ -106,7 +106,7 @@ The server offers the following tenant parameters to control the navigation. The
 
 For a first trial it is quite convenient to use the H2 in-memory database as it comes with Spring Boot and requires no configuration. After your first steps with Open Team One you might want to progress to a disk based SQL database, like MariaDB. MariaDB is a popular MySQL fork. In fact, MariaDB is the continuation of MySQL by the original author and a community. MariaDB is drop-in compatible with MySQL, so everything written in this section works for MySQL, too.
 
-When I first tried integrating with MariaDB, it seemed to be easy. However, I soon ran into issues related to character encoding. The same happened when I set up an instance running on a virtual server on the internet. It seems that we are already hitting the limits of MySQL and MariaDB with an application like Open Team One in an internationalized (non-English) environment. Sorry folks, the days of the empire are over, and Unicode is required these days. The good news is, with the following recipe I managed to get Open Team One to run on a MariaDB database.
+With version 1.0.0 of Open Team One Server I ran into issues related to character encoding. The issue was that the byte represenatation of key fields grew too long when using 4-byte UTF-8 encoding for the database. In release 1.0.0 the issue was solved by using a special script to generate the database tables. In release 2.0.0 this is no longer required as we have turned all key fields into integers. We still advise of the following settings.
 
 First, make sure you have enabled UTF-8 with support for 4-byte characters. To that end, make sure the following configuration is in the MariaDB configuration files. On Debian you do not need to do anything. On Slackware you need to modify _/etc/my.cnf.d/server.cnf_. On other distros it will be similar.
 
@@ -120,15 +120,9 @@ Next you need to prepare an empty database for a standard user. Having started t
 	mysql --password
 	> create database teamone character set = 'utf8mb4' collate = 'utf8mb4_unicode_ci';
 	> create user 'springuser'@'localhost' identified by 'dbPassword';
-	> grant select, insert, update, delete on teamone.* to 'springuser'@'localhost';
+	> grant all on teamone.* to 'springuser'@'localhost';
 
 In this example the database is called _teamone_ and contains a user _springuser_ with password _dbPassword_. The database name, the user name and the password can be freely chosen.
-
-Now comes the tricky part. Since on the hosted system I ran into problems with key lengths and UTF-8, I could not use the SpringBoot framework to create the database tables automatically (which it normally will do). Instead I had to create the tables offline. You can do the same by simply pasting the provided [script](docu/create_tables_mysql) into the SQL console at this point. If you would like to experiment with SpringBoot instead, you need to elevate the user privileges by saying
-
-	> grant all to 'springuser'@'localhost';
-
-In the latter case, remember to lower the user privileges in a productive environment after table creation.
 
 Next you need to add the JDBC database driver to the project. We have already added the following dependency to our Maven file pom.xml:
 
@@ -142,13 +136,19 @@ So, for MariaDB or MySQL you don't need to do anything. If you use a different S
 Finally we add the following properties to the _application.properties_ file. In fact, you just need to uncomment them and insert the correct names and passwords, and maybe the TCP port of the database server.
 
 	spring.jpa.hibernate.ddl-auto=update
-	spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+	spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 	spring.datasource.url=jdbc:mysql://localhost:3306/teamone
 	spring.datasource.username=springuser
 	spring.datasource.password=dbPassword
 	spring.datasource.connectionProperties=useUnicode=true;characterEncoding=utf-8;serverTimezone=UTC;
 
 Restart Open Team One Server and you're done. If you want to migrate the content over to the new DB, save and import a snapshot via the admin tools. 
+
+Remark: In a productive environment you can drop the permissions of the database user and change the property `spring.jpa.hibernate.ddl-auto=none` after the first server run.
+
+## Database Migration
+
+The database schema has changed going from version 1.0.0 to 2.0.0. For the migration I exported a database to JSON, migrated the JSON, and uploaded it to a fresh installation. The only change in the JSON file is a change of data type: all exposed internal key fields change from data type string to data type number. Of course they need to change consistently across the whole JSON file, and the file names of profile pictures and attachments on disk need to change accordingly - they equal the fileId in the database.
 
 ## SSL Configuration
 
@@ -185,12 +185,12 @@ One of the most simple deployment options is to build a JAR file that can be exe
 
 This will build the project in the "target" directory and create two JAR files: One relatively small, containing only the project artefacts, the other one quite large, containing everything including the dependencies.
 
-	-rw-r--r--  1 xxx users 30102998 Nov  9 00:53 openTeamOneServer-0.0.1-SNAPSHOT.jar
-	-rw-r--r--  1 xxx users   114474 Nov  9 00:53 openTeamOneServer-0.0.1-SNAPSHOT.jar.original
+	-rw-r----- 1 mar mar 41480573 Jun 18 23:55 openTeamOneServer-2.0.0.jar
+	-rw-r----- 1 mar mar   157703 Jun 18 23:55 openTeamOneServer-2.0.0.jar.original
 
 The large JAR file can be copied to another machine and executed by a JRE (Java Runtime Environment) like this:
 
-	java -jar openTeamOneServer-0.0.1-SNAPSHOT.jar
+	java -jar openTeamOneServer-2.0.0.jar
 
 I was able to run and deploy the jar file on a virtual server on the internet. The server came with a minimal headless Debian 9.0 installation (around 500 MB). I only had to install the following two packages including their dependencies in an ssh console:
 
@@ -211,7 +211,7 @@ If you want to run the service under systemd control in order to be independent 
     [Service]
     Type=simple
     User=root
-    ExecStart=/usr/bin/java -Xrs -jar /opt/openTeamOneServer-1.0.0-SNAPSHOT.jar
+    ExecStart=/usr/bin/java -Xrs -jar /opt/openTeamOneServer-2.0.0.jar
     Restart=always
     RestartSec=10
 
