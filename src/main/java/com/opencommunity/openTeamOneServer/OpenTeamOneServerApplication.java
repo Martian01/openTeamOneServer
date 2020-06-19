@@ -22,7 +22,7 @@ public class OpenTeamOneServerApplication implements WebMvcConfigurer {
 	}
 
 	@Autowired
-	public ContentService contentService;
+	private ContentService contentService;
 
 	@Bean
 	public CommandLineRunner loadContent() {

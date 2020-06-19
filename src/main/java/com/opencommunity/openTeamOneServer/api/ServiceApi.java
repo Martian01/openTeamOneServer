@@ -2,6 +2,7 @@ package com.opencommunity.openTeamOneServer.api;
 
 import com.opencommunity.openTeamOneServer.data.*;
 import com.opencommunity.openTeamOneServer.persistence.*;
+import com.opencommunity.openTeamOneServer.util.ContentService;
 import com.opencommunity.openTeamOneServer.util.RestLib;
 import com.opencommunity.openTeamOneServer.util.StreamUtil;
 import com.opencommunity.openTeamOneServer.util.TimeUtil;
@@ -44,6 +45,8 @@ public class ServiceApi {
 	private ViewedConfirmationRepository viewedConfirmationRepository;
 	@Autowired
 	private SubscriptionRepository subscriptionRepository;
+	@Autowired
+	private ContentService contentService;
 	@Autowired
 	private RestLib restLib;
 
@@ -134,6 +137,9 @@ public class ServiceApi {
 			return restLib.httpBadRequestResponse;
 		TenantParameter parameter = new TenantParameter(new JSONObject(requestBody));
 		tenantParameterRepository.save(parameter);
+		//
+		if ("dataDirectory".equals(parameter.name))
+			contentService.prepareDataDirectory(parameter.value);
 		//
 		return restLib.httpResponse(parameter.toJson(), HttpStatus.CREATED);
 	}

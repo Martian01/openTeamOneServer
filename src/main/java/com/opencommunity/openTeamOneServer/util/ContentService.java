@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.util.Iterator;
 
 @Component
@@ -47,9 +48,22 @@ public class ContentService {
 			tpr.save(new TenantParameter("startPageUser", "/default/user/index.html"));
 		if (tpr.findTopByName("dataDirectory") == null)
 			tpr.save(new TenantParameter("dataDirectory", "/opt/openTeamOneServer/data"));
+		prepareDataDirectory("/opt/openTeamOneServer/data");
 		//
 		if (ur.countByHasAdminRoleTrue() == 0)
 			ur.save(new User("admin", "admin", null, false, true));
+	}
+
+	@SuppressWarnings("ResultOfMethodCallIgnored")
+	public void prepareDataDirectory(String dirName) {
+		File dataDir = new File(dirName);
+		boolean rc = dataDir.mkdirs();
+		File subDir = new File(dataDir, "attachments");
+		rc = subDir.mkdirs();
+		subDir = new File(dataDir, "profiles");
+		rc = subDir.mkdirs();
+		subDir = new File(dataDir, "snapshots");
+		rc = subDir.mkdirs();
 	}
 
 	public JSONObject getSummary() throws JSONException {

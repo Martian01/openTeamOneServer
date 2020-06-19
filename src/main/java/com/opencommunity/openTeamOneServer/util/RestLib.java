@@ -35,7 +35,7 @@ public class RestLib {
 	private static final Random randomGenerator = new Random();
 
 	public static int getRandomInt() {
-		return randomGenerator.nextInt();
+		return randomGenerator.nextInt() & 0x7fffffff;
 	}
 
 	/* Bean Methods */

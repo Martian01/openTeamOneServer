@@ -30,7 +30,7 @@ You copy the complete content of the project directory "demo" into the designate
 
 ![Preparation](docu/demo1.png)
 
-Note: as of release 2.0.0, the server suggests the directory `/opt/openTeamOneServer/data`.
+Note: as of release 2.0.0, the server defaults to the directory `/opt/openTeamOneServer/data`.
 
 ### Step 2: Starting the Server
 

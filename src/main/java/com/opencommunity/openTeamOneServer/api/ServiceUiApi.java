@@ -143,6 +143,9 @@ public class ServiceUiApi {
 		TenantParameter tp = new TenantParameter(key, value);
 		tenantParameterRepository.save(tp);
 		//
+		if ("dataDirectory".equals(tp.name))
+			contentService.prepareDataDirectory(tp.value);
+		//
 		return restLib.httpForwardResponse(request, user, forward);
 	}
 
