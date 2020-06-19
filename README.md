@@ -28,7 +28,7 @@ In step 1 you need to designate a data directory for the server, or rather, for 
 
 You copy the complete content of the project directory "demo" into the designated data directory. At the time of writing that would be the three subdirectories "attachments", "profiles" and "snapshots". The result should look like this:
 
-![Preparation](docu/demo1.png)
+![Preparation](images/demo1.png)
 
 Note: as of release 2.0.0, the server defaults to the directory `/opt/openTeamOneServer/data`.
 
@@ -44,7 +44,7 @@ When the server is running you call up the start page in a web browser. Assuming
 
 The default administration login is user "admin" with password "admin".
 
-![Admin Login](docu/demo2.png)
+![Admin Login](images/demo2.png)
 
 ### Step 4: Configuration
 
@@ -52,13 +52,13 @@ The server is smart enough to configure missing information when it starts up. T
 
 So before you continue with anything, you need to make this directory known to the server. This is done by providing the tenant parameter "dataDirectory" and hitting the "Set" button, as shown in the following picture:
 
-![Configuration](docu/demo3.png)
+![Configuration](images/demo3.png)
 
 ### Step 5: Import
 
 In this step you import the database content of the demo instance from the JSON file "demo". If you followed the previous steps, the server will find it when you hit the "Load" button as in the following picture:
 
-![Import](docu/demo4.png)
+![Import](images/demo4.png)
 
 Congratulations! The demo instance is now operational.
 
@@ -66,7 +66,7 @@ Congratulations! The demo instance is now operational.
 
 The demo instance contains 3 users that you can log in as from your mobile devices. The user names are player01, player02 and player03. All 3 of them have the case-sensitive password "pass".
 
-![App Login](docu/screenshot0.png)
+![App Login](images/screenshot0.png)
 
 You can now familiarize yourself with the system by creating transactional content through mobile devices, and studying the database content using the admin functionality of the server. 
 
@@ -78,10 +78,10 @@ You can also export and import JSON snapshots of the database content. Note that
 
 Here are a few screenshots of SAP Team One connected against Open Team One Server, displaying the default demo content. The screenshots show the drawer, the landing page, the content of a room, the room details.
 
-![Drawer](docu/screenshot1.png)
-![Landing page](docu/screenshot2.png)
-![Room content](docu/screenshot3.png)
-![Room details](docu/screenshot4.png)
+![Drawer](images/screenshot1.png)
+![Landing page](images/screenshot2.png)
+![Room content](images/screenshot3.png)
+![Room details](images/screenshot4.png)
 
 ## Web Application
 
@@ -89,7 +89,7 @@ Open Team One offers a web application for two user groups: administrators and u
 
 Users will be taken to a self-service, where they can change their profile picture, display name and password.
 
-![User Self Service](docu/webapp1.png)
+![User Self Service](images/webapp1.png)
 
 Administrators will be taken to a set of pages where they can browse and modify all tables and file attachments in the database. You have caught a glimpse of it in the quick guide section.
 
@@ -248,4 +248,49 @@ Start Open Team One Server with the command line
     /usr/bin/java -Dspring.config.additional-location=file:/opt/openTeamOneServer/config/ -jar openTeamOneServer.jar
 
 This means you can inject properties at runtime by providing a file `/opt/openTeamOneServer/config/application.properties`. In addition, the mount point allows you to use `/opt/openTeamOneServer/data` as the data directory for database snapshots, attachments and profile pictures.
+
+## Docker Images
+
+Nowadays, the gold standard for deployment in the cloud (even for simplified deployment at home) is Docker. We now provide Docker files to build ready-made docker images of Open Team One Server. Basically there are three options.
+
+If you have the build environment on your machine you can create a docker image containing your own JAR file:
+
+	docker build -f Dockerfile-local -t openteamone .
+
+Alternatively you can build a docker image entirely without a locally installed build environment:
+
+	docker build -t openteamone .
+
+However, the most convenient option is to use the ready-made image `dockahdockah/openteamone` from the Docker Hub.
+
+With an Open Team One Server Docker image you can set up a server on the fly, using the in-memory database. You can mount a local directory into the Docker container, for instance to inject snapshots and images into the filesystem. You can also start a server from scratch and keep all data inside the container.
+
+	docker run -v $LOCAL_OPEN_TEAM_ONE_DIRECTORY:/opt/openTeamOneServer dockahdockah/openteamone
+
+But there is more. With the smallest amount of preparation you can spin up MariaDB and Open Team One Server together, to provide a fully functional server with persistence out of the box. All you need to do is provide three mount points, copy two files from the distribution to inject parameters, and call Docker Compose to create the cluster.
+
+Let's look at it step by step.
+
+#### Step 1
+
+Create three local directories to store data and configuration. Let's call them LOCAL_MARIADB_CONF_DIRECTORY, LOCAL_MARIADB_DATA_DIRECTORY and LOCAL_OPEN_TEAM_ONE_DIRECTORY. For simplicity we shall use three environment variables of the same name.
+
+#### Step 2
+
+From the git repository, copy a couple of files into the newly created directories:
+
+	cd  openTeamOneServer
+	cp -a docker/teamone.cnf $LOCAL_MARIADB_CONF_DIRECTORY
+	mkdir -p $LOCAL_OPEN_TEAM_ONE_DIRECTORY/config
+	cp -a docker/application.properties $LOCAL_OPEN_TEAM_ONE_DIRECTORY/config/
+
+#### Step 3
+
+Start the cluster:
+
+	docker-compose up -d
+
+You can now log on to the admin UI at http://localhost:8080 and create content in the usual way. The data directory is already correctly set to `/opt/openTeamOneServer/data`, which you can find in your local filesystem under `$LOCAL_OPEN_TEAM_ONE_DIRECTORY/data`.
+
+In case you wish to set up secure communication via https, we propose to use the same mount point for sharing the certificate, for instance in `$LOCAL_OPEN_TEAM_ONE_DIRECTORY/keystores`
 

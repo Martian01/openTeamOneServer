@@ -6,9 +6,12 @@
 !/COPYRIGHT
 !/LICENSE
 !/*.md
-!/demo/
-!/docu/
-!/mvnw
-!/mvnw.cmd
+!/*.sh
+!/*.yaml
+!/mvnw*
+!/Dockerfile*
 !/pom.xml
 !/src/
+!/demo/
+!/images/
+!/docker/

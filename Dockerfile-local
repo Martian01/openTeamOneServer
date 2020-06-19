@@ -1,0 +1,14 @@
+#
+# Package the locally built jar file. Make sure it exists and is current
+#
+FROM openjdk:8-jre-alpine  
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.7.3/wait /usr/local/bin/wait
+RUN chmod +x /usr/local/bin/wait
+RUN mkdir -p /opt/openTeamOneServer/config && \
+mkdir -p /opt/openTeamOneServer/data && \
+mkdir -p /opt/openTeamOneServer/keystores
+COPY docker/start.sh /usr/local/bin/
+COPY target/*.jar /opt/openTeamOneServer.jar
+ENTRYPOINT ["/bin/sh", "-c", "/usr/local/bin/start.sh"]
+
+# use mount point /opt/openTeamOneServer for config injection and server data
