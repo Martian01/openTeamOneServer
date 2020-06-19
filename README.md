@@ -30,6 +30,8 @@ You copy the complete content of the project directory "demo" into the designate
 
 ![Preparation](docu/demo1.png)
 
+Note: as of release 2.0.0, the server suggests the directory `/opt/openTeamOneServer/data`.
+
 ### Step 2: Starting the Server
 
 Next step is to start the server and log in to the admin section. Since this project is distributed as source code, you would import it as Java project into a suitable IDE like IntelliJ IDEA or Eclipse. When asked for a project type you would probably choose "Maven" to take advantage of the provided _pom.xml_ file.
@@ -237,14 +239,13 @@ I was not successful running the server under a different user, but then again, 
 
 The previous section was about manual deployment on a single server. However, in a cloud context you might want to start up and shut down instances of application and persistence services based on current demand. The services will be configured at runtime, automatically, through the injection of parameters via file system or environment.
 
-Since you do not want to compile a new version of Open Team One every time you need different parameters you can inject application properties at runtime. To that end, mount a file into your runtime image, say
+Since you do not want to compile a new version of Open Team One every time you need different parameters you can inject application properties at runtime. To that end, mount a directory into your runtime image. The obvious mount point is 
 
-    /mnt/inject/application.properties
+    /opt/openTeamOneServer
 
-and start Open Team One with the command line
+Start Open Team One Server with the command line 
 
-    /usr/bin/java -jar openTeamOneServer.jar -Dspring.config.additional-location=file:/mnt/inject/
+    /usr/bin/java -Dspring.config.additional-location=file:/opt/openTeamOneServer/config/ -jar openTeamOneServer.jar
 
-The parameters in the injected file will override the parameters in the jar file.
+This means you can inject properties at runtime by providing a file `/opt/openTeamOneServer/config/application.properties`. In addition, the mount point allows you to use `/opt/openTeamOneServer/data` as the data directory for database snapshots, attachments and profile pictures.
 
-Caveat: I have verified this to work when starting Open Team One on a remote server. However, for some reason it failed to work when putting the service under systemd control. I am still investigating.

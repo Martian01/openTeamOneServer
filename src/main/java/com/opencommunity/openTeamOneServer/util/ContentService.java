@@ -46,7 +46,7 @@ public class ContentService {
 		if (tpr.findTopByName("startPageUser") == null)
 			tpr.save(new TenantParameter("startPageUser", "/default/user/index.html"));
 		if (tpr.findTopByName("dataDirectory") == null)
-			tpr.save(new TenantParameter("dataDirectory", "/tmp"));
+			tpr.save(new TenantParameter("dataDirectory", "/opt/openTeamOneServer/data"));
 		//
 		if (ur.countByHasAdminRoleTrue() == 0)
 			ur.save(new User("admin", "admin", null, false, true));
