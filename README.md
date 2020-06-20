@@ -152,7 +152,7 @@ Remark: In a productive environment you can drop the permissions of the database
 
 ## Database Migration
 
-The database schema has changed going from version 1.0.0 to 2.0.0. For the migration I exported a database to JSON, migrated the JSON, and uploaded it to a fresh installation. The only change in the JSON file is a change of data type: all exposed internal key fields change from data type string to data type number. Of course they need to change consistently across the whole JSON file, and the file names of profile pictures and attachments on disk need to change accordingly - they equal the fileId in the database.
+The database schema has changed going from version 1.0.0 to 2.0.0. For the migration we provide a small tool in the `tools` directory that transforms the snapshots and the filenames in the data directory from the old format to the new format. Your mileage may vary. Life is meant to be hard.
 
 ## SSL Configuration
 

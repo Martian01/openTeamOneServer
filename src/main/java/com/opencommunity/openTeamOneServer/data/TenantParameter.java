@@ -19,7 +19,7 @@ public class TenantParameter {
 
 	@Column(length = 16)
 	public String name;
-	@Column(length = 64)
+	@Column(length = 128)
 	public String value;
 
 	public TenantParameter() { }
