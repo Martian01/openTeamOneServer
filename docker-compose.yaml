@@ -19,6 +19,7 @@ services:
       - "8080:8080"
     environment:
       WAIT_HOSTS: mariadb:3306
+      WAIT_HOSTS_TIMEOUT: 60
     volumes:
       - $LOCAL_OPEN_TEAM_ONE_DIRECTORY:/opt/openTeamOneServer
     depends_on:

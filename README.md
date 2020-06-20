@@ -16,31 +16,33 @@ An interface for the generation of push notifications has been provided. However
 
 Whilst the server is functionally complete within the scope described above, the user experience of the web apps for server administration and user self-service is still experimental. Those web apps are fully functional, but they could do with a better web design and a modern frontend implementation resulting in a best-of-breed user experience.
 
-## Quick Guide (How to run the server with demo content)
+## Quick Guide - Starting a Demo Server
 
-A running server instance consists of two data sources: the integrated relational database for structured objects, and the file system for potentially large images and file attachments. The structured objects in the database are sometimes referred to as "business objects". They can be exported and imported in a serialized JSON representation (but internally they strictly live as strongly typed Java objects). The entirety of the database can be exported and imported in the form of large JSON files, which can also be stored in the file system of the server.
+A running server instance consists of two data sources: the integrated relational database for structured objects, and the file system for potentially large images and file attachments. The structured objects in the database are sometimes referred to as "business objects". They can be exported and imported in a serialized JSON representation (but internally they strictly exist as strongly typed Java objects). The entirety of the database can be exported and imported in the form of large JSON files, which can also be stored in the file system of the server.
 
 Therefore, in order to bootstrap a demo server we need to provide a filesystem directory with content, including a JSON serialization of the database content. We then import the JSON file into the database, and voilà, the demo instance is ready.
 
-### Step 1: Preparation
+### Step 1: Demo Preparation
 
-In step 1 you need to designate a data directory for the server, or rather, for the tenant that this server instance represents. In this example the directory chosen is /var/cache/openTeamOne but you are free to choose any other directory.
+In step 1 you need to designate a data directory for the server. You are free to choose any directory you like, but for reasons of analogy with the Docker image we highly suggest using `/opt/openTeamOneServer/data`.
 
 You copy the complete content of the project directory "demo" into the designated data directory. At the time of writing that would be the three subdirectories "attachments", "profiles" and "snapshots". The result should look like this:
 
 ![Preparation](images/demo1.png)
 
-Note: as of release 2.0.0, the server defaults to the directory `/opt/openTeamOneServer/data`.
-
 ### Step 2: Starting the Server
 
-Next step is to start the server and log in to the admin section. Since this project is distributed as source code, you would import it as Java project into a suitable IDE like IntelliJ IDEA or Eclipse. When asked for a project type you would probably choose "Maven" to take advantage of the provided _pom.xml_ file.
+Next step is to start the server and log in to the admin section. There are three Options:
 
-You would start the server by hitting the "execute" button of your IDE. Alternatively you can build and execute a JAR file on the command line, as layed out in a section below.
+1. If you have Docker installed, simply call up `docker run -v /opt/openTeamOneServer:/opt/openTeamOneServer dockahdockah/openteamone`, provided you followed our naming suggestion in step 1.
+
+2. Otherwise you can run the project from source. Simply import it as Java project into a suitable IDE like IntelliJ IDEA, Net Beans or Eclipse. When asked for a project type you would probably choose "Maven" to take advantage of the provided _pom.xml_ file. When ready, hit the "execute" button of your IDE.
+
+3. Another way of running the project from source is building and executing it from the command line, as layed out in a section below.
 
 ### Step 3: Login
 
-When the server is running you call up the start page in a web browser. Assuming your server listens on TCP port 8080 (depends on your run configuration), you would enter the URL http://localhost:8080 in your browser.
+When the server is running you call up the start page in a web browser. Assuming your server listens on TCP port 8080, you would enter the URL http://localhost:8080 in your browser.
 
 The default administration login is user "admin" with password "admin".
 
@@ -50,7 +52,7 @@ The default administration login is user "admin" with password "admin".
 
 The server is smart enough to configure missing information when it starts up. There are not many configuration settings to begin with, and every setting can be changed by the administrator. However, there is one setting the server cannot guess: the data directory you have chosen in step 1.
 
-So before you continue with anything, you need to make this directory known to the server. This is done by providing the tenant parameter "dataDirectory" and hitting the "Set" button, as shown in the following picture:
+So unless you followed our naming suggestion in step 1, you now need to enter your directory name and hit the "Set" button, as shown in the following picture:
 
 ![Configuration](images/demo3.png)
 
@@ -68,20 +70,16 @@ The demo instance contains 3 users that you can log in as from your mobile devic
 
 ![App Login](images/screenshot0.png)
 
-You can now familiarize yourself with the system by creating transactional content through mobile devices, and studying the database content using the admin functionality of the server. 
-
-At this point in time the admin functionality is limited to the bare essentials. There are maintenance modules for the database tables available, allowing you to create, read, update & delete table entries (the so-called CRUD operations). There are database tables for tenant parameters, users, persons, rooms, room memberships, messages, files, viewed confirmations and subscriptions.
-
-You can also export and import JSON snapshots of the database content. Note that a JSON file can be partial. For instance, if a JSON import contains only users and persons, it will not affect other object types in the database.
-
 ## Screenshots of Demo Content
 
-Here are a few screenshots of SAP Team One connected against Open Team One Server, displaying the default demo content. The screenshots show the drawer, the landing page, the content of a room, the room details.
+Here are a few screenshots of SAP Team One connected against Open Team One Server, displaying the default demo content. The screenshots show the drawer, the landing page, the content of a room, the room details, in both light and dark mode.
 
 ![Drawer](images/screenshot1.png)
 ![Landing page](images/screenshot2.png)
 ![Room content](images/screenshot3.png)
 ![Room details](images/screenshot4.png)
+![Landing page, dark](images/screenshot5.png)
+![Search page, dark](images/screenshot6.png)
 
 ## Web Application
 
@@ -91,9 +89,13 @@ Users will be taken to a self-service, where they can change their profile pictu
 
 ![User Self Service](images/webapp1.png)
 
-Administrators will be taken to a set of pages where they can browse and modify all tables and file attachments in the database. You have caught a glimpse of it in the quick guide section.
+Administrators will get access to a broader range of server maintenance modules. There are modules for the database tables, allowing you to create, read, update & delete table entries (the so-called CRUD operations). There are database tables for tenant parameters, users, persons, rooms, room memberships, messages, files, viewed-confirmations, subscriptions and sessions.
 
-Open Team One is designed to support different web applications, should there ever be more than one. The default web applikation is meant to be a fully functional proof-of-concept. It resides in the project directory src/main/resources/static/default/ and is served via the URL http://localhost:8080/default/ . Additional web applications can be placed into subdirectories that are sibling to src/main/resources/static/default/.
+![User Self Service](images/webapp2.png)
+
+You can also export and import JSON snapshots of the database content. Note that a JSON file can be partial. For instance, if a JSON import contains only users and persons, it will not affect other object types in the database.
+
+Open Team One is designed to support different web applications, should there ever be more than one. The default web applikation is meant to be a fully functional proof of concept. It resides in the project directory src/main/resources/static/default/ and is served via the URL http://localhost:8080/default/ . Additional web applications can be placed into subdirectories that are sibling to src/main/resources/static/default/.
 
 The server offers the following tenant parameters to control the navigation. The /ui/* services will automatically redirect to the targets specified by those tenant parameters. By overwriting them in the database you can set another web application as default.
 
@@ -170,7 +172,7 @@ You will be asked to set a password. Finally, you enter your details in the _app
 
 	server.port=8443
 	security.require-ssl=true
-	server.ssl.key-store=/path/to/keystore.p12
+	server.ssl.key-store=/opt/openTeamOneServer/keystores/keystore.p12
 	server.ssl.key-store-password=yourKeyStorePassword
 	server.ssl.keyStoreType=PKCS12
 	server.ssl.keyAlias=yourAlias
@@ -251,29 +253,19 @@ This means you can inject properties at runtime by providing a file `/opt/openTe
 
 ## Docker Images
 
-Nowadays, the gold standard for deployment in the cloud (even for simplified deployment at home) is Docker. We now provide Docker files to build ready-made docker images of Open Team One Server. Basically there are three options.
+Nowadays, the gold standard for deployment in the cloud (even for simplified deployment at home) is Docker. We now provide a ready-made docker image of Open Team One Server on the Docker Hub. It is called `dockahdockah/openteamone`. There is no need to build your own, but the Docker files are provided anyway.
 
-If you have the build environment on your machine you can create a docker image containing your own JAR file:
-
-	docker build -f Dockerfile-local -t openteamone .
-
-Alternatively you can build a docker image entirely without a locally installed build environment:
-
-	docker build -t openteamone .
-
-However, the most convenient option is to use the ready-made image `dockahdockah/openteamone` from the Docker Hub.
-
-With an Open Team One Server Docker image you can set up a server on the fly, using the in-memory database. You can mount a local directory into the Docker container, for instance to inject snapshots and images into the filesystem. You can also start a server from scratch and keep all data inside the container.
+With the Docker image you can set up a server on the fly, using the in-memory database. You can (but you don't have to) mount a local directory into the Docker container, for instance to inject snapshots and images into the filesystem, as we have done in the demo section at the beginning.
 
 	docker run -v $LOCAL_OPEN_TEAM_ONE_DIRECTORY:/opt/openTeamOneServer dockahdockah/openteamone
 
-But there is more. With the smallest amount of preparation you can spin up MariaDB and Open Team One Server together, to provide a fully functional server with persistence out of the box. All you need to do is provide three mount points, copy two files from the distribution to inject parameters, and call Docker Compose to create the cluster.
+But there is more. With almost no effort you can spin up MariaDB and Open Team One Server in a cluster together, to provide a server with persistence out of the box. All you need to do is provide three empty directories, copy two files to inject parameters, and call Docker Compose to create the cluster.
 
 Let's look at it step by step.
 
 #### Step 1
 
-Create three local directories to store data and configuration. Let's call them LOCAL_MARIADB_CONF_DIRECTORY, LOCAL_MARIADB_DATA_DIRECTORY and LOCAL_OPEN_TEAM_ONE_DIRECTORY. For simplicity we shall use three environment variables of the same name.
+Create three local directories to store data and configuration. Let's call them LOCAL_MARIADB_CONF_DIRECTORY, LOCAL_MARIADB_DATA_DIRECTORY and LOCAL_OPEN_TEAM_ONE_DIRECTORY. For simplicity we shall use three environment variables of the same names.
 
 #### Step 2
 
@@ -290,7 +282,7 @@ Start the cluster:
 
 	docker-compose up -d
 
-You can now log on to the admin UI at http://localhost:8080 and create content in the usual way. The data directory is already correctly set to `/opt/openTeamOneServer/data`, which you can find in your local filesystem under `$LOCAL_OPEN_TEAM_ONE_DIRECTORY/data`.
+You can now log on to the admin UI at http://localhost:8080 and create content in the usual way.
 
 In case you wish to set up secure communication via https, we propose to use the same mount point for sharing the certificate, for instance in `$LOCAL_OPEN_TEAM_ONE_DIRECTORY/keystores`
 
