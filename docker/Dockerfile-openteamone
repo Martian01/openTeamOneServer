@@ -22,4 +22,4 @@ COPY --from=build /tmp/build/docker/start.sh /usr/local/bin/
 COPY --from=build /tmp/build/target/*.jar /opt/openTeamOneServer.jar
 ENTRYPOINT ["/bin/sh", "-c", "/usr/local/bin/start.sh"]
 
-# use mount point /opt/openTeamOneServer for config injection and server data
+# mount points: /opt/openTeamOneServer for configuration and server data

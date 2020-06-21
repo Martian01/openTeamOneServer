@@ -4,6 +4,14 @@
 
 Open Team One Server is a backend component to support the communication function of SAP Team One mobile apps. At this point in time the software is ready to be used productively.
 
+## Quick Guide for the Impatient
+
+Create two environment variables LOCAL_MARIADB_DATA_DIRECTORY and LOCAL_OPEN_TEAM_ONE_DIRECTORY pointing to two empty directories. Next, from inside the repository directory, call
+
+	docker-compose up -d
+
+A fully persisted server is now available under the URL http://localhost:8080.
+
 ## Scope
 
 Open Team One Server aimes to provide a simple and functional solution of high performance for those needing a communication server under their own control - in terms of source code and operations. Instead of re-inventing the wheel we use freely available mobile clients, namely the SAP Team One mobile apps that are available for multiple platforms.
@@ -12,11 +20,11 @@ The SAP Team One apps are normally operated against a SAP Sports One backend tha
 
 An interface for the generation of push notifications has been provided. However, since the API keys and certificates used for the proprietary SAP app are not in the public domain, they cannot be provided as part of this open source project.
 
-## Request for Help
+## Web Designers Wanted
 
 Whilst the server is functionally complete within the scope described above, the user experience of the web apps for server administration and user self-service is still experimental. Those web apps are fully functional, but they could do with a better web design and a modern frontend implementation resulting in a best-of-breed user experience.
 
-## Quick Guide - Starting a Demo Server
+## Starting a Demo Server
 
 A running server instance consists of two data sources: the integrated relational database for structured objects, and the file system for potentially large images and file attachments. The structured objects in the database are sometimes referred to as "business objects". They can be exported and imported in a serialized JSON representation (but internally they strictly exist as strongly typed Java objects). The entirety of the database can be exported and imported in the form of large JSON files, which can also be stored in the file system of the server.
 
@@ -189,12 +197,12 @@ One of the most simple deployment options is to build a JAR file that can be exe
 
 This will build the project in the "target" directory and create two JAR files: One relatively small, containing only the project artefacts, the other one quite large, containing everything including the dependencies.
 
-	-rw-r----- 1 mar mar 41480573 Jun 18 23:55 openTeamOneServer-2.0.0.jar
-	-rw-r----- 1 mar mar   157703 Jun 18 23:55 openTeamOneServer-2.0.0.jar.original
+	-rw-r--r--   1 user     staff  43183552 Jun 21 13:10 openTeamOneServer-2.0.1.jar
+	-rw-r--r--   1 user     staff    159940 Jun 21 13:10 openTeamOneServer-2.0.1.jar.original
 
 The large JAR file can be copied to another machine and executed by a JRE (Java Runtime Environment) like this:
 
-	java -jar openTeamOneServer-2.0.0.jar
+	java -jar openTeamOneServer.jar
 
 I was able to run and deploy the jar file on a virtual server on the internet. The server came with a minimal headless Debian 9.0 installation (around 500 MB). I only had to install the following two packages including their dependencies in an ssh console:
 
@@ -215,7 +223,7 @@ If you want to run the service under systemd control in order to be independent 
     [Service]
     Type=simple
     User=root
-    ExecStart=/usr/bin/java -Xrs -jar /opt/openTeamOneServer-2.0.0.jar
+    ExecStart=/usr/bin/java -Xrs -jar /path/to/openTeamOneServer.jar
     Restart=always
     RestartSec=10
 
@@ -259,24 +267,15 @@ With the Docker image you can set up a server on the fly, using the in-memory da
 
 	docker run -v $LOCAL_OPEN_TEAM_ONE_DIRECTORY:/opt/openTeamOneServer dockahdockah/openteamone
 
-But there is more. With almost no effort you can spin up MariaDB and Open Team One Server in a cluster together, to provide a server with persistence out of the box. All you need to do is provide three empty directories, copy two files to inject parameters, and call Docker Compose to create the cluster.
+But there is more. With almost no effort you can spin up MariaDB and Open Team One Server in a cluster together, to provide a server with persistence out of the box. All you need to do is provide two empty directories.
 
 Let's look at it step by step.
 
 #### Step 1
 
-Create three local directories to store data and configuration. Let's call them LOCAL_MARIADB_CONF_DIRECTORY, LOCAL_MARIADB_DATA_DIRECTORY and LOCAL_OPEN_TEAM_ONE_DIRECTORY. For simplicity we shall use three environment variables of the same names.
+Create two local directories to store the data. Let's call them LOCAL_MARIADB_DATA_DIRECTORY and LOCAL_OPEN_TEAM_ONE_DIRECTORY. For simplicity we create two environment variables of the same name.
 
 #### Step 2
-
-From the git repository, copy a couple of files into the newly created directories:
-
-	cd  openTeamOneServer
-	cp -a docker/teamone.cnf $LOCAL_MARIADB_CONF_DIRECTORY
-	mkdir -p $LOCAL_OPEN_TEAM_ONE_DIRECTORY/config
-	cp -a docker/application.properties $LOCAL_OPEN_TEAM_ONE_DIRECTORY/config/
-
-#### Step 3
 
 Start the cluster:
 
@@ -284,5 +283,5 @@ Start the cluster:
 
 You can now log on to the admin UI at http://localhost:8080 and create content in the usual way.
 
-In case you wish to set up secure communication via https, we propose to use the same mount point for sharing the certificate, for instance in `$LOCAL_OPEN_TEAM_ONE_DIRECTORY/keystores`
+In case you wish to set up secure communication via https, we propose to use the same mount point for sharing the certificate, for instance in `$LOCAL_OPEN_TEAM_ONE_DIRECTORY/keystores`. You can inject all required parameters in the docker-compose.yaml file.
 
