@@ -10,7 +10,7 @@ Create two environment variables LOCAL_MARIADB_DATA_DIRECTORY and LOCAL_OPEN_TEA
 
 	docker-compose up -d
 
-A fully persisted server is now available under the URL http://localhost:8080.
+After a few seconds (a minute at most), a fully persisted Team One backend will be available under the URL http://localhost:8080.
 
 ## Scope
 
