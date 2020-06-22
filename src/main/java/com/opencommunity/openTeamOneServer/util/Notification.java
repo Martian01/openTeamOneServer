@@ -87,7 +87,7 @@ public class Notification {
 									if ("fcm".equals(targetType))
 										recipient.payload = getFcmPayload(accountId);
 									else if ("aps".equals(targetType))
-										recipient.payload = getApsPayload(accountId, personId);
+										recipient.payload = getApsPayload(accountId, Integer.parseInt(personId));
 									return recipient;
 								}
 							}
@@ -132,15 +132,15 @@ public class Notification {
 					fcmPayload.put("data", data);
 					data.put("messageType", 1);
 					data.put("clientAccountId", accountId);
-					data.put("roomId", message.roomId);
-					data.put("messageId", message.messageId);
+					data.put("roomId", message.roomId.toString());
+					data.put("messageId", message.messageId.toString());
 					data.put("timestamp", message.postedAt);
 					return fcmPayload;
 				} catch (Exception ignored) { }
 				return null;
 			}
 
-			private JSONObject getApsPayload(String accountId, String personId) {
+			private JSONObject getApsPayload(String accountId, Integer personId) {
 				try {
 					String messageText = message.text == null || message.text.length() <= 1600 ? message.text :
 							message.text.substring(0, 1600);
@@ -152,9 +152,9 @@ public class Notification {
 						JSONObject data = new JSONObject();
 						apsPayload.put("data", data);
 						data.put("clientAccountId", accountId);
-						data.put("roomId", message.roomId);
-						data.put("messageId", message.messageId);
-						data.put("senderId", message.senderPersonId);
+						data.put("roomId", message.roomId.toString());
+						data.put("messageId", message.messageId.toString());
+						data.put("senderId", message.senderPersonId.toString());
 						data.put("timestamp", message.postedAt);
 						data.put("message", messageText);
 						return apsPayload;
@@ -171,9 +171,9 @@ public class Notification {
 					JSONObject data = new JSONObject();
 					apsPayload.put("data", data);
 					data.put("clientAccountId", accountId);
-					data.put("roomId", message.roomId);
-					data.put("messageId", message.messageId);
-					data.put("senderId", message.senderPersonId);
+					data.put("roomId", message.roomId.toString());
+					data.put("messageId", message.messageId.toString());
+					data.put("senderId", message.senderPersonId.toString());
 					data.put("timestamp", message.postedAt);
 					return apsPayload;
 				} catch (Exception ignored) { }

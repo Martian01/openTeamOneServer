@@ -197,8 +197,8 @@ One of the most simple deployment options is to build a JAR file that can be exe
 
 This will build the project in the "target" directory and create two JAR files: One relatively small, containing only the project artefacts, the other one quite large, containing everything including the dependencies.
 
-	-rw-r--r--   1 user     staff  43183552 Jun 21 13:10 openTeamOneServer-2.0.1.jar
-	-rw-r--r--   1 user     staff    159940 Jun 21 13:10 openTeamOneServer-2.0.1.jar.original
+	-rw-r--r--   1 user     staff  43183625 Jun 22 14:24 openTeamOneServer-2.0.2.jar
+	-rw-r--r--   1 user     staff    160008 Jun 22 14:24 openTeamOneServer-2.0.2.jar.original
 
 The large JAR file can be copied to another machine and executed by a JRE (Java Runtime Environment) like this:
 
