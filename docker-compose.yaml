@@ -5,10 +5,10 @@ services:
     ports:
       - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: teamone
-      MYSQL_USER: teamone
-      MYSQL_PASSWORD: AfricanSwallow
+      MYSQL_ROOT_PASSWORD: yourSuperStrongRootPassword
+      MYSQL_DATABASE: yourDatabaseName
+      MYSQL_USER: yourUserName
+      MYSQL_PASSWORD: yourSuperStrongUserPassword
       MYSQL_INITDB_SKIP_TZINFO: skip
     volumes:
       - $LOCAL_MARIADB_DATA_DIRECTORY:/var/lib/mysql
@@ -29,9 +29,9 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MariaDB53Dialect
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
-      SPRING_DATASOURCE_URL: jdbc:mysql://mariadb:3306/teamone
-      SPRING_DATASOURCE_USERNAME: teamone
-      SPRING_DATASOURCE_PASSWORD: AfricanSwallow
+      SPRING_DATASOURCE_URL: jdbc:mysql://mariadb:3306/yourDatabaseName
+      SPRING_DATASOURCE_USERNAME: yourUserName
+      SPRING_DATASOURCE_PASSWORD: yourSuperStrongUserPassword
       SPRING_DATASOURCE_CONNECTIONPROPERTIES: useUnicode=true;characterEncoding=utf-8;serverTimezone=UTC;
 #      SECURITY_REQUIRE_SSL: "true"
 #      SERVER_SSL_ENABLED: "true"

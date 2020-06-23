@@ -285,3 +285,18 @@ You can now log on to the admin UI at http://localhost:8080 and create content i
 
 In case you wish to set up secure communication via https, we propose to use the same mount point for sharing the certificate, for instance in `$LOCAL_OPEN_TEAM_ONE_DIRECTORY/keystores`. You can inject all required parameters in the docker-compose.yaml file.
 
+## Security
+
+As a word of warning, barely 24 hours after switching to the Docker-based variant on my web server I was greeted with this database content:
+
+![Cyber Crime](images/security.png)
+
+It looks like an automated break-in, enabled by a weak MariaDB root password and the fact that the port was available from outside. The remedy obviously is
+
+1. Use strong passwords
+
+2. Do not expose internal ports to the outside world - use a firewall
+
+I did use a firewall (UFW), but the problem here is a security flaw by Docker, exposing your ports **despite the firewall rules saying otherwise**. On the internet there are a wild number of recipes how to overcome this, many of them not working as promised. What helped me in the end was the procedure described in the following GitHub repository:
+
+https://github.com/chaifeng/ufw-docker
