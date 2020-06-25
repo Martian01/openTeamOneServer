@@ -23,9 +23,9 @@ public class InfoConfig implements InfoContributor {
 	public String serviceInstanceId() {
 		try {
 			String hostName = InetAddress.getLocalHost().getHostName();
-			return hostName.startsWith("t1-") ? hostName : "t1-" + hostName;
+			return hostName.startsWith("teamone-") ? hostName : "teamone-" + hostName;
 		} catch (Exception ignored) { }
-		return "t1";
+		return "teamone";
 	}
 
 }
