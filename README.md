@@ -6,11 +6,13 @@ Open Team One Server is a backend component to support the communication functio
 
 ## Quick Guide for the Impatient
 
-Create two environment variables LOCAL_MARIADB_DATA_DIRECTORY and LOCAL_OPEN_TEAM_ONE_DIRECTORY pointing to two empty directories. Next, from inside the repository directory, call
+Create two environment variables LOCAL_MARIADB_DATA_DIRECTORY and LOCAL_OPEN_TEAM_ONE_DIRECTORY pointing to two empty directories. Next, from inside the `docker` directory, call
 
 	docker-compose up -d
 
 After a few seconds (a minute at most), a fully persisted Team One backend will be available under the URL http://localhost:8080.
+
+Note: for this recipe to work you need to have docker and docker-compose installed.
 
 ## Scope
 
