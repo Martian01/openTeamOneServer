@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# This scripts builds and pushes Docker images
+#
+# Open Team One Server
+# Copyright c 2017-2020  Martin Rogge <martin_rogge@users.sourceforge.net>
+
+set -e
+
+PREFIX=dockahdockah/
+SUFFIX=:latest
+
+if [ -f pom.xml ] ; then
+
+	docker build -f docker/Dockerfile-openteamone -t ${PREFIX}openteamone${SUFFIX} .
+
+	echo
+	echo "-------------"
+	echo "Build Success"
+	echo "-------------"
+	echo
+
+	docker push ${PREFIX}openteamone${SUFFIX}
+
+	echo
+	echo "--------------"
+	echo "Upload Success"
+	echo "--------------"
+	echo
+
+else
+	echo "Wrong directory. Nothing done."
+fi
