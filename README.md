@@ -303,6 +303,6 @@ I did use a firewall (UFW), but the problem here is a security flaw by Docker, e
 
 However, in the end the combination of UFW and Docker simply refused to work at all. I removed UFW and resorted to changing the routing tables manually. On my web server, I added the following rule:
 
-iptables -t mangle -A PREROUTING -i eth0 -p tcp --dport 3306 -j DROP
+	iptables -t mangle -A PREROUTING -i eth0 -p tcp --dport 3306 -j DROP
 
 Your mileage may vary depending on your setup of interfaces, tables and rules.
