@@ -299,7 +299,9 @@ It looks like an automated break-in, enabled by a weak MariaDB root password and
 
 2. Do not expose internal ports to the outside world - use a firewall
 
-I did use a firewall (UFW), but the problem here is a security flaw by Docker, exposing your ports **despite the firewall rules saying otherwise**. On the internet there are a number of recipes how to overcome this. For a while I used this one: https://github.com/chaifeng/ufw-docker
+The problem was: I did use a firewall (UFW), but unbeknownst to me there is a security flaw in Docker exposing your ports, **overriding the firewall rules**.
+
+After the break-in I tried solutions I found on the internet, like https://github.com/chaifeng/ufw-docker .
 
 However, in the end the combination of UFW and Docker simply refused to work at all. I removed UFW and resorted to changing the routing tables manually. On my web server, I added the following rule:
 
