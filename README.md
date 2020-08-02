@@ -299,6 +299,10 @@ It looks like an automated break-in, enabled by a weak MariaDB root password and
 
 2. Do not expose internal ports to the outside world - use a firewall
 
-I did use a firewall (UFW), but the problem here is a security flaw by Docker, exposing your ports **despite the firewall rules saying otherwise**. On the internet there are a wild number of recipes how to overcome this, many of them not working as promised. What helped me in the end was the procedure described in the following GitHub repository:
+I did use a firewall (UFW), but the problem here is a security flaw by Docker, exposing your ports **despite the firewall rules saying otherwise**. On the internet there are a number of recipes how to overcome this. For a while I used this one: https://github.com/chaifeng/ufw-docker
 
-https://github.com/chaifeng/ufw-docker
+However, in the end the combination of UFW and Docker simply refused to work at all. I removed UFW and resorted to changing the routing tables manually. On my web server, I added the following rule:
+
+iptables -t mangle -A PREROUTING -i eth0 -p tcp --dport 3306 -j DROP
+
+Your mileage may vary depending on your setup of interfaces, tables and rules.
