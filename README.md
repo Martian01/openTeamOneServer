@@ -120,7 +120,7 @@ The server offers the following tenant parameters to control the navigation. The
 
 For a first trial it is quite convenient to use the H2 in-memory database as it comes with Spring Boot and requires no configuration. After your first steps with Open Team One you might want to progress to a disk based SQL database, like MariaDB. MariaDB is a popular MySQL fork. In fact, MariaDB is the continuation of MySQL by the original author and a community. MariaDB is drop-in compatible with MySQL, so everything written in this section works for MySQL, too.
 
-With version 1.0.0 of Open Team One Server I ran into issues related to character encoding. The issue was that the byte represenatation of key fields grew too long when using 4-byte UTF-8 encoding for the database. In release 1.0.0 the issue was solved by using a special script to generate the database tables. In release 2.0.0 this is no longer required as we have turned all key fields into integers. We still advise of the following settings.
+With version 1 of Open Team One Server I ran into issues related to character encoding. The issue was that the byte represenatation of key fields grew too long when using 4-byte UTF-8 encoding for the database. In release 1 the issue was solved by using a special script to generate the database tables. In release 2 this is no longer required as we have turned all key fields into integers. We still advise of the following settings.
 
 First, make sure you have enabled UTF-8 with support for 4-byte characters. To that end, make sure the following configuration is in the MariaDB configuration files. On Debian you do not need to do anything. On Slackware you need to modify _/etc/my.cnf.d/server.cnf_. On other distros it will be similar.
 
@@ -132,11 +132,11 @@ First, make sure you have enabled UTF-8 with support for 4-byte characters. To t
 Next you need to prepare an empty database for a standard user. Having started the database daemon, you simply enter the following three commands in any SQL console connected to the database, for instance the _mysql_ binary:
 
 	mysql --password
-	> create database teamone character set = 'utf8mb4' collate = 'utf8mb4_unicode_ci';
-	> create user 'springuser'@'localhost' identified by 'dbPassword';
-	> grant all on teamone.* to 'springuser'@'localhost';
+	> create database yourDatabaseName character set = 'utf8mb4' collate = 'utf8mb4_unicode_ci';
+	> create user 'yourUserName'@'localhost' identified by 'yourSuperStrongUserPassword';
+	> grant all on yourDatabaseName.* to 'yourUserName'@'localhost';
 
-In this example the database is called _teamone_ and contains a user _springuser_ with password _dbPassword_. The database name, the user name and the password can be freely chosen.
+The database name, the user name and the password can be freely chosen.
 
 Next you need to add the JDBC database driver to the project. We have already added the following dependency to our Maven file pom.xml:
 
@@ -147,14 +147,27 @@ Next you need to add the JDBC database driver to the project. We have already ad
 
 So, for MariaDB or MySQL you don't need to do anything. If you use a different SQL database, you'll have to add the corresponding driver.
 
-Finally we add the following properties to the _application.properties_ file. In fact, you just need to uncomment them and insert the correct names and passwords, and maybe the TCP port of the database server.
+Finally we use the following properties in the _application.properties_ file.
 
-	spring.jpa.hibernate.ddl-auto=update
-	spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-	spring.datasource.url=jdbc:mysql://localhost:3306/teamone
-	spring.datasource.username=springuser
-	spring.datasource.password=dbPassword
-	spring.datasource.connectionProperties=useUnicode=true;characterEncoding=utf-8;serverTimezone=UTC;
+	spring.jpa.hibernate.ddl-auto = ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+	spring.jpa.properties.hibernate.dialect = ${SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT}
+	spring.datasource.driver-class-name = ${SPRING_DATASOURCE_DRIVER_CLASS_NAME}
+	spring.datasource.url = ${SPRING_DATASOURCE_URL}
+	spring.datasource.username = ${SPRING_DATASOURCE_USERNAME}
+	spring.datasource.password = ${SPRING_DATASOURCE_PASSWORD}
+	spring.datasource.connectionProperties = ${SPRING_DATASOURCE_CONNECTIONPROPERTIES}
+
+Instead of overwriting them with the correct values we simply inject the corresponding environment variables:
+
+	SPRING_JPA_HIBERNATE_DDL_AUTO=update
+	SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MariaDB53Dialect
+	SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+	SPRING_DATASOURCE_URL=jdbc:mysql://mariadb:3306/yourDatabaseName
+	SPRING_DATASOURCE_USERNAME=yourUserName
+	SPRING_DATASOURCE_PASSWORD=yourSuperStrongUserPassword
+	SPRING_DATASOURCE_CONNECTIONPROPERTIES=useUnicode=true;characterEncoding=utf-8;serverTimezone=UTC;
+
+Note: the semicolon must be escaped on most shells.
 
 Restart Open Team One Server and you're done. If you want to migrate the content over to the new DB, save and import a snapshot via the admin tools. 
 
@@ -162,7 +175,7 @@ Remark: In a productive environment you can drop the permissions of the database
 
 ## Database Migration
 
-The database schema has changed going from version 1.0.0 to 2.0.0. For the migration we provide a small tool in the `tools` directory that transforms the snapshots and the filenames in the data directory from the old format to the new format. Your mileage may vary. Life is meant to be hard.
+The database schema has changed going from version 1 to 2. For the migration we provide a small tool in the `tools` directory that transforms the snapshots and the filenames in the data directory from the old format to the new format. Your mileage may vary. Life is meant to be hard.
 
 ## SSL Configuration
 
@@ -178,14 +191,27 @@ This will generate a bunch of keys and certificates in _/etc/letsencrypt/_. Next
 	cd /etc/letsencrypt/live/<your domain>/
 	openssl pkcs12 -export -in fullchain.pem -inkey privkey.pem -out keystore.p12 -name <your alias> -CAfile chain.pem -caname root
 
-You will be asked to set a password. Finally, you enter your details in the _application.properties_ file:
+You will be asked to set a password.
 
-	server.port=8443
-	security.require-ssl=true
-	server.ssl.key-store=/opt/openTeamOneServer/keystores/keystore.p12
-	server.ssl.key-store-password=yourKeyStorePassword
-	server.ssl.keyStoreType=PKCS12
-	server.ssl.keyAlias=yourAlias
+Finally, you enter your details in the _application.properties_ file, using the following properties:
+
+	server.port = ${SERVER_PORT}
+	security.require-ssl = ${SECURITY_REQUIRE_SSL}
+	server.ssl.enabled = ${SERVER_SSL_ENABLED}
+	server.ssl.key-store = ${SERVER_SSL_KEY_STORE}
+	server.ssl.key-store-password = ${SERVER_SSL_KEY_STORE_PASSWORD}
+	server.ssl.keyStoreType = ${SERVER_SSL_KEYSTORETYPE}
+	server.ssl.keyAlias = ${SERVER_SSL_KEYALIAS}
+
+Instead of overwriting the properties we inject the correct values via environment variables:
+
+	SERVER_PORT=8443
+	SECURITY_REQUIRE_SSL=true
+	SERVER_SSL_ENABLED=true
+	SERVER_SSL_KEY_STORE=/opt/openTeamOneServer/keystores/keystore.p12
+	SERVER_SSL_KEY_STORE_PASSWORD=yourKeyStorePassword
+	SERVER_SSL_KEYSTORETYPE=PKCS12
+	SERVER_SSL_KEYALIAS=yourAlias
 
 After restarting the server you can access it via HTTPS. If you need both HTTP and HTTPS access at the same time, configuration is a little harder. Check out the web tutorials for that.
 
@@ -199,8 +225,8 @@ One of the most simple deployment options is to build a JAR file that can be exe
 
 This will build the project in the "target" directory and create two JAR files: One relatively small, containing only the project artefacts, the other one quite large, containing everything including the dependencies.
 
-	-rw-r--r--   1 user     staff  43183625 Jun 22 14:24 openTeamOneServer-2.0.2.jar
-	-rw-r--r--   1 user     staff    160008 Jun 22 14:24 openTeamOneServer-2.0.2.jar.original
+	-rw-r-----  1 mar mar 43266327 Aug 28 15:46 openTeamOneServer-2.0.4.jar
+	-rw-r-----  1 mar mar   159839 Aug 28 15:46 openTeamOneServer-2.0.4.jar.original
 
 The large JAR file can be copied to another machine and executed by a JRE (Java Runtime Environment) like this:
 
@@ -249,17 +275,15 @@ I was not successful running the server under a different user, but then again, 
 
 ## Cloud Service Deployment
 
-The previous section was about manual deployment on a single server. However, in a cloud context you might want to start up and shut down instances of application and persistence services based on current demand. The services will be configured at runtime, automatically, through the injection of parameters via file system or environment.
+The previous section was about manual deployment on a single server. However, in a cloud context you might want to start up and shut down instances of application and persistence services based on current demand. The services will be configured at runtime, automatically, through the injection of parameters.
 
-Since you do not want to compile a new version of Open Team One every time you need different parameters you can inject application properties at runtime. To that end, mount a directory into your runtime image. The obvious mount point is 
+Since you do not want to compile a new version of Open Team One every time you need different parameters you can inject application properties at runtime. To that end, the standard image allows overriding each and every application property by an environment variable.
 
-    /opt/openTeamOneServer
+If that mechanism is insufficient for you, you can inject and override applications properties with a command line option:
 
-Start Open Team One Server with the command line 
+    /usr/bin/java -Dspring.config.additional-location=file:/path/to/ -jar openTeamOneServer.jar
 
-    /usr/bin/java -Dspring.config.additional-location=file:/opt/openTeamOneServer/config/ -jar openTeamOneServer.jar
-
-This means you can inject properties at runtime by providing a file `/opt/openTeamOneServer/config/application.properties`. In addition, the mount point allows you to use `/opt/openTeamOneServer/data` as the data directory for database snapshots, attachments and profile pictures.
+In this example you inject the properties from a file `/path/to/application.properties`. Obviously it makes sense to use an existing mount point into the image.
 
 ## Docker Images
 
