@@ -2,7 +2,7 @@
 
 ![Logo](src/main/resources/static/default/logo128.png)
 
-Open Team One Server is a backend component to support the communication function of SAP Team One mobile apps. At this point in time the software is ready to be used productively.
+Open Team One Server is a back-end component to support the communication function of SAP Team One mobile apps. At this point in time the software is ready to be used productively.
 
 ## Quick Guide for the Impatient
 
@@ -10,27 +10,27 @@ Create two environment variables LOCAL_MARIADB_DATA_DIRECTORY and LOCAL_OPEN_TEA
 
 	docker-compose up -d
 
-After a few seconds (a minute at most), a fully persisted Team One backend will be available under the URL http://localhost:8080.
+After a few seconds (a minute at most), a fully persisted Team One back-end will be available under the URL http://localhost:8080.
 
 Note: for this recipe to work you need to have docker and docker-compose installed.
 
 ## Scope
 
-Open Team One Server aimes to provide a simple and functional solution of high performance for those needing a communication server under their own control - in terms of source code and operations. Instead of re-inventing the wheel we use freely available mobile clients, namely the SAP Team One mobile apps that are available for multiple platforms.
+Open Team One Server aims to provide a simple and functional solution of high performance for those needing a communication server under their own control - in terms of source code and operations. Instead of re-inventing the wheel we use freely available mobile clients, namely the SAP Team One mobile apps that are available for multiple platforms.
 
-The SAP Team One apps are normally operated against a SAP Sports One backend that integrates communication with multiple sports applications. Typical examples are injury notifications, videos, questionnaires to capture user feedback and performance KPIs, and information packages combining media and editorials. All those integration scenarios are missing from Open Team One for the simple reason that Open Team One is purely a communication hub for mobile users, not a sports solution.
+The SAP Team One apps are normally operated against a SAP Sports One back-end that integrates communication with multiple sports applications. Typical examples are injury notifications, videos, questionnaires to capture user feedback and performance KPIs, and information packages combining media and editorials. All those integration scenarios are missing from Open Team One for the simple reason that Open Team One is purely a communication hub for mobile users, not a sports solution.
 
 An interface for the generation of push notifications has been provided. However, since the API keys and certificates used for the proprietary SAP app are not in the public domain, they cannot be provided as part of this open source project.
 
 ## Web Designers Wanted
 
-Whilst the server is functionally complete within the scope described above, the user experience of the web apps for server administration and user self-service is still experimental. Those web apps are fully functional, but they could do with a better web design and a modern frontend implementation resulting in a best-of-breed user experience.
+Whilst the server is functionally complete within the scope described above, the user experience of the web apps for server administration and user self-service is still experimental. Those web apps are fully functional, but they could do with a better web design and a modern front-end implementation resulting in a best-of-breed user experience.
 
 ## Starting a Demo Server
 
 A running server instance consists of two data sources: the integrated relational database for structured objects, and the file system for potentially large images and file attachments. The structured objects in the database are sometimes referred to as "business objects". They can be exported and imported in a serialized JSON representation (but internally they strictly exist as strongly typed Java objects). The entirety of the database can be exported and imported in the form of large JSON files, which can also be stored in the file system of the server.
 
-Therefore, in order to bootstrap a demo server we need to provide a filesystem directory with content, including a JSON serialization of the database content. We then import the JSON file into the database, and voilà, the demo instance is ready.
+Therefore, in order to bootstrap a demo server we need to provide a file-system directory with content, including a JSON serialization of the database content. We then import the JSON file into the database, and voilà, the demo instance is ready.
 
 ### Step 1: Demo Preparation
 
@@ -48,7 +48,7 @@ Next step is to start the server and log in to the admin section. There are thre
 
 2. Otherwise you can run the project from source. Simply import it as Java project into a suitable IDE like IntelliJ IDEA, Net Beans or Eclipse. When asked for a project type you would probably choose "Maven" to take advantage of the provided _pom.xml_ file. When ready, hit the "execute" button of your IDE.
 
-3. Another way of running the project from source is building and executing it from the command line, as layed out in a section below.
+3. Another way of running the project from source is building and executing it from the command line, as laid out in a section below.
 
 ### Step 3: Login
 
@@ -105,7 +105,7 @@ Administrators will get access to a broader range of server maintenance modules.
 
 You can also export and import JSON snapshots of the database content. Note that a JSON file can be partial. For instance, if a JSON import contains only users and persons, it will not affect other object types in the database.
 
-Open Team One is designed to support different web applications, should there ever be more than one. The default web applikation is meant to be a fully functional proof of concept. It resides in the project directory src/main/resources/static/default/ and is served via the URL http://localhost:8080/default/ . Additional web applications can be placed into subdirectories that are sibling to src/main/resources/static/default/.
+Open Team One is designed to support different web applications, should there ever be more than one. The default web application is meant to be a fully functional proof of concept. It resides in the project directory src/main/resources/static/default/ and is served via the URL http://localhost:8080/default/ . Additional web applications can be placed into subdirectories that are sibling to src/main/resources/static/default/.
 
 The server offers the following tenant parameters to control the navigation. The /ui/* services will automatically redirect to the targets specified by those tenant parameters. By overwriting them in the database you can set another web application as default.
 
@@ -120,7 +120,7 @@ The server offers the following tenant parameters to control the navigation. The
 
 For a first trial it is quite convenient to use the H2 in-memory database as it comes with Spring Boot and requires no configuration. After your first steps with Open Team One you might want to progress to a disk based SQL database, like MariaDB. MariaDB is a popular MySQL fork. In fact, MariaDB is the continuation of MySQL by the original author and a community. MariaDB is drop-in compatible with MySQL, so everything written in this section works for MySQL, too.
 
-With version 1 of Open Team One Server I ran into issues related to character encoding. The issue was that the byte represenatation of key fields grew too long when using 4-byte UTF-8 encoding for the database. In release 1 the issue was solved by using a special script to generate the database tables. In release 2 this is no longer required as we have turned all key fields into integers. We still advise of the following settings.
+With version 1 of Open Team One Server I ran into issues related to character encoding. The issue was that the byte representation of key fields grew too long when using 4-byte UTF-8 encoding for the database. In release 1 the issue was solved by using a special script to generate the database tables. In release 2 this is no longer required as we have turned all key fields into integers. We still advise of the following settings.
 
 First, make sure you have enabled UTF-8 with support for 4-byte characters. To that end, make sure the following configuration is in the MariaDB configuration files. On Debian you do not need to do anything. On Slackware you need to modify _/etc/my.cnf.d/server.cnf_. On other distros it will be similar.
 
@@ -289,7 +289,7 @@ In this example you inject the properties from a file `/path/to/application.prop
 
 Nowadays, the gold standard for deployment in the cloud (even for simplified deployment at home) is Docker. We now provide a ready-made docker image of Open Team One Server on the Docker Hub. It is called `dockahdockah/openteamone`. There is no need to build your own, but the Docker files are provided anyway.
 
-With the Docker image you can set up a server on the fly, using the in-memory database. You can (but you don't have to) mount a local directory into the Docker container, for instance to inject snapshots and images into the filesystem, as we have done in the demo section at the beginning.
+With the Docker image you can set up a server on the fly, using the in-memory database. You can (but you don't have to) mount a local directory into the Docker container, for instance to inject snapshots and images into the file system, as we have done in the demo section at the beginning.
 
 	docker run -v $LOCAL_OPEN_TEAM_ONE_DIRECTORY:/opt/openTeamOneServer dockahdockah/openteamone
 
