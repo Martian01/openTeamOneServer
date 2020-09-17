@@ -18,13 +18,8 @@ public class OpenTeamOneServerApplication {
 	private ContentService contentService;
 
 	@Bean
-	public CommandLineRunner loadContent() {
-		return new CommandLineRunner() {
-			@Override
-			public void run(String... args) throws Exception {
-				System.out.println("\n" + contentService.getSummary().toString(4) + "\n");
-			}
-		};
+	public CommandLineRunner printContentSummary() {
+		return args -> System.out.println("\n" + contentService.getSummary().toString(4) + "\n");
 	}
 
 }

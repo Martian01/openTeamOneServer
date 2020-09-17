@@ -54,7 +54,6 @@ public class ContentService {
 			ur.save(new User("admin", "admin", null, false, true));
 	}
 
-	@SuppressWarnings("ResultOfMethodCallIgnored")
 	public void prepareDataDirectory(String dirName) {
 		File dataDir = new File(dirName);
 		boolean rc = dataDir.mkdirs();
