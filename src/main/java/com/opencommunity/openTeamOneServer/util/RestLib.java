@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -73,12 +74,12 @@ public class RestLib {
 		return map;
 	}
 
-	/* Basic Auth services (for the iOS app) */
+	/* Basic Auth */
 
 	public String[] splitBasicAuthHeader(String authHeader) {
 		if (authHeader != null && authHeader.startsWith("Basic ")) {
 			try {
-				String decodedHeader = URLDecoder.decode(new String(Base64.decodeFast(authHeader.substring(6)), "UTF-8"), "UTF-8");
+				String decodedHeader = URLDecoder.decode(new String(Base64.decodeFast(authHeader.substring(6)), StandardCharsets.UTF_8), "UTF-8");
 				if (decodedHeader != null)
 					return decodedHeader.split(":");
 			} catch (Exception ignored) { }
