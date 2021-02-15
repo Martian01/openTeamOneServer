@@ -1,9 +1,8 @@
 package com.opencommunity.openTeamOneServer.persistence;
 
-import com.opencommunity.openTeamOneServer.data.Message;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.CrudRepository;
+import com.opencommunity.openTeamOneServer.data.*;
+import org.springframework.data.domain.*;
+import org.springframework.data.repository.*;
 
 public interface MessageRepository extends CrudRepository<Message, Integer> {
 	// for latest message

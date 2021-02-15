@@ -14,8 +14,8 @@
 
 package com.opencommunity.openTeamOneServer.util;
 
-import java.io.UnsupportedEncodingException;
-import java.security.SecureRandom;
+import java.io.*;
+import java.security.*;
 
 /**
  * BCrypt implements OpenBSD-style Blowfish password hashing using

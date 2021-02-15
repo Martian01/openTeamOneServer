@@ -1,28 +1,19 @@
 package com.opencommunity.openTeamOneServer.util;
 
-import com.opencommunity.openTeamOneServer.data.Session;
-import com.opencommunity.openTeamOneServer.data.TenantParameter;
-import com.opencommunity.openTeamOneServer.data.User;
-import com.opencommunity.openTeamOneServer.persistence.TenantParameterRepository;
-import com.opencommunity.openTeamOneServer.persistence.UserRepository;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
+import com.opencommunity.openTeamOneServer.data.*;
+import com.opencommunity.openTeamOneServer.persistence.*;
+import org.json.*;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.core.io.*;
+import org.springframework.http.*;
+import org.springframework.lang.*;
+import org.springframework.stereotype.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import javax.servlet.http.*;
+import java.net.*;
+import java.nio.charset.*;
+import java.util.*;
+import java.util.regex.*;
 
 @Component
 public class RestLib {

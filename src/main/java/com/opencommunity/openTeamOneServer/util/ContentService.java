@@ -2,15 +2,13 @@ package com.opencommunity.openTeamOneServer.util;
 
 import com.opencommunity.openTeamOneServer.data.*;
 import com.opencommunity.openTeamOneServer.persistence.*;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.json.*;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.stereotype.*;
 
-import javax.annotation.PostConstruct;
-import java.io.File;
-import java.util.Iterator;
+import javax.annotation.*;
+import java.io.*;
+import java.util.*;
 
 @Component
 public class ContentService {

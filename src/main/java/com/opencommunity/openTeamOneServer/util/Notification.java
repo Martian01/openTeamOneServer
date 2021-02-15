@@ -1,22 +1,16 @@
 package com.opencommunity.openTeamOneServer.util;
 
-import com.opencommunity.openTeamOneServer.data.Message;
-import com.opencommunity.openTeamOneServer.data.TenantParameter;
-import com.opencommunity.openTeamOneServer.persistence.TenantParameterRepository;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Component;
+import com.opencommunity.openTeamOneServer.data.*;
+import com.opencommunity.openTeamOneServer.persistence.*;
+import org.json.*;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.jdbc.core.*;
+import org.springframework.stereotype.*;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.io.*;
+import java.net.*;
+import java.nio.charset.*;
+import java.sql.*;
 import java.util.*;
 
 @Component

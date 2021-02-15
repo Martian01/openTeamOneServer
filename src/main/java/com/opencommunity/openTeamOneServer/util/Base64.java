@@ -1,6 +1,6 @@
 package com.opencommunity.openTeamOneServer.util;
 
-import java.util.Arrays;
+import java.util.*;
 
 /** A very fast and memory efficient class to encode and decode to and from BASE64 in full accordance
  * with RFC 2045.<br><br>

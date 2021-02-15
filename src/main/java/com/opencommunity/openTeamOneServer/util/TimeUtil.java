@@ -1,10 +1,7 @@
 package com.opencommunity.openTeamOneServer.util;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.text.*;
+import java.util.*;
 
 public class TimeUtil { // TODO: Java 8
 

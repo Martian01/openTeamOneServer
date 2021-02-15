@@ -1,28 +1,17 @@
 package com.opencommunity.openTeamOneServer.api;
 
-import com.opencommunity.openTeamOneServer.data.Session;
-import com.opencommunity.openTeamOneServer.data.SymbolicFile;
-import com.opencommunity.openTeamOneServer.data.User;
-import com.opencommunity.openTeamOneServer.persistence.SymbolicFileRepository;
-import com.opencommunity.openTeamOneServer.persistence.TenantParameterRepository;
-import com.opencommunity.openTeamOneServer.persistence.UserRepository;
-import com.opencommunity.openTeamOneServer.util.RestLib;
-import com.opencommunity.openTeamOneServer.util.StreamUtil;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import com.opencommunity.openTeamOneServer.data.*;
+import com.opencommunity.openTeamOneServer.persistence.*;
+import com.opencommunity.openTeamOneServer.util.*;
+import org.json.*;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.core.io.*;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.nio.charset.StandardCharsets;
+import javax.servlet.http.*;
+import java.io.*;
+import java.nio.charset.*;
 
 @RestController
 @RequestMapping("/sap/sports/fnd/api")

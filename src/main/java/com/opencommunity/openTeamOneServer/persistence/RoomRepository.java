@@ -1,7 +1,7 @@
 package com.opencommunity.openTeamOneServer.persistence;
 
-import com.opencommunity.openTeamOneServer.data.Room;
-import org.springframework.data.repository.CrudRepository;
+import com.opencommunity.openTeamOneServer.data.*;
+import org.springframework.data.repository.*;
 
 public interface RoomRepository extends CrudRepository<Room, Integer> {
 	Iterable<Room> findByRoomType(String roomType);

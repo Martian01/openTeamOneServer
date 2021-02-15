@@ -1,14 +1,10 @@
 package com.opencommunity.openTeamOneServer.data;
 
-import com.opencommunity.openTeamOneServer.util.JsonUtil;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.opencommunity.openTeamOneServer.util.*;
+import org.json.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import java.util.ArrayList;
+import javax.persistence.*;
+import java.util.*;
 
 @Entity
 public class TenantParameter {

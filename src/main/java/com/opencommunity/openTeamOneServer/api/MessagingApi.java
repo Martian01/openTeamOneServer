@@ -3,21 +3,15 @@ package com.opencommunity.openTeamOneServer.api;
 import com.opencommunity.openTeamOneServer.data.*;
 import com.opencommunity.openTeamOneServer.persistence.*;
 import com.opencommunity.openTeamOneServer.util.*;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.json.*;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.data.domain.*;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
+import javax.servlet.http.*;
+import java.io.*;
 import java.util.*;
 
 @RestController

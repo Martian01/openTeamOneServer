@@ -2,26 +2,17 @@ package com.opencommunity.openTeamOneServer.api;
 
 import com.opencommunity.openTeamOneServer.data.*;
 import com.opencommunity.openTeamOneServer.persistence.*;
-import com.opencommunity.openTeamOneServer.util.ContentService;
-import com.opencommunity.openTeamOneServer.util.RestLib;
-import com.opencommunity.openTeamOneServer.util.StreamUtil;
-import com.opencommunity.openTeamOneServer.util.TimeUtil;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import com.opencommunity.openTeamOneServer.util.*;
+import org.json.*;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.core.io.*;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import javax.servlet.http.*;
+import java.io.*;
+import java.nio.file.*;
 
 @RestController
 @RequestMapping("/svc")

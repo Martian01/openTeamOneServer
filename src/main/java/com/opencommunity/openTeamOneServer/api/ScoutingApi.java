@@ -1,24 +1,14 @@
 package com.opencommunity.openTeamOneServer.api;
 
-import com.opencommunity.openTeamOneServer.data.Person;
-import com.opencommunity.openTeamOneServer.data.Session;
-import com.opencommunity.openTeamOneServer.data.TenantParameter;
-import com.opencommunity.openTeamOneServer.data.User;
-import com.opencommunity.openTeamOneServer.persistence.PersonRepository;
-import com.opencommunity.openTeamOneServer.persistence.TenantParameterRepository;
-import com.opencommunity.openTeamOneServer.persistence.UserRepository;
-import com.opencommunity.openTeamOneServer.util.JsonUtil;
-import com.opencommunity.openTeamOneServer.util.RestLib;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import com.opencommunity.openTeamOneServer.data.*;
+import com.opencommunity.openTeamOneServer.persistence.*;
+import com.opencommunity.openTeamOneServer.util.*;
+import org.json.*;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.*;
 
 @RestController
 public class ScoutingApi {

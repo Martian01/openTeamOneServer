@@ -1,17 +1,10 @@
 package com.opencommunity.openTeamOneServer.data;
 
-import com.opencommunity.openTeamOneServer.util.JsonUtil;
-import com.opencommunity.openTeamOneServer.util.RestLib;
-import com.opencommunity.openTeamOneServer.util.TimeUtil;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.opencommunity.openTeamOneServer.util.*;
+import org.json.*;
 
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import javax.validation.constraints.*;
+import java.util.*;
 
 public class Session {
 

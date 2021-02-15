@@ -1,7 +1,7 @@
 package com.opencommunity.openTeamOneServer.persistence;
 
-import com.opencommunity.openTeamOneServer.data.User;
-import org.springframework.data.repository.CrudRepository;
+import com.opencommunity.openTeamOneServer.data.*;
+import org.springframework.data.repository.*;
 
 public interface UserRepository extends CrudRepository<User, Integer> {
 	User findTopByUserId(String userId);

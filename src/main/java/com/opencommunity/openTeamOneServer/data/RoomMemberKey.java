@@ -1,6 +1,6 @@
 package com.opencommunity.openTeamOneServer.data;
 
-import java.io.Serializable;
+import java.io.*;
 
 public class RoomMemberKey implements Serializable {
 

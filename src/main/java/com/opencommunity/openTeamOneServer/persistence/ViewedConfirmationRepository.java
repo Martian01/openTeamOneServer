@@ -1,8 +1,7 @@
 package com.opencommunity.openTeamOneServer.persistence;
 
-import com.opencommunity.openTeamOneServer.data.ViewedConfirmation;
-import com.opencommunity.openTeamOneServer.data.ViewedConfirmationKey;
-import org.springframework.data.repository.CrudRepository;
+import com.opencommunity.openTeamOneServer.data.*;
+import org.springframework.data.repository.*;
 
 public interface ViewedConfirmationRepository extends CrudRepository<ViewedConfirmation, ViewedConfirmationKey> {
 	// for message confirmations

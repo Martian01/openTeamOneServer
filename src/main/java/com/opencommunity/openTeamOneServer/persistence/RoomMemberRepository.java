@@ -1,8 +1,7 @@
 package com.opencommunity.openTeamOneServer.persistence;
 
-import com.opencommunity.openTeamOneServer.data.RoomMember;
-import com.opencommunity.openTeamOneServer.data.RoomMemberKey;
-import org.springframework.data.repository.CrudRepository;
+import com.opencommunity.openTeamOneServer.data.*;
+import org.springframework.data.repository.*;
 
 public interface RoomMemberRepository extends CrudRepository<RoomMember, RoomMemberKey> {
 	// for members
